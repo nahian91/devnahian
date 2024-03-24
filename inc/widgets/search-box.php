@@ -4,19 +4,13 @@
 // assigned all default values
 protected $default_config = [
   'widget_title' => 'Search Box Widget',
-  'template' => 'list-thumbnail',
-  'amount_of_posts' => 3,
-  'in_ex_categories' => '',
-  'show_link_more' => 0,
-  'link_more_link' => '',
-  'link_more_text' => '',
 ];
 
 function __construct() {
   $widget_ops = array(
-    'classname' => 'categories-list-sidebar', // widget class appears to the widget parent DIV
+    'classname' => 'seach-box-sidebar', // widget class appears to the widget parent DIV
   );
-  parent::__construct( 'categories-list-widget', 'Search Box Widget', $widget_ops );
+  parent::__construct( 'seach-box-widget', 'Search Box Widget', $widget_ops );
 }
 
 
@@ -29,14 +23,15 @@ $instance = array_merge($this->default_config, $instance);
 
 //get all the input field value from the widget $instance
 $widget_title = $instance['widget_title']; // get the widget title
-$posts_amount = $instance['amount_of_posts']; // get the total amount of posts to be displayed
 
 // starting the parent DIV declared to the sidebar
 echo $args['before_widget']; ?>
 
 
   <?php if ( $widget_title ) { ?>
-  <h2 class="widget-title"><?php echo $widget_title; ?></h2>
+    <div class="section-title">
+        <h5><?php echo $widget_title; ?></h5>
+    </div>
   <?php } ?>
 
   <form role="search" method="get" class="search-form" action="<?php echo home_url('/'); ?>">
