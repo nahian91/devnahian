@@ -38,7 +38,7 @@
                 <div class="col-lg-12">
                     <div class="copyright">
                         <p>&copy; Copyright 2023
-                            <a href="#">Collections</a>, All rights reserved.</p>
+                            <a href="#">Collectionsggggg</a>, All rights reserved.</p>
                     </div>
                     <div class="back">
                         <a href="#" class="back-top">
