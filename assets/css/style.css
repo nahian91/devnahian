@@ -1263,10 +1263,14 @@ input:checked + .slider:before {
 }
 
 .widget-categories li {
-  background-color: #F9F9FF;
-  padding: 15px 20px;
-  border-radius: 10px;
+  border-bottom: 1px solid #F9F9FF;
   margin-bottom: 15px;
+  padding-bottom: 15px;
+}
+.widget-categories li:last-child{
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .widget-categories li a {
