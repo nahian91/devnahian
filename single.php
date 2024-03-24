@@ -27,17 +27,16 @@ get_header();
                             <h4><?php the_title();?></h4>
                             <div class="post-single-info">
                                 <ul class="list-inline">
-														<li>
-															<?php  $author_id = get_the_author_meta( 'ID' );  ?>
-															<a href="author.html"><?php echo get_the_author_meta( 'nicename', $author_id );?></a>
-														</li>
+									<li>
+										<?php  $author_id = get_the_author_meta( 'ID' );  ?>
+											<a href="author.html"><?php echo get_the_author_meta( 'nicename', $author_id );?></a>
+									</li>
                                     <li class="dot"></li>
                                     <li><?php echo get_the_date(); ?></li>
                                     <li class="dot"></li>
                                 </ul>
                             </div>
-                        </div>
-                  
+                        </div>                  
                         <div class="post-single-body">
                             <?php the_content(); ?>                           
                         </div>

@@ -17,15 +17,15 @@ get_header();
             <div class="row">
                 <div class="col-lg-12">
 					<div class="row">
-					<div class="col-lg-12">
-					<div class="categorie-title"> 
-                         <small>
-                            <a href="index.html">Home</a>
-                            <span class="arrow_carrot-right"></span> <?php echo get_the_archive_title(); ?>
-                        </small>
-                        <h3><?php echo get_the_archive_title(); ?></h3>
-                    </div>
-					</div>
+						<div class="col-lg-12">
+							<div class="categorie-title"> 
+								<small>
+									<a href="index.html">Home</a>
+									<span class="arrow_carrot-right"></span> <?php echo get_the_archive_title(); ?>
+								</small>
+								<h3><?php echo get_the_archive_title(); ?></h3>
+							</div>
+						</div>
 					</div>
                     <div class="row">
 					<?php

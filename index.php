@@ -58,8 +58,9 @@ get_header();
 										</div>
 										<!--/-->
 									</div>
-								<?php
 
+									
+								<?php
 							endwhile;
 
 						else :
@@ -67,7 +68,18 @@ get_header();
 							get_template_part( 'template-parts/content', 'none' );
 
 						endif;
+
 						?>
+
+						<div class="pagination-main">
+							<?php 
+								// Pagination links
+								the_posts_pagination( array(
+									'prev_text' => __( 'Previous', 'textdomain' ),
+									'next_text' => __( 'Next', 'textdomain' ),
+								) );
+							?>
+						</div>
                         
                     </div>
                 </div>

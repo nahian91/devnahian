@@ -25,22 +25,22 @@
 <div id="page" class="site">
 	<a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'anahian' ); ?></a>
 
-	<!--loading -->
+	<!-- Loading -->
     <div class="loading">
         <div class="circle"></div>
     </div>
-    <!--/-->
+    <!-- Loading -->
 
-    <!-- Navigation-->
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
-            <!--logo-->
+            <!-- Logo -->
             <div class="logo">
                 <a href="<?php echo site_url();?>">Abdullah Nahian</a>
             </div>
-            <!--/-->
+            <!-- Logo -->
     
-            <!--navbar-collapse-->
+            <!-- Navbar Collapse -->
             <div class="collapse navbar-collapse" id="main_nav">
             <?php
 			wp_nav_menu(
@@ -53,7 +53,7 @@
 			);
 			?>
             </div>
-            <!--/-->
+            <!-- Loading -->
         </div>
     </nav>
-    <!--/-->
+    <!-- Navigation -->

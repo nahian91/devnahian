@@ -11,13 +11,13 @@
 
 ?>
 
-	<!--newslettre-->
-<section class="newslettre">
+	<!-- Newsletter -->
+    <section class="newsletter">
         <div class="container-fluid">
             <div class="newslettre-width text-center">
                 <div class="newslettre-info">
                     <h5>Subscribe to our Newslatter</h5>
-                    <p> Sign up for free and be the first to get notified about new posts. </p>
+                    <p>Sign up for free and be the first to get notified about new posts. </p>
                 </div>
                 <form action="#" class="newslettre-form">
                     <div class="form-flex">
@@ -31,14 +31,13 @@
         </div>
     </section>
     
-    <!--footer-->
+    <!-- Footer -->
     <footer class="footer">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="copyright">
-                        <p>&copy; Copyright 2024444
-                            <a href="#">Abdullah Nahian</a>, All rights reserved.</p>
+                        <p>&copy; Copyright 2024 <a href="#">Abdullah Nahian</a>. All rights reserved.</p>
                     </div>
                     <div class="back">
                         <a href="#" class="back-top">
@@ -50,7 +49,7 @@
         </div>
     </footer>
 
-    <!--Search-form-->
+    <!-- Search Form -->
     <div class="search">
         <div class="container-fluid">
             <div class="search-width  text-center">

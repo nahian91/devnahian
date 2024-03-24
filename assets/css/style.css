@@ -2700,3 +2700,22 @@ body.rtl {
 .item-content {
   margin: 20px 0;
 }
+
+.pagination-main {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.pagination-main .prev.page-numbers, .pagination-main .next.page-numbers {
+  color: #0077b7;
+  font-weight: 500;
+}
+.pagination-main .nav-links a {
+  margin: 0 5px;
+  font-size: 18px;
+}
+.pagination-main .nav-links .page-numbers.current {
+  font-weight: 600;
+  color: #0077b7;
+  font-size: 20px;
+}
