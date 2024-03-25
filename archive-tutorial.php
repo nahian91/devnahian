@@ -12,7 +12,7 @@ get_header();
             <div class="row">
                 <div class="col-lg-12">
                     <div class="breadcumb">
-                        <h4><?php the_title(); ?></h4>
+                        <h4>Tutorial</h4>
                     </div>
                 </div>
             </div>
