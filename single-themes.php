@@ -70,13 +70,12 @@
             </div>
         </div>
     </section>
-    <section class="pt-80 pb-80">
+    <section>
         <div class="container single-theme-area">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="single-theme-title">
                         <h4>Amazing Demos</h4>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi, aut.</p>
                     </div>
                 </div>
             </div>
@@ -103,12 +102,12 @@
             </div>
         </div>
     </section>
-    <section class="pb-80">
+    <section>
         <div class="container single-theme-area"> 
             <div class="row">
                 <div class="col-lg-12">
                     <div class="single-theme-title">
-                        <h4>Pikme features at a glance </h4>
+                        <h4>David Features</h4>
                         <p>Some of the features which you should consider when using this theme </p>
                     </div>
                 </div>
