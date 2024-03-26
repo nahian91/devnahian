@@ -1,6 +1,23 @@
 (function ($) {
     "use strict";
 
+    // Show the first tab's content initially
+    $('.single-theme-tab-content:first').addClass('active').show();
+    $('.single-theme-tab-menu li:first').addClass('active');
+
+    // Handle tab clicks
+    $('.single-theme-tab-menu a').on('click', function(e) {
+        e.preventDefault();
+        
+        var target = $(this).attr('href');
+        
+        $('.single-theme-tab-menu li').removeClass('active');
+        $(this).parent().addClass('active');
+        
+        $('.single-theme-tab-content').removeClass('active').fadeOut('fast');
+        $(target).addClass('active').fadeIn('fast');
+    });
+
     /* -----------------------------------
             Preloader
     ----------------------------------- */

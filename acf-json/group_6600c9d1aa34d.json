@@ -111,6 +111,32 @@
             ]
         },
         {
+            "key": "field_66025c7e159c1",
+            "label": "Select Download",
+            "name": "select_download",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "download_shortcode": "Download Shortcode",
+                "download_paid": "Download Paid"
+            },
+            "default_value": "download_shortcode",
+            "return_format": "array",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
             "key": "field_6600cc2b44173",
             "label": "Tutorial Download Shortcode",
             "name": "tutorial_download_shortcode",
@@ -118,9 +144,70 @@
             "type": "text",
             "instructions": "",
             "required": 0,
-            "conditional_logic": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_66025c7e159c1",
+                        "operator": "==",
+                        "value": "download_shortcode"
+                    }
+                ]
+            ],
             "wrapper": {
                 "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_66025e7008976",
+            "label": "Tutorial Download Paid URL",
+            "name": "tutorial_download_paid_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_66025c7e159c1",
+                        "operator": "==",
+                        "value": "download_paid"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "40",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": ""
+        },
+        {
+            "key": "field_66025f1043dae",
+            "label": "Tutorial Download Paid Text",
+            "name": "tutorial_download_paid_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_66025c7e159c1",
+                        "operator": "==",
+                        "value": "download_paid"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "60",
                 "class": "",
                 "id": ""
             },
@@ -149,5 +236,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1711328932
+    "modified": 1711432876
 }

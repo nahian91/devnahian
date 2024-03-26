@@ -1,33 +1,3 @@
-/* -----------------------------------------------
-				CSS Styles 
---------------------------------------------------
-
-    Template Name: NoonPost. - Personal Blog HTML Template
-    
---------------------------------------------------
-
-Table of Content
-
-    - Global
-    - Helpers
-    - Section
-    - Navigation
-    - Layouts
-    - Widget
-    - Post-card
-    - Post-single
-    - Categorie
-    - Hero
-    - About
-    - Contact 
-    - Footer
-	- Preloader 
-    - Responsive
-    - Dark
-    - RTL
- 
-
------------------------------------ */
 /* -----------------------------------
 		 Global
 ----------------------------------- */
@@ -58,6 +28,13 @@ body {
   color: #333;
   font-weight: 400;
   position: relative;
+}
+
+.pt-80{
+  padding-top: 80px;
+}
+.pb-80{
+  padding-bottom: 80px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -2803,4 +2780,144 @@ body.rtl {
   top: 50%;
   transform: translateY(-50%);
   left: 0;
+}
+.download-btn{
+  text-align: center;
+}
+.download-btn a {
+	display: inline-block;
+	background-color: #0077b7;
+	color: #fff;
+	padding: 20px 40px;
+	border-radius: 10px;
+	font-weight: 600;
+	transition: .3s;
+	font-size: 18px;
+}
+.download-btn a:hover{
+  background-color: #333;
+}
+
+/* Styles for tabs and tab content */
+.single-theme-tab-content {
+  display: none;
+}
+
+.single-theme-tab-content.active {
+  display: block;
+}
+
+/* Styles for active tab */
+.single-theme-tab-menu li.active a {
+  color: red; /* Change color as needed */
+}
+.single-theme-area {
+	background-color: #ffffff !important;
+	padding: 30px;
+	border-radius: 20px !important;
+	margin-bottom: 60px;
+	display: block;
+	position: relative;
+	-webkit-box-shadow: 0px 5px 20px 0px rgba(69, 67, 96, 0.1);
+	box-shadow: 0px 5px 20px 0px rgba(69, 67, 96, 0.1);
+}
+
+
+.single-theme-info {
+  text-align: center;
+}
+.single-theme-info h4 {
+  font-size: 35px;
+  line-height: 45px;
+  font-weight: 700;
+}
+.single-theme-info p {
+  margin: 25px 0;
+  font-size: 18px;
+  line-height: 27px;
+}
+.single-theme-price-top {
+  border: 1px solid #ddd;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+.single-theme-price-top p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 26px;
+  font-weight: 600;
+  padding: 10px 20px;
+  align-items: center;
+  margin-bottom: 0;
+}
+.single-theme-price-top p span {
+  font-size: 35px;
+}
+.single-theme-price-top a {
+  display: block;
+  margin: auto;
+  text-align: center;
+  background-color: #0077b7;
+  width: 160px;
+  padding: 10px 30px;
+  color: #fff;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: .3s;
+}
+.single-theme-price-top a:hover {
+  background-color: #333;
+}
+
+.single-theme-info-right {
+  border: 1px solid #ddd;
+  padding: 20px;
+}
+.single-theme-info-right li {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f4f4f4;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
+.single-theme-info-right li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+.single-theme-info-right li span {
+  font-weight: 500;
+}
+
+.single-theme-title {
+  text-align: center;
+  margin-bottom: 50px;
+}
+.single-theme-title h4 {
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.single-demo {
+  padding-top: 200%;
+  background-size: cover;
+  background-position: inherit;
+  position: relative;
+}
+.single-demo-box {
+	margin-bottom: 30px;
+	border: 1px solid #ddd;
+	text-align: center;
+}
+.single-demo-box h4 {
+	font-size: 20px;
+	font-weight: 600;
+}
+.single-demo-content {
+  padding: 15px 0;
+}
+.single-demo-content a {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
 }
