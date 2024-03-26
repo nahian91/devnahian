@@ -37,9 +37,10 @@ get_header();
                                     <div class="post-card">
                                         <div class="post-card-image">
                                             <?php
-                                            $tutorial_image = get_field('tutorial_image');
-                                            if ($tutorial_image) {
-                                                echo '<img src="' . esc_url($tutorial_image['url']) . '" alt="' . esc_attr($tutorial_image['alt']) . '">';
+                                            $demo_image = get_field('demo_image');
+                                            print_r($demo_image);
+                                            if ($demo_image) {
+                                                echo '<img src="' . esc_url($demo_image['url']) . '" alt="' . esc_attr($demo_image['alt']) . '">';
                                             } else {
                                                 echo '<img src="placeholder-image.jpg" alt="Placeholder Image">';
                                             }

@@ -2940,3 +2940,20 @@ body.rtl {
   top: 50%;
   transform: translateY(-50%);
 }
+
+.post-video-download-btn {
+  text-align: center;
+}
+.post-video-download-btn a {
+  display: inline-block;
+  background-color: #0077b7;
+  color: #fff;
+  padding: 10px 40px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 500;
+  transition: .3s;
+}
+.post-video-download-btn a:hover {
+  background-color: #333;
+}

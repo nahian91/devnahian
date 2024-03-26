@@ -23,6 +23,7 @@ get_header();
                         $args = array(
                             'post_type'      => 'tutorial',
                             'posts_per_page' => 20,
+                            'orderby' => 'rand',
                         );
 
                         $query = new WP_Query($args);

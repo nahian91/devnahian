@@ -64,15 +64,24 @@ get_header();
 							</div>
 
 							<?php
-								$tutorial_download_shortcode = get_field('tutorial_download_shortcode');
-								if($tutorial_download_shortcode) {
-									?>
-									<div class="post-video-download">
-										<?php echo do_shortcode($tutorial_download_shortcode);?>
-									</div>
-								<?php
-								}
-							?>
+                                $select_download = get_field('select_download');
+                                if($select_download['value'] == 'download_shortcode') {
+                                    $tutorial_download_shortcode = get_field('tutorial_download_shortcode');
+                                    ?>
+                                        <div class="post-video-download">
+                                            <?php echo do_shortcode($tutorial_download_shortcode); ?>
+                                        </div>
+                                    <?php 
+                                } else { 
+                                    $tutorial_download_paid_url = get_field('tutorial_download_paid_url');    
+                                    $tutorial_download_paid_text = get_field('tutorial_download_paid_text');    
+                                ?>
+                                    <div class="post-video-download-btn">
+                                        <a href="<?php echo $tutorial_download_paid_url; ?>" target="_blank"><?php echo $tutorial_download_paid_text; ?></a>
+                                    </div>
+                                <?php
+                                }
+                            ?>
                         </div>
                     </div> <!--/-->
                 </div>
