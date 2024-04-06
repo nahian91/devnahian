@@ -28,7 +28,9 @@ get_header();
                             <div class="post-single-info">
                                 <ul class="list-inline">
                                     <li class="dot"></li>
-                                    <li><?php echo get_the_date(); ?></li>
+                                    <li>Published: <?php echo get_the_date(); ?></li>
+                                    <li class="dot"></li>
+                                    <li>Updated: <?php echo get_the_modified_date(); ?></li>
                                 </ul>
                             </div>
                         </div>                  
