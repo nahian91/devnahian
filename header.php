@@ -16,7 +16,7 @@
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
-
+    <meta name="google-adsense-account" content="ca-pub-5810116187271532">
 	<?php wp_head(); ?>
 </head>
 
