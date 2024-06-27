@@ -28,10 +28,13 @@ get_header();
                         $category = get_category_by_slug($category_slug);
                         $category_id = $category->term_id;
 
+                        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+
                         $args = array(
                             'post_type' => 'post',
                             'posts_per_page' => get_option('posts_per_page'),
                             'category__not_in' => array($category_id),
+                            'paged' => $paged,
                         );
 
                         $query = new WP_Query($args);
@@ -105,3 +108,4 @@ get_header();
 
 <?php
 get_footer();
+?>
