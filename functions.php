@@ -284,3 +284,21 @@ function my_acf_json_save_point( $path ) {
     return get_stylesheet_directory() . '/acf-json';
 }
 add_filter( 'acf/settings/save_json', 'my_acf_json_save_point' );
+
+
+function track_post_views($post_id) {
+    if (!is_single()) return;
+
+    $views = get_post_meta($post_id, 'post_views_count', true);
+
+    if ($views == '') {
+        $views = 0;
+        delete_post_meta($post_id, 'post_views_count');
+        add_post_meta($post_id, 'post_views_count', '0');
+    } else {
+        $views++;
+        update_post_meta($post_id, 'post_views_count', $views);
+    }
+}
+remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0); // Remove the prefetching for adjacent posts
+add_action('wp_head', 'track_post_views');

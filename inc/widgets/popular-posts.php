@@ -1,18 +1,17 @@
 <?php
-class Recent_Posts_List_Widget extends WP_Widget {
+class Popular_Posts_List_Widget extends WP_Widget {
     // Assigned all default values
     protected $default_config = [
-        'widget_title' => 'Recents Posts',
+        'widget_title' => 'Popular Posts',
         'template' => 'list-thumbnail',
         'amount_of_posts' => 3,
-        'selected_posts' => '',
     ];
 
     function __construct() {
         $widget_ops = array(
-            'classname' => 'recent-posts-sidebar', // widget class appears to the widget parent DIV
+            'classname' => 'popular-posts-sidebar', // widget class appears to the widget parent DIV
         );
-        parent::__construct( 'recent-posts-list-widget', 'Recent Posts List Widget', $widget_ops );
+        parent::__construct( 'popular-posts-list-widget', 'Popular Posts List Widget', $widget_ops );
     }
 
     // Front-end display of the widget
@@ -23,7 +22,6 @@ class Recent_Posts_List_Widget extends WP_Widget {
         // Get all the input field value from the widget $instance
         $widget_title = $instance['widget_title']; // Get the widget title
         $posts_amount = $instance['amount_of_posts']; // Get the total amount of posts to be displayed
-        $selected_posts = $instance['selected_posts']; // Get the selected posts
 
         // Starting the parent DIV declared to the sidebar
         echo $args['before_widget']; ?>
@@ -39,7 +37,9 @@ class Recent_Posts_List_Widget extends WP_Widget {
             'post_type' => 'post',
             'post_status' => 'publish',
             'posts_per_page' => $posts_amount,
-            'post__in' => explode(',', $selected_posts), // Include selected posts
+            'meta_key' => 'post_views_count',
+            'orderby' => 'meta_value_num',
+            'order' => 'DESC',
         );
 
         $query = new WP_Query($query_args);
@@ -93,12 +93,6 @@ class Recent_Posts_List_Widget extends WP_Widget {
             <label>
                 <input id="<?= $this->get_field_id( 'amount_of_posts' ); ?>" name="<?= $this->get_field_name( 'amount_of_posts' ); ?>" type="text" value="<?= $instance['amount_of_posts']; ?>" />
             </label>
-
-            <h4><?php esc_html_e( 'Selected Posts:', 'ewa-essentialwa-theme' ); ?></h4>
-            <label>
-                <input id="<?= $this->get_field_id( 'selected_posts' ); ?>" name="<?= $this->get_field_name( 'selected_posts' ); ?>" type="text" value="<?= $instance['selected_posts']; ?>" />
-                <p class="description"><?php esc_html_e( 'Enter the IDs of the selected posts separated by commas.', 'ewa-essentialwa-theme' ); ?></p>
-            </label>
         </div>
 
     <?php 
@@ -106,8 +100,8 @@ class Recent_Posts_List_Widget extends WP_Widget {
 }
 
 // Initialize the widget to the admin side
-function Recent_Posts_List_Widget_init() {
-    register_widget( 'Recent_Posts_List_Widget' );
+function Popular_Posts_List_Widget_init() {
+    register_widget( 'Popular_Posts_List_Widget' );
 }
-add_action( 'widgets_init', 'Recent_Posts_List_Widget_init' );
+add_action( 'widgets_init', 'Popular_Posts_List_Widget_init' );
 ?>
