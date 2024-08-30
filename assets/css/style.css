@@ -853,7 +853,7 @@ input:checked + .slider:before {
 .logo a {
 	text-transform: uppercase;
 	font-weight: 800;
-	font-size: 24px;
+	font-size: 18px;
 	color: #333;
 }
 .blog-grid {
@@ -2970,4 +2970,66 @@ body.rtl {
   display: inline-block;
   width: 25%; /* Adjust width as needed */
   text-align: right;
+}
+
+
+/* Header */
+
+.header-social li {
+  margin-left: 15px;
+}
+.header-social li a {
+  font-size: 15px;
+  background-color: red;
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  text-align: center;
+  line-height: 25px;
+}
+.header-top-area {
+  background-color: #111;
+  color: #fff;
+  padding: 10px 0;
+}
+.header-info li {
+  margin-right: 25px;
+}
+
+/* Breadcumb */
+
+.breadcumb-area {
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  padding: 50px 0;
+  position: relative;
+  color: #fff;
+  z-index: 2;
+}
+.breadcumb-area:after {
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: #333;
+  z-index: -1;
+  opacity: .85;
+}
+.breadcumb-area h4 {
+  color: #fff;
+  font-size: 50px;
+  font-weight: 600;
+}
+.breadcumb-area ul {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+.breadcumb-area ul li {
+  margin: 0 10px;
+  font-weight: 500;
+  font-size: 18px;
 }

@@ -33,17 +33,18 @@
 
     <section class="header-top-area">
         <div class="container-fluid">
-            <div class="row">
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <ul>
-                        <li><a href="mailt: nahiansylhet@gmail.com">nahiansylhet@gmail.com</a></li>
-                        <li><a href="tel: 01686195607">01686195607</a></li>
+                    <ul class="header-info d-flex">
+                        <li class="d-flex align-items-center"><a href="mailt: nahiansylhet@gmail.com"><i class="fa-regular fa-envelope"></i> nahiansylhet@gmail.com</a></li>
+                        <li class="d-flex align-items-center"><a href="tel: 01686195607"><i class="fa-brands fa-whatsapp"></i> 01686195607</a></li>
                     </ul>
                 </div>
                 <div class="col-md-6">                    
-                    <ul>
-                        <li><a href=""></a></li>
-                        <li><a href=""></a></li>
+                    <ul class="header-social d-flex justify-content-end">
+                        <li><a href=""><i class="fa-brands fa-facebook-f"></i></a></li>
+                        <li><a href=""><i class="fa-brands fa-linkedin-in"></i></a></li>
+                        <li><a href=""><i class="fa-brands fa-youtube"></i></a></li>
                     </ul>
                 </div>
             </div>
@@ -53,7 +54,7 @@
     <!-- Navigation -->
     <nav class="header-area">
         <div class="container-fluid">
-            <div class="row">
+            <div class="row align-items-center">
                 <div class="col-md-3">
                     <!-- Logo -->
                     <div class="logo">
@@ -68,7 +69,7 @@
                             'theme_location' => 'menu-1',
                             'container' => 'ul',
                             'add_li_class'  => 'nav-item',
-                            'menu_class'     => 'navbar-nav ml-auto',
+                            'menu_class'     => 'navbar-nav',
                         )
                     );
                     ?>
@@ -79,14 +80,29 @@
     <?php
     // Get the current user info
     $current_user = wp_get_current_user();
-    $user_name = $current_user->display_name; // Or use $current_user->user_login for the username
+    $user_name = $current_user->display_name;
+
+    // Tutor LMS specific URLs
+    $dashboard_url = tutor_utils()->tutor_dashboard_url();
+    $profile_url = tutor_utils()->profile_url($current_user->ID);
+    $change_password_url = tutor_utils()->get_tutor_profile_url('settings');
+    $logout_url = wp_logout_url( home_url() ); // Redirect to homepage after logout
     ?>
-    <p>Hello, <?php echo esc_html( $user_name ); ?>!</p>
-    <!-- Optionally, add a logout link or profile link here -->
-    <a href="<?php echo esc_url( wp_logout_url() ); ?>">Log Out</a>
+    <p>Hello, <?php echo esc_html( $user_name ); ?></p>
+    <ul>
+        <li><a href="<?php echo esc_url( $dashboard_url ); ?>">Dashboard</a></li>
+        <li><a href="<?php echo esc_url( $profile_url ); ?>">Profile</a></li>
+        <li><a href="<?php echo esc_url( $change_password_url ); ?>">Change Password</a></li>
+        <li><a href="<?php echo esc_url( $logout_url ); ?>">Log Out</a></li>
+    </ul>
 <?php else : ?>
-    <p><a href="<?php echo esc_url( wp_login_url() ); ?>">Sign In</a></p>
+    <?php
+    // Use the Tutor LMS login URL
+    $login_url = tutor_utils()->get_tutor_login_url(); // Use get_tutor_login_url to ensure the correct function
+    ?>
+    <p><a href="<?php echo esc_url( $login_url ); ?>">Sign In</a></p>
 <?php endif; ?>
+
 
                 </div>
             </div>

@@ -17,6 +17,20 @@ get_header();
 
 <main id="primary" class="site-main">
 
+    <section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>Blogs</h4>
+                    <ul>
+                        <li><a href="<?php echo site_url();?>">Home</a></li>
+                        <li> / </li>
+                        <li>Blogs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
     <!--blog-grid-->
     <section class="blog-grid">
         <div class="container-fluid">
