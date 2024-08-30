@@ -73,8 +73,8 @@ get_header();
                         <div class="pagination-main">
                             <?php
                             the_posts_pagination(array(
-                                'prev_text' => __('Previous', 'anahian'),
-                                'next_text' => __('Next', 'anahian'),
+                                'prev_text' => __('Previous', 'devnahian'),
+                                'next_text' => __('Next', 'devnahian'),
                             ));
                             ?>
                         </div>

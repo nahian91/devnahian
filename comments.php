@@ -7,7 +7,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
- * @package anahian
+ * @package devnahian
  */
 
 /*
@@ -28,18 +28,18 @@ if ( post_password_required() ) {
 		?>
 		<h2 class="comments-title">
 			<?php
-			$anahian_comment_count = get_comments_number();
-			if ( '1' === $anahian_comment_count ) {
+			$devnahian_comment_count = get_comments_number();
+			if ( '1' === $devnahian_comment_count ) {
 				printf(
 					/* translators: 1: title. */
-					esc_html__( '1 Comment', 'anahian' ),
+					esc_html__( '1 Comment', 'devnahian' ),
 					'<span>' . wp_kses_post( get_the_title() ) . '</span>'
 				);
 			} else {
 				printf( 
 					/* translators: 1: comment count number, 2: title. */
-					esc_html( _nx( '%1$s Comments', '%1$s Comments', $anahian_comment_count, 'comments title', 'anahian' ) ),
-					number_format_i18n( $anahian_comment_count ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					esc_html( _nx( '%1$s Comments', '%1$s Comments', $devnahian_comment_count, 'comments title', 'devnahian' ) ),
+					number_format_i18n( $devnahian_comment_count ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					'<span>' . wp_kses_post( get_the_title() ) . '</span>'
 				);
 			}
@@ -66,7 +66,7 @@ if ( post_password_required() ) {
 		// If comments are closed and there are comments, let's leave a little note, shall we?
 		if ( ! comments_open() ) :
 			?>
-			<p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'anahian' ); ?></p>
+			<p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'devnahian' ); ?></p>
 			<?php
 		endif;
 

@@ -73,35 +73,35 @@ class About_Me_Widget extends WP_Widget {
 
         <!-- shows all the input fields to the widget admin side -->
         <div>
-            <h4><?php esc_html_e( 'Widget Title:', 'anahian' ); ?></h4>
+            <h4><?php esc_html_e( 'Widget Title:', 'devnahian' ); ?></h4>
             <label>
                 <input id="<?= $this->get_field_id( 'widget_title' ); ?>" name="<?= $this->get_field_name( 'widget_title' ); ?>" type="text" value="<?= $instance['widget_title']; ?>" />
             </label>
         </div>
 
         <div>
-            <h4><?php esc_html_e( 'Image Source:', 'anahian' ); ?></h4>
+            <h4><?php esc_html_e( 'Image Source:', 'devnahian' ); ?></h4>
             <label>
                 <input id="<?= $this->get_field_id( 'image_src' ); ?>" name="<?= $this->get_field_name( 'image_src' ); ?>" type="text" value="<?= $instance['image_src']; ?>" />
             </label>
         </div>
 
         <div>
-            <h4><?php esc_html_e( 'Heading:', 'anahian' ); ?></h4>
+            <h4><?php esc_html_e( 'Heading:', 'devnahian' ); ?></h4>
             <label>
                 <input id="<?= $this->get_field_id( 'heading' ); ?>" name="<?= $this->get_field_name( 'heading' ); ?>" type="text" value="<?= $instance['heading']; ?>" />
             </label>
         </div>
 
         <div>
-            <h4><?php esc_html_e( 'Paragraph Text:', 'anahian' ); ?></h4>
+            <h4><?php esc_html_e( 'Paragraph Text:', 'devnahian' ); ?></h4>
             <label>
                 <textarea id="<?= $this->get_field_id( 'paragraph_text' ); ?>" name="<?= $this->get_field_name( 'paragraph_text' ); ?>" rows="4"><?= $instance['paragraph_text']; ?></textarea>
             </label>
         </div>
 
         <div>
-            <h4><?php esc_html_e( 'Link URL:', 'anahian' ); ?></h4>
+            <h4><?php esc_html_e( 'Link URL:', 'devnahian' ); ?></h4>
             <label>
                 <input id="<?= $this->get_field_id( 'link_url' ); ?>" name="<?= $this->get_field_name( 'link_url' ); ?>" type="text" value="<?= $instance['link_url']; ?>" />
             </label>

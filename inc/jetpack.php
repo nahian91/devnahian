@@ -4,7 +4,7 @@
  *
  * @link https://jetpack.com/
  *
- * @package anahian
+ * @package devnahian
  */
 
 /**
@@ -14,13 +14,13 @@
  * See: https://jetpack.com/support/responsive-videos/
  * See: https://jetpack.com/support/content-options/
  */
-function anahian_jetpack_setup() {
+function devnahian_jetpack_setup() {
 	// Add theme support for Infinite Scroll.
 	add_theme_support(
 		'infinite-scroll',
 		array(
 			'container' => 'main',
-			'render'    => 'anahian_infinite_scroll_render',
+			'render'    => 'devnahian_infinite_scroll_render',
 			'footer'    => 'page',
 		)
 	);
@@ -33,7 +33,7 @@ function anahian_jetpack_setup() {
 		'jetpack-content-options',
 		array(
 			'post-details' => array(
-				'stylesheet' => 'anahian-style',
+				'stylesheet' => 'devnahian-style',
 				'date'       => '.posted-on',
 				'categories' => '.cat-links',
 				'tags'       => '.tags-links',
@@ -48,13 +48,13 @@ function anahian_jetpack_setup() {
 		)
 	);
 }
-add_action( 'after_setup_theme', 'anahian_jetpack_setup' );
+add_action( 'after_setup_theme', 'devnahian_jetpack_setup' );
 
-if ( ! function_exists( 'anahian_infinite_scroll_render' ) ) :
+if ( ! function_exists( 'devnahian_infinite_scroll_render' ) ) :
 	/**
 	 * Custom render function for Infinite Scroll.
 	 */
-	function anahian_infinite_scroll_render() {
+	function devnahian_infinite_scroll_render() {
 		while ( have_posts() ) {
 			the_post();
 			if ( is_search() ) :

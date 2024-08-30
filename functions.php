@@ -1,10 +1,10 @@
 <?php
 /**
- * anahian functions and definitions
+ * devnahian functions and definitions
  *
  * @link https://developer.wordpress.org/themes/basics/theme-functions/
  *
- * @package anahian
+ * @package devnahian
  */
 
 if ( ! defined( '_S_VERSION' ) ) {
@@ -19,9 +19,9 @@ if ( ! defined( '_S_VERSION' ) ) {
  * runs before the init hook. The init hook is too late for some features, such
  * as indicating support for post thumbnails.
  */
-function anahian_setup() {
+function devnahian_setup() {
     // Make theme available for translation.
-    load_theme_textdomain( 'anahian', get_template_directory() . '/languages' );
+    load_theme_textdomain( 'devnahian', get_template_directory() . '/languages' );
 
     // Let WordPress manage the document title.
     add_theme_support( 'title-tag' );
@@ -32,7 +32,7 @@ function anahian_setup() {
     // This theme uses wp_nav_menu() in one location.
     register_nav_menus(
         array(
-            'menu-1' => esc_html__( 'Primary', 'anahian' ),
+            'menu-1' => esc_html__( 'Primary', 'devnahian' ),
         )
     );
 
@@ -54,7 +54,7 @@ function anahian_setup() {
     add_theme_support(
         'custom-background',
         apply_filters(
-            'anahian_custom_background_args',
+            'devnahian_custom_background_args',
             array(
                 'default-color' => 'ffffff',
                 'default-image' => '',
@@ -76,7 +76,7 @@ function anahian_setup() {
         )
     );
 }
-add_action( 'after_setup_theme', 'anahian_setup' );
+add_action( 'after_setup_theme', 'devnahian_setup' );
 
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
@@ -85,22 +85,22 @@ add_action( 'after_setup_theme', 'anahian_setup' );
  *
  * @global int $content_width
  */
-function anahian_content_width() {
-    $GLOBALS['content_width'] = apply_filters( 'anahian_content_width', 640 );
+function devnahian_content_width() {
+    $GLOBALS['content_width'] = apply_filters( 'devnahian_content_width', 640 );
 }
-add_action( 'after_setup_theme', 'anahian_content_width', 0 );
+add_action( 'after_setup_theme', 'devnahian_content_width', 0 );
 
 /**
  * Register widget area.
  *
  * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
  */
-function anahian_widgets_init() {
+function devnahian_widgets_init() {
     register_sidebar(
         array(
-            'name'          => esc_html__( 'Sidebar', 'anahian' ),
+            'name'          => esc_html__( 'Sidebar', 'devnahian' ),
             'id'            => 'sidebar-1',
-            'description'   => esc_html__( 'Add widgets here.', 'anahian' ),
+            'description'   => esc_html__( 'Add widgets here.', 'devnahian' ),
             'before_widget' => '<section id="%1$s" class="widget %2$s">',
             'after_widget'  => '</section>',
             'before_title'  => '<h2 class="widget-title">',
@@ -108,12 +108,12 @@ function anahian_widgets_init() {
         )
     );
 }
-add_action( 'widgets_init', 'anahian_widgets_init' );
+add_action( 'widgets_init', 'devnahian_widgets_init' );
 
 /**
  * Enqueue scripts and styles.
  */
-function anahian_scripts() {
+function devnahian_scripts() {
     // Google Font
     wp_enqueue_style( 'google-font', 'https://fonts.googleapis.com/css?family=Muli:300,400,500,600,700,800,900&display=swap', array(), null );
 
@@ -130,8 +130,8 @@ function anahian_scripts() {
     wp_enqueue_style( 'style', get_template_directory_uri() . '/assets/css/style.css', array(), _S_VERSION, 'all' );
 
     // Main stylesheet
-    wp_enqueue_style( 'anahian-style', get_stylesheet_uri(), array(), _S_VERSION );
-    wp_style_add_data( 'anahian-style', 'rtl', 'replace' );
+    wp_enqueue_style( 'devnahian-style', get_stylesheet_uri(), array(), _S_VERSION );
+    wp_style_add_data( 'devnahian-style', 'rtl', 'replace' );
 
     // Popper JS
     wp_enqueue_script( 'popper', get_template_directory_uri() . '/assets/js/popper.min.js', array('jquery'), _S_VERSION, true );
@@ -146,7 +146,7 @@ function anahian_scripts() {
         wp_enqueue_script( 'comment-reply' );
     }
 }
-add_action( 'wp_enqueue_scripts', 'anahian_scripts' );
+add_action( 'wp_enqueue_scripts', 'devnahian_scripts' );
 
 /**
  * Implement the Custom Header feature.

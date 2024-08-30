@@ -9,7 +9,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
- * @package anahian
+ * @package devnahian
  */
 
 get_header();
@@ -89,8 +89,8 @@ get_header();
                             <?php
                             // Pagination links
                             the_posts_pagination(array(
-                                'prev_text' => __('Previous', 'anahian'),
-                                'next_text' => __('Next', 'anahian'),
+                                'prev_text' => __('Previous', 'devnahian'),
+                                'next_text' => __('Next', 'devnahian'),
                             ));
                             ?>
                         </div>
