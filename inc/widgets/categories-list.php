@@ -66,7 +66,7 @@ class Categories_List_Widget extends WP_Widget {
 
         <!-- Widget Title -->
         <div>
-            <h4><?php esc_html_e( 'Widget Title:', 'ewa-essentialwa-theme' ); ?></h4>
+            <h4><?php esc_html_e( 'Widget Title:', 'devnahian' ); ?></h4>
             <label>
                 <input id="<?= $this->get_field_id( 'widget_title' ); ?>" name="<?= $this->get_field_name( 'widget_title' ); ?>" type="text" value="<?= $instance['widget_title']; ?>" />
             </label>

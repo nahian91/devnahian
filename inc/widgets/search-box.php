@@ -68,7 +68,7 @@ function form( $instance ) {
     <!-- shows all the input fields to the widget admin side -->
     <div>
 
-      <h4><?php esc_html_e( 'Widget Title:', 'ewa-essentialwa-theme' ); ?></h4>
+      <h4><?php esc_html_e( 'Widget Title:', 'devnahian' ); ?></h4>
       <label>
         <input id="<?= $this->get_field_id( 'widget_title' ); ?>" name="<?= $this->get_field_name( 'widget_title' ); ?>" type="text" value="<?= $instance['widget_title']; ?>" />
       </label>

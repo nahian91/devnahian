@@ -19,7 +19,7 @@ get_header();
 		<section class="blog-grid">
 			<div class="container-fluid">
 				<div class="row">
-					<div class="col-lg-8">
+					<div class="col-lg-12">
 						<div class="page-content">
 							<?php
 								while ( have_posts() ) :
@@ -30,9 +30,6 @@ get_header();
 								endwhile; // End of the loop.
 							?>
 						</div>
-					</div>
-					<div class="col-lg-4">
-						<?php get_sidebar(); ?>
 					</div>
 				</div>
 			</div>

@@ -55,7 +55,7 @@
     <nav class="header-area">
         <div class="container-fluid">
             <div class="row align-items-center">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <!-- Logo -->
                     <div class="logo">
                         <a href="<?php echo site_url();?>">Abdullah Nahian</a>
@@ -67,41 +67,46 @@
                     wp_nav_menu(
                         array(
                             'theme_location' => 'menu-1',
-                            'container' => 'ul',
-                            'add_li_class'  => 'nav-item',
-                            'menu_class'     => 'navbar-nav',
                         )
                     );
                     ?>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
 
+                <div class="header-profile">
                 <?php if ( is_user_logged_in() ) : ?>
     <?php
     // Get the current user info
     $current_user = wp_get_current_user();
     $user_name = $current_user->display_name;
 
-    // Tutor LMS specific URLs
+    // Get the user's avatar
+    $avatar = get_avatar( $current_user->ID, 64 );
+
     $dashboard_url = tutor_utils()->tutor_dashboard_url();
-    $profile_url = tutor_utils()->profile_url($current_user->ID);
-    $change_password_url = tutor_utils()->get_tutor_profile_url('settings');
-    $logout_url = wp_logout_url( home_url() ); // Redirect to homepage after logout
     ?>
-    <p>Hello, <?php echo esc_html( $user_name ); ?></p>
-    <ul>
-        <li><a href="<?php echo esc_url( $dashboard_url ); ?>">Dashboard</a></li>
-        <li><a href="<?php echo esc_url( $profile_url ); ?>">Profile</a></li>
-        <li><a href="<?php echo esc_url( $change_password_url ); ?>">Change Password</a></li>
-        <li><a href="<?php echo esc_url( $logout_url ); ?>">Log Out</a></li>
-    </ul>
+    <p><a href="<?php echo esc_url( $dashboard_url ); ?>"><?php echo $avatar; ?> Hi, <?php echo esc_html( $user_name ); ?></a></p>
 <?php else : ?>
     <?php
     // Use the Tutor LMS login URL
     $login_url = tutor_utils()->get_tutor_login_url(); // Use get_tutor_login_url to ensure the correct function
     ?>
-    <p><a href="<?php echo esc_url( $login_url ); ?>">Sign In</a></p>
+    <p><a class="btn-custom" href="<?php echo esc_url( $login_url ); ?>">Dashboard</a></p>
 <?php endif; ?>
+
+<?php if ( function_exists('WC') ) : ?>
+    <div class="mini-cart">
+        <a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-icon">
+            <i class="fa fa-shopping-cart"></i> <!-- Replace with your preferred cart icon -->
+            <span class="cart-count">
+                <?php echo WC()->cart->get_cart_contents_count(); ?>
+            </span>
+        </a>
+    </div>
+<?php endif; ?>
+                </div>
+
+
 
 
                 </div>

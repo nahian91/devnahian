@@ -313,3 +313,41 @@ function track_post_views($post_id) {
 }
 remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0); // Remove the prefetching for adjacent posts
 add_action('wp_head', 'track_post_views');
+
+
+if ( ! function_exists( 'etlms_course_categories' ) ) {
+	function etlms_course_categories() {
+		$course_categories      = array();
+		$course_categories_term = tutils()->get_course_categories_term();
+		foreach ( $course_categories_term as $term ) {
+			$course_categories[ $term->term_id ] = $term->name;
+		}
+
+		return $course_categories;
+	}
+}
+
+
+if ( ! function_exists( 'etlms_get_course' ) ) {
+    function etlms_get_course() {
+        global $post;
+        $course_id        = $post->ID;
+        $course_post_type = tutor()->course_post_type;
+
+        // Check if the current post is a single course post
+        if ( is_single() && $post->post_type == $course_post_type ) {
+            return true;
+        }
+
+        // Check if the post is a Tutor LMS Elementor template
+        if ( $post->post_type == 'elementor_library' ) {
+            $is_tutor_template = get_post_meta( $post->ID, '_tutor_lms_elementor_template_id', true );
+            if ( $is_tutor_template ) {
+                return setup_course_data(); // Ensure this function is defined and available
+            }
+        }
+
+        return false;
+    }
+}
+?>
