@@ -31,29 +31,65 @@
     </div>
     <!-- Loading -->
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <section class="header-top-area">
         <div class="container-fluid">
-            <!-- Logo -->
-            <div class="logo">
-                <a href="<?php echo site_url();?>">Abdullah Nahian</a>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li><a href="mailt: nahiansylhet@gmail.com">nahiansylhet@gmail.com</a></li>
+                        <li><a href="tel: 01686195607">01686195607</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6">                    
+                    <ul>
+                        <li><a href=""></a></li>
+                        <li><a href=""></a></li>
+                    </ul>
+                </div>
             </div>
-            <!-- Logo -->
-    
-            <!-- Navbar Collapse -->
-            <div class="collapse navbar-collapse" id="main_nav">
-            <?php
-			wp_nav_menu(
-				array(
-					'theme_location' => 'menu-1',
-                    'container' => 'ul',
-                    'add_li_class'  => 'nav-item',
-					'menu_class'     => 'navbar-nav ml-auto',
-				)
-			);
-			?>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="header-area">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3">
+                    <!-- Logo -->
+                    <div class="logo">
+                        <a href="<?php echo site_url();?>">Abdullah Nahian</a>
+                    </div>
+                    <!-- Logo -->
+                </div>
+                <div class="col-md-6 text-center">
+                <?php
+                    wp_nav_menu(
+                        array(
+                            'theme_location' => 'menu-1',
+                            'container' => 'ul',
+                            'add_li_class'  => 'nav-item',
+                            'menu_class'     => 'navbar-nav ml-auto',
+                        )
+                    );
+                    ?>
+                </div>
+                <div class="col-md-3">
+
+                <?php if ( is_user_logged_in() ) : ?>
+    <?php
+    // Get the current user info
+    $current_user = wp_get_current_user();
+    $user_name = $current_user->display_name; // Or use $current_user->user_login for the username
+    ?>
+    <p>Hello, <?php echo esc_html( $user_name ); ?>!</p>
+    <!-- Optionally, add a logout link or profile link here -->
+    <a href="<?php echo esc_url( wp_logout_url() ); ?>">Log Out</a>
+<?php else : ?>
+    <p><a href="<?php echo esc_url( wp_login_url() ); ?>">Sign In</a></p>
+<?php endif; ?>
+
+                </div>
             </div>
-            <!-- Loading -->
         </div>
     </nav>
     <!-- Navigation -->

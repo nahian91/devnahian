@@ -184,6 +184,17 @@ require get_template_directory() . '/inc/widgets/categories-list.php';
 require get_template_directory() . '/inc/widgets/search-box.php';
 require get_template_directory() . '/inc/widgets/about-me.php';
 
+// Add a class to the body tag if the admin bar is visible
+function add_admin_bar_body_class( $classes ) {
+    if ( is_user_logged_in() && is_admin_bar_showing() ) {
+        $classes[] = 'admin-bar';
+    }
+    return $classes;
+}
+add_filter( 'body_class', 'add_admin_bar_body_class' );
+
+
+
 /**
  * Register hero block
  */
