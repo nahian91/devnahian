@@ -7,15 +7,19 @@ get_header();
 
 <main id="primary" class="site-main">
 
-    <section class="blog-grid">
-        <div class="container-fluid">
+<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
+        <div class="container">
             <div class="row">
-                <div class="col-lg-12">
-                    <div class="breadcumb">
-                        <h4>Tutorial</h4>
-                    </div>
+                <div class="col-md-12">                    
+                    <div class="post-single-content">
+                        <h4><?php the_title();?></h4>
+                    </div> 
                 </div>
             </div>
+        </div>
+    </section>
+    <section class="blog-grid">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-8 mt-30">
                     <div class="row">

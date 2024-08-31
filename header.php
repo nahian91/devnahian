@@ -49,9 +49,9 @@
                 </div>
                 <div class="col-md-6">                    
                     <ul class="header-social d-flex justify-content-end">
-                        <li><a href=""><i class="fa fa-facebook"></i></a></li>
-                        <li><a href=""><i class="fa fa-linkedin"></i></a></li>
-                        <li><a href=""><i class="fa fa-youtube"></i></a></li>
+                        <li><a href="https://www.facebook.com/nahian01/" target="_blank"><i class="fa fa-facebook"></i></a></li>
+                        <li><a href="https://www.linkedin.com/in/nahian91/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+                        <li><a href="https://www.youtube.com/@CodewithAbdullahNahian" target="_blank"><i class="fa fa-youtube"></i></a></li>
                     </ul>
                 </div>
             </div>

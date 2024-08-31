@@ -2716,6 +2716,9 @@ body.rtl {
   text-align: center;
   line-height: 25px;
 }
+.header-social li a:hover{
+  color: #fff;
+}
 .header-top-area {
   background-color: #111;
   color: #fff;
