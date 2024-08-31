@@ -11,22 +11,24 @@ get_header();
 ?>
 
 	<main id="primary" class="site-main">
+
+	<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                <div class="post-single-content">
+                            <h4><?php echo get_the_archive_title(); ?></h4>
+                        </div> 
+                </div>
+            </div>
+        </div>
+    </section>
 		<!--blog-grid-->
 		<section class="blog-grid">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-					<div class="row">
-						<div class="col-lg-12">
-							<div class="categorie-title"> 
-								<small>
-									<a href="index.html">Home</a>
-									<span class="arrow_carrot-right"></span> <?php echo get_the_archive_title(); ?>
-								</small>
-								<h3><?php echo get_the_archive_title(); ?></h3>
-							</div>
-						</div>
-					</div>
                     <div class="row">
 					<?php
 						if ( have_posts() ) :

@@ -17,6 +17,7 @@
         $('.single-theme-tab-content').removeClass('active').fadeOut('fast');
         $(target).addClass('active').fadeIn('fast');
     });
+    
 
     /* -----------------------------------
             Preloader

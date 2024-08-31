@@ -83,18 +83,27 @@
     // Get the user's avatar
     $avatar = get_avatar( $current_user->ID, 64 );
 
+    // Get Tutor LMS dashboard URL
     $dashboard_url = tutor_utils()->tutor_dashboard_url();
+
+    // Debug: Display the generated dashboard URL
+    echo '<!-- Dashboard URL: ' . esc_url( $dashboard_url ) . ' -->';
     ?>
     <p><a href="<?php echo esc_url( $dashboard_url ); ?>"><?php echo $avatar; ?> Hi, <?php echo esc_html( $user_name ); ?></a></p>
 <?php else : ?>
     <?php
-    // Use the Tutor LMS login URL
-    $login_url = tutor_utils()->get_tutor_login_url(); // Use get_tutor_login_url to ensure the correct function
+    // Get Tutor LMS login URL
+    $login_url = tutor_utils()->login_url();
+    print_r($login_url);
+
+    // Debug: Display the generated login URL
+    echo '<!-- Login URL: ' . esc_url( $login_url ) . ' -->';
     ?>
-    <p><a class="btn-custom" href="<?php echo esc_url( $login_url ); ?>">Dashboard</a></p>
+    <p><a class="btn-custom" href="http://devnahian.local/dashboard/">Dashboard</a></p>
 <?php endif; ?>
 
-<?php if ( function_exists('WC') ) : ?>
+
+<?php if ( function_exists('WC') && WC()->cart->get_cart_contents_count() > 0 ) : ?>
     <div class="mini-cart">
         <a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-icon">
             <i class="fa fa-shopping-cart"></i> <!-- Replace with your preferred cart icon -->
@@ -104,6 +113,9 @@
         </a>
     </div>
 <?php endif; ?>
+
+
+
                 </div>
 
 
