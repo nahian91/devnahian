@@ -16,7 +16,14 @@
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
-    <meta name="google-adsense-account" content="ca-pub-5810116187271532">
+    <!-- Paste your Google Analytics code here -->
+   <script async src="https://www.googletagmanager.com/gtag/js?id=G-F2ER1G9M45"></script>
+   <script>
+   window.dataLayer = window.dataLayer || [];
+   function gtag(){dataLayer.push(arguments);}
+   gtag('js', new Date());
+   gtag('config', 'G-F2ER1G9M45');
+   </script>
 	<?php wp_head(); ?>
 </head>
 
