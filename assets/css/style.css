@@ -16,7 +16,9 @@
   padding: 0;
   margin: 0;
 }
-
+:root{
+  --tutor-color-primary: #0077b7;
+}
 html {
   scroll-behavior: smooth;
 }
@@ -2771,8 +2773,8 @@ body.rtl {
   position: relative;
 }
 .menu li a {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
   display: block;
   padding: 15px;
   color: #333;
@@ -2804,6 +2806,7 @@ body.rtl {
 }
 .menu li ul li a{
   padding: 0;
+  font-size: 16px;
 }
 
 

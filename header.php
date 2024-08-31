@@ -36,15 +36,15 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <ul class="header-info d-flex">
-                        <li class="d-flex align-items-center"><a href="mailt: nahiansylhet@gmail.com"><i class="fa-regular fa-envelope"></i> nahiansylhet@gmail.com</a></li>
-                        <li class="d-flex align-items-center"><a href="tel: 01686195607"><i class="fa-brands fa-whatsapp"></i> 01686195607</a></li>
+                        <li class="d-flex align-items-center"><a href="mailt: nahiansylhet@gmail.com"><i class="fa fa-envelope"></i> nahiansylhet@gmail.com</a></li>
+                        <li class="d-flex align-items-center"><a href="tel: 01686195607"><i class="fa fa-whatsapp"></i> 01686195607</a></li>
                     </ul>
                 </div>
                 <div class="col-md-6">                    
                     <ul class="header-social d-flex justify-content-end">
-                        <li><a href=""><i class="fa-brands fa-facebook-f"></i></a></li>
-                        <li><a href=""><i class="fa-brands fa-linkedin-in"></i></a></li>
-                        <li><a href=""><i class="fa-brands fa-youtube"></i></a></li>
+                        <li><a href=""><i class="fa fa-facebook"></i></a></li>
+                        <li><a href=""><i class="fa fa-linkedin"></i></a></li>
+                        <li><a href=""><i class="fa fa-youtube"></i></a></li>
                     </ul>
                 </div>
             </div>
@@ -99,7 +99,7 @@
     // Debug: Display the generated login URL
     echo '<!-- Login URL: ' . esc_url( $login_url ) . ' -->';
     ?>
-    <p><a class="btn-custom" href="http://devnahian.local/dashboard/">Dashboard</a></p>
+    <p><a class="btn-custom" href="<?php echo site_url();?>/dashboard/">Dashboard</a></p>
 <?php endif; ?>
 
 

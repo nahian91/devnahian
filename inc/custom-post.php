@@ -32,7 +32,7 @@ function create_posttype_tutorial() {
         'capability_type'       => 'post',
         'has_archive'           => true,
         'hierarchical'          => false,
-        'menu_position'         => 5,
+        'menu_position'         => 25,
         'show_in_rest'          => true, // For REST API support
         'supports'              => array( 'title', 'editor', 'thumbnail', 'revisions', 'custom-fields' ),
     );
@@ -71,7 +71,7 @@ function create_posttype_theme() {
         'capability_type'       => 'post',
         'has_archive'           => true,
         'hierarchical'          => false,
-        'menu_position'         => 5,
+        'menu_position'         => 25,
         'show_in_rest'          => true,
         'supports'              => array( 'title', 'editor', 'thumbnail', 'revisions', 'custom-fields' ),
     );
@@ -79,3 +79,43 @@ function create_posttype_theme() {
     register_post_type( 'theme', $args );
 }
 add_action( 'init', 'create_posttype_theme' );
+
+
+// Function to register 'Digital' custom post type
+function create_posttype_digital() {
+    $labels = array(
+        'name'                  => _x( 'Digital', 'Post type general name', 'textdomain' ),
+        'singular_name'         => _x( 'Digital', 'Post type singular name', 'textdomain' ),
+        'menu_name'             => _x( 'Digital', 'Admin Menu text', 'textdomain' ),
+        'name_admin_bar'        => _x( 'Digital', 'Add New on Toolbar', 'textdomain' ),
+        'add_new'               => __( 'Add New', 'textdomain' ),
+        'add_new_item'          => __( 'Add New Digital', 'textdomain' ),
+        'new_item'              => __( 'New Digital', 'textdomain' ),
+        'edit_item'             => __( 'Edit Digital', 'textdomain' ),
+        'view_item'             => __( 'View Digital', 'textdomain' ),
+        'all_items'             => __( 'All Digital', 'textdomain' ),
+        'search_items'          => __( 'Search Digital', 'textdomain' ),
+        'parent_item_colon'     => __( 'Parent Digital:', 'textdomain' ),
+        'not_found'             => __( 'No Digital found.', 'textdomain' ),
+        'not_found_in_trash'    => __( 'No Digital found in Trash.', 'textdomain' ),
+    );
+
+    $args = array(
+        'labels'                => $labels,
+        'public'                => true,
+        'publicly_queryable'    => true,
+        'show_ui'               => true,
+        'show_in_menu'          => true,
+        'query_var'             => true,
+        'rewrite'               => array( 'slug' => 'digital' ),
+        'capability_type'       => 'post',
+        'has_archive'           => true,
+        'hierarchical'          => false,
+        'menu_position'         => 25,
+        'show_in_rest'          => true,
+        'supports'              => array( 'title', 'editor', 'thumbnail', 'revisions', 'custom-fields' ),
+    );
+
+    register_post_type( 'Digital', $args );
+}
+add_action( 'init', 'create_posttype_digital' );
