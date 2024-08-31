@@ -15,26 +15,37 @@
 get_header();
 ?>
 
-	<main id="primary" class="site-main">
-		<section class="blog-grid">
-			<div class="container-fluid">
+<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				
+			<div class="post-single-content">
+						<h4><?php the_title();?></h4>
+					</div> 
+			</div>
+		</div>
+	</div>
+</section>
+
+<?php
+	while ( have_posts() ) :
+		the_post();
+
+		?>
+			<div class="container">
 				<div class="row">
-					<div class="col-lg-12">
+					<div class="col-md-12">
 						<div class="page-content">
-							<?php
-								while ( have_posts() ) :
-									the_post();
-
-									get_template_part( 'template-parts/content', 'page' );
-
-								endwhile; // End of the loop.
-							?>
+							<?php the_content(); ?>
 						</div>
 					</div>
 				</div>
 			</div>
-		</section>
-	</main><!-- #main -->
+		<?php 
+
+	endwhile; // End of the loop.
+?>
 
 <?php
 

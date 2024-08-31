@@ -2906,3 +2906,55 @@ body.rtl {
 	margin-bottom: 0;
 	padding: 15px;
 }
+
+.tutorstarter-order-receipt-container {
+  background-color: #fff;
+  box-shadow: 0px 5px 20px 0px rgba(69, 67, 96, 0.1);
+  padding: 30px;
+  margin-bottom: 80px;
+}
+.woocommerce-order h2 {
+  font-size: 24px;
+  text-transform: capitalize;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.checkout-payment, .checkout-order-summary {
+  background-color: #fff;
+  padding: 30px;
+  box-shadow: 0px 5px 20px 0px rgba(69, 67, 96, 0.1);
+}
+.woocommerce-billing-fields h3, .checkout-order-summary h2 {
+  text-transform: capitalize;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+  font-size: 26px;
+}
+
+.woocommerce-input-wrapper {
+  width: 100%;
+}
+.woocommerce-input-wrapper input, .woocommerce-input-wrapper select {
+  width: 100% !important;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+#select2-billing_state-container {
+  width: 100%;
+}
+.select2-container--default .select2-selection--single {
+  height: 35px;
+  border: 1px solid #ddd;
+  border-radius: 0;
+  line-height: 20px;
+}
+
+.elementor-element.elementor-element-3d0a812.e-flex.e-con-boxed.e-con.e-parent.e-lazyloaded {
+	display: none;
+}
+.page-content {
+	margin: 30px 0;
+	box-shadow: 0px 5px 20px 0px rgba(69, 67, 96, 0.1);
+}

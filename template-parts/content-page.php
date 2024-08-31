@@ -9,10 +9,20 @@
 
 ?>
 
+
+<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				
+			<div class="post-single-content">
+					</div> 
+			</div>
+		</div>
+	</div>
+</section>
+
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<header class="entry-header">
-		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
-	</header><!-- .entry-header -->
 
 	<?php devnahian_post_thumbnail(); ?>
 

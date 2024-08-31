@@ -314,40 +314,18 @@ function track_post_views($post_id) {
 remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0); // Remove the prefetching for adjacent posts
 add_action('wp_head', 'track_post_views');
 
+// Remove multiple fields and sections from the WooCommerce checkout
+add_filter( 'woocommerce_checkout_fields', 'custom_remove_checkout_fields' );
+function custom_remove_checkout_fields( $fields ) {
+    // Unset individual fields
+    unset($fields['billing']['billing_company']); // Company name
+    unset($fields['billing']['billing_country']); // Country / Region
+    unset($fields['billing']['billing_address_1']); // Street address
+    unset($fields['billing']['billing_address_2']); // Apartment, suite, etc.
+    unset($fields['billing']['billing_city']); // Town / City
+    unset($fields['billing']['billing_district']); // District (if custom field)
+    unset($fields['billing']['billing_postcode']); // Postcode / ZIP
+    unset($fields['order']['order_comments']); // Additional information
 
-if ( ! function_exists( 'etlms_course_categories' ) ) {
-	function etlms_course_categories() {
-		$course_categories      = array();
-		$course_categories_term = tutils()->get_course_categories_term();
-		foreach ( $course_categories_term as $term ) {
-			$course_categories[ $term->term_id ] = $term->name;
-		}
-
-		return $course_categories;
-	}
+    return $fields;
 }
-
-
-if ( ! function_exists( 'etlms_get_course' ) ) {
-    function etlms_get_course() {
-        global $post;
-        $course_id        = $post->ID;
-        $course_post_type = tutor()->course_post_type;
-
-        // Check if the current post is a single course post
-        if ( is_single() && $post->post_type == $course_post_type ) {
-            return true;
-        }
-
-        // Check if the post is a Tutor LMS Elementor template
-        if ( $post->post_type == 'elementor_library' ) {
-            $is_tutor_template = get_post_meta( $post->ID, '_tutor_lms_elementor_template_id', true );
-            if ( $is_tutor_template ) {
-                return setup_course_data(); // Ensure this function is defined and available
-            }
-        }
-
-        return false;
-    }
-}
-?>
