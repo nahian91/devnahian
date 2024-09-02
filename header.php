@@ -70,13 +70,15 @@
                     <!-- Logo -->
                 </div>
                 <div class="col-md-6 text-center">
-                <?php
-                    wp_nav_menu(
-                        array(
-                            'theme_location' => 'menu-1',
-                        )
-                    );
-                    ?>
+        <?php
+            wp_nav_menu(
+                array(
+                    'theme_location' => 'menu-1',
+                    'menu_id' => 'mainmenu'
+                )
+            );
+        ?>
+                
                 </div>
                 <div class="col-md-4">
 

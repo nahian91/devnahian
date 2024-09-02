@@ -67,6 +67,8 @@
       this.pause();
     });
 
+    $('#mainmenu').slicknav();
+
 
    
 })(jQuery);

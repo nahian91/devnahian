@@ -13,10 +13,9 @@ get_header();
 	<section class="error-404">
 		<div class="container">
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 text-center">
 					<h1 class="page-title"><?php esc_html_e( 'Oops! That page can&rsquo;t be found.', 'devnahian' ); ?></h1>
 					<p><?php esc_html_e( 'It looks like nothing was found at this location. Maybe try one of the links below or a search?', 'devnahian' ); ?></p>
-					<?php get_search_form(); ?>
 				</div>
 			</div>
 		</div>

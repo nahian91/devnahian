@@ -33,6 +33,8 @@ function devnahian_setup() {
     register_nav_menus(
         array(
             'menu-1' => esc_html__( 'Primary', 'devnahian' ),
+            'footer-1' => esc_html__( 'Footer 1', 'devnahian' ),
+            'footer-2' => esc_html__( 'Footer 2', 'devnahian' ),
         )
     );
 
@@ -126,8 +128,14 @@ function devnahian_scripts() {
     // Bootstrap CSS
     wp_enqueue_style( 'bootstrap', get_template_directory_uri() . '/assets/css/bootstrap.min.css', array(), _S_VERSION, 'all' );
 
+    // Slicknav CSS
+    wp_enqueue_style( 'slicknav', get_template_directory_uri() . '/assets/css/slicknav.min.css', array(), _S_VERSION, 'all' );
+
     // Style CSS
     wp_enqueue_style( 'style', get_template_directory_uri() . '/assets/css/style.css', array(), _S_VERSION, 'all' );
+
+    // Responsive CSS
+    wp_enqueue_style( 'responsive-theme', get_template_directory_uri() . '/assets/css/responsive.css', array(), _S_VERSION, 'all' );
 
     // Main stylesheet
     wp_enqueue_style( 'devnahian-style', get_stylesheet_uri(), array(), _S_VERSION );
@@ -138,6 +146,9 @@ function devnahian_scripts() {
 
     // Bootstrap JS
     wp_enqueue_script( 'bootstrap', get_template_directory_uri() . '/assets/js/bootstrap.min.js', array('jquery'), _S_VERSION, true );
+
+    // Slicknav JS
+    wp_enqueue_script( 'slicknav', get_template_directory_uri() . '/assets/js/slicknav.min.js', array('jquery'), _S_VERSION, true );
 
     // Main JS
     wp_enqueue_script( 'main', get_template_directory_uri() . '/assets/js/main.js', array('jquery'), _S_VERSION, true );
@@ -183,15 +194,6 @@ require get_template_directory() . '/inc/widgets/popular-posts.php';
 require get_template_directory() . '/inc/widgets/categories-list.php';
 require get_template_directory() . '/inc/widgets/search-box.php';
 require get_template_directory() . '/inc/widgets/about-me.php';
-
-// Add a class to the body tag if the admin bar is visible
-function add_admin_bar_body_class( $classes ) {
-    if ( is_user_logged_in() && is_admin_bar_showing() ) {
-        $classes[] = 'admin-bar';
-    }
-    return $classes;
-}
-add_filter( 'body_class', 'add_admin_bar_body_class' );
 
 
 
