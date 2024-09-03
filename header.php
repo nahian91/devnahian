@@ -15,6 +15,7 @@
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-adsense-account" content="ca-pub-5810116187271532">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
     <!-- Paste your Google Analytics code here -->
    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F2ER1G9M45"></script>
