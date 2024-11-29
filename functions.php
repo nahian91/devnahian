@@ -290,6 +290,89 @@ function collection_render_callback( $block, $content = '', $is_preview = false 
     <?php
 }
 
+
+if (!function_exists('track_unique_post_views')) {
+    function track_unique_post_views($post_id) {
+        if (!is_single()) return;
+
+        // Check if the user has already viewed this post using cookies
+        $cookie_name = 'post_viewed_' . $post_id;
+        if (!isset($_COOKIE[$cookie_name])) {
+            // Update the view count if the cookie doesn't exist
+            $count_key = 'post_views_count';
+            $count = get_post_meta($post_id, $count_key, true);
+
+            if ($count == '') {
+                $count = 0;
+                delete_post_meta($post_id, $count_key);
+                add_post_meta($post_id, $count_key, '0');
+            } else {
+                $count++;
+                update_post_meta($post_id, $count_key, $count);
+            }
+
+            // Set the cookie to mark this post as viewed by the user
+            setcookie($cookie_name, '1', time() + 3600 * 24, '/'); // Expires in 24 hours
+        }
+    }
+}
+
+if (!function_exists('set_unique_post_views')) {
+    function set_unique_post_views() {
+        if (is_single()) {
+            global $post;
+            track_unique_post_views($post->ID);
+        }
+    }
+    add_action('wp_head', 'set_unique_post_views');
+}
+
+if (!function_exists('get_post_views')) {
+    function get_post_views($post_id) {
+        $count_key = 'post_views_count';
+        $count = get_post_meta($post_id, $count_key, true);
+        return $count ? $count : '0';
+    }
+}
+
+
+// Add a new column to the post list
+function add_views_column($columns) {
+    $columns['post_views'] = 'Views';
+    return $columns;
+}
+add_filter('manage_posts_columns', 'add_views_column');
+
+// Populate the new column with the post view count
+function display_views_column($column_name, $post_id) {
+    if ($column_name === 'post_views') {
+        $views = get_post_meta($post_id, 'post_views_count', true);
+        echo $views ? $views : '0';
+    }
+}
+add_action('manage_posts_custom_column', 'display_views_column', 10, 2);
+
+// Make the new column sortable
+function make_views_column_sortable($columns) {
+    $columns['post_views'] = 'post_views';
+    return $columns;
+}
+add_filter('manage_edit-post_sortable_columns', 'make_views_column_sortable');
+
+// Set the query to sort by views
+function sort_by_views_column($query) {
+    if (!is_admin()) return;
+
+    $orderby = $query->get('orderby');
+    if ($orderby === 'post_views') {
+        $query->set('meta_key', 'post_views_count');
+        $query->set('orderby', 'meta_value_num');
+    }
+}
+add_action('pre_get_posts', 'sort_by_views_column');
+
+
+
 /**
  * Change ACF JSON save point.
  */
@@ -331,3 +414,5 @@ function custom_remove_checkout_fields( $fields ) {
 
     return $fields;
 }
+
+

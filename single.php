@@ -26,6 +26,9 @@ get_header();
                                     <li>Published: <?php echo get_the_date(); ?></li>
                                     <li class="dot"></li>
                                     <li>Updated: <?php echo get_the_modified_date(); ?></li>
+                                    <li class="dot"></li>
+                                    <li><?php echo get_post_views(get_the_ID()) . ' Views';?></li>
+                                    
                                 </ul>
                             </div>
                         </div> 
