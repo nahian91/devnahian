@@ -40,7 +40,9 @@ get_header();
                                 <div class="col-lg-4">
                                     <div class="post-card">
                                         <div class="post-card-image">
-                                            <img src="<?php the_post_thumbnail_url();?> ?>" alt="<?php the_title(); ?>">
+                                            <div class="post-card-image-hover">
+                                                <img src="<?php the_post_thumbnail_url();?> ?>" alt="<?php the_title(); ?>">
+                                            </div>
                                         </div>
                                         <div class="post-card-content">
                                             <h5><?php the_title(); ?></h5>

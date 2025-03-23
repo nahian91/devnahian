@@ -21,3 +21,18 @@ Underscores is distributed under the terms of the GNU GPL v2 or later.
 Normalizing styles have been helped along thanks to the fine work of
 Nicolas Gallagher and Jonathan Neal https://necolas.github.io/normalize.css/
 */
+
+
+.post-card-image-hover {
+  cursor: n-resize;
+}
+.post-card-image-hover img{
+  width: 100%;
+  object-fit: cover;
+  object-position: top;
+  height: 400px;
+  transition: 8s all ease;
+}
+.post-card-image-hover img:hover{
+  object-position: bottom;
+}
