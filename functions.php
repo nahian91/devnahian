@@ -415,4 +415,92 @@ function custom_remove_checkout_fields( $fields ) {
     return $fields;
 }
 
+add_action('init', 'handle_course_retake_action');
 
+function handle_course_retake_action() {
+    if (isset($_GET['action']) && $_GET['action'] === 'retake_course' && is_user_logged_in()) {
+        $course_id = get_the_ID();
+        $user_id = get_current_user_id();
+
+        // Reset course progress
+        tutor_utils()->delete_course_progress($user_id, $course_id);
+
+        // Redirect back to course page
+        wp_redirect(get_permalink($course_id));
+        exit;
+    }
+}
+
+// Track unique post views
+function track_unique_post_views($post_id) {
+    if (is_single() && !isset($_COOKIE['viewed_post_' . $post_id])) {
+        $count_key = 'post_views_count';
+        $count = get_post_meta($post_id, $count_key, true);
+        
+        if ($count == '') {
+            $count = 0;
+            delete_post_meta($post_id, $count_key);
+            add_post_meta($post_id, $count_key, '1');
+        } else {
+            $count++;
+            update_post_meta($post_id, $count_key, $count);
+        }
+
+        // Set a cookie to prevent counting repeated views by the same user
+        setcookie('viewed_post_' . $post_id, 'true', time() + 3600, '/');
+    }
+}
+add_action('wp_head', 'track_unique_post_views');
+
+// Add a custom column to the admin posts table
+function add_post_views_column($columns) {
+    $columns['post_views'] = 'Views';
+    return $columns;
+}
+add_filter('manage_posts_columns', 'add_post_views_column');
+
+// Populate the custom column with data
+function show_post_views_column($column_name, $post_id) {
+    if ($column_name === 'post_views') {
+        $views = get_post_meta($post_id, 'post_views_count', true);
+        echo $views ? esc_html($views) : '0';
+    }
+}
+add_action('manage_posts_custom_column', 'show_post_views_column', 10, 2);
+
+// Make the custom column sortable
+function make_post_views_column_sortable($columns) {
+    $columns['post_views'] = 'post_views_count';
+    return $columns;
+}
+add_filter('manage_edit-post_sortable_columns', 'make_post_views_column_sortable');
+
+// Handle the sorting for the custom column
+function post_views_column_orderby($query) {
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+    if ('post_views_count' === $query->get('orderby')) {
+        $query->set('meta_key', 'post_views_count');
+        $query->set('orderby', 'meta_value_num');
+    }
+}
+add_action('pre_get_posts', 'post_views_column_orderby');
+
+function restrict_username_registration($user_login) {
+    // Define the disallowed pattern for "blogspot"
+    $disallowed_pattern = '/blogspot/i'; // The "i" makes the match case-insensitive
+
+    // Check if the username contains the disallowed pattern
+    if (preg_match($disallowed_pattern, $user_login)) {
+        // Throw an error if the username contains "blogspot"
+        wp_die(
+            'Registration failed: Usernames containing "blogspot" are not allowed.', 
+            'Username Restriction Error', 
+            array('back_link' => true)
+        );
+    }
+
+    return $user_login;
+}
+add_filter('pre_user_login', 'restrict_username_registration');
