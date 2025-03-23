@@ -504,3 +504,10 @@ function restrict_username_registration($user_login) {
     return $user_login;
 }
 add_filter('pre_user_login', 'restrict_username_registration');
+
+
+function allow_webp_uploads($mime_types) {
+    $mime_types['webp'] = 'image/webp';
+    return $mime_types;
+}
+add_filter('upload_mimes', 'allow_webp_uploads');
