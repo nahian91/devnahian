@@ -511,3 +511,5 @@ function allow_webp_uploads($mime_types) {
     return $mime_types;
 }
 add_filter('upload_mimes', 'allow_webp_uploads');
+
+
