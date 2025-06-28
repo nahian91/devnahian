@@ -2971,8 +2971,9 @@ body.rtl {
   align-items: flex-start;
 }
 .single-footer ul li a {
-  padding: 0;
-  font-size: 16px;
+	padding: 0;
+	font-size: 16px;
+	font-weight: 500;
 }
 .single-footer ul li {
   margin-bottom: 5px;
@@ -2983,8 +2984,8 @@ body.rtl {
 }
 .single-footer h4 {
   text-transform: capitalize;
-  font-weight: 500;
-  font-size: 22px;
+  font-weight: 600;
+  font-size: 20px;
   margin-bottom: 15px;
 }
 .footer-bottom {
@@ -3015,4 +3016,15 @@ body.rtl {
 .tutor-widget h3 {
   font-family: "Muli";
   font-weight: 700;
+}
+.tutor-template-segment.tutor-login-wrap {
+	margin: 80px auto;
+}
+.wp-singular.page-template-default.page.page-id-1889.wp-theme-devnahian-latest.theme-devnahian-latest.tutor-lms.woocommerce-js.no-sidebar.elementor-default.elementor-kit-1884 .page-content {
+	background-color: transparent;
+	box-shadow: none;
+}
+.cart-product-image img {
+	max-width: 150px !important;
+	margin-right: 10px;
 }
