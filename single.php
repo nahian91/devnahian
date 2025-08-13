@@ -54,6 +54,52 @@ get_header();
                 </div>
                 <div class="col-lg-4">
                     <?php get_sidebar();?>
+                    <div class="widget">
+    <div class="section-title">
+        <h5>Latest Courses</h5>
+    </div>
+    <ul class="widget-latest-posts">
+        <?php
+        $args = array(
+            'post_type'      => 'courses', // Tutor LMS course post type
+            'post__in'       => array(2273, 4263, 4345, 4969, 4853), // Replace with your course IDs
+            'orderby'        => 'post__in',
+            'posts_per_page' => 5,
+            'post_status'    => 'publish',
+        );
+
+        $query = new WP_Query($args);
+        if ($query->have_posts()) :
+            while ($query->have_posts()) : $query->the_post();
+                $price = tutor_utils()->get_course_price(get_the_ID());
+                ?>
+                <li class="last-post">
+                    <div class="image">
+                        <a href="<?php the_permalink(); ?>">
+                            <?php 
+                            if (has_post_thumbnail()) {
+                                the_post_thumbnail('mediun');
+                            } else {
+                                echo '<img src="' . esc_url(get_template_directory_uri() . '/assets/img/default-course.jpg') . '" alt="' . esc_attr(get_the_title()) . '">';
+                            }
+                            ?>
+                        </a>
+                    </div>
+                    <div class="content">
+                        <p>
+                            <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                        </p>
+                    </div>
+                </li>
+                <?php
+            endwhile;
+            wp_reset_postdata();
+        else :
+            echo '<li>No courses found.</li>';
+        endif;
+        ?>
+    </ul>
+</div>
                 </div>
             </div>
         </div>

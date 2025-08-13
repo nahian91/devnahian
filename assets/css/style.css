@@ -870,21 +870,19 @@ input:checked + .slider:before {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  margin-bottom: 30px;
   position: relative;
+  margin-bottom: -20px;
 }
 
 .widget-latest-posts .last-post .image {
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
   margin-right: 15px;
   overflow: hidden;
   position: relative;
-  border-radius: 20px;
 }
 
 .widget-latest-posts .last-post .image img {
-  border-radius: 20px;
   width: auto;
   height: auto;
   -webkit-transition: all 0.9s ease-in-out;

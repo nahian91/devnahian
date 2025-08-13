@@ -54,46 +54,102 @@ get_header();
 							<div class="post-video-links">
 								<h4>Important Links</h4>
 								<?php 
-								// Check if $tutorial_important_links is set and is an array
 								if (isset($tutorial_important_links) && is_array($tutorial_important_links)) {
 									foreach($tutorial_important_links as $link) {
-										// Retrieve values from the $link array
 										$important_link_url = $link['important_link_url'];
 										$important_link_title = $link['important_link_title'];
 										// Output the link
 										echo '<span><a href="' . esc_url($important_link_url) . '">' . esc_html($important_link_title) . '</a></span>';
 									}
 								} else {
-									// Output a message if $tutorial_important_links is not set or not an array
 									echo 'No important links found.';
 								}
 								?>
 							</div>
 
 							<?php
-                                $select_download = get_field('select_download');
-                                if($select_download['value'] == 'download_shortcode') {
-                                    $tutorial_download_shortcode = get_field('tutorial_download_shortcode');
-                                    ?>
-                                        <div class="post-video-download">
-                                            <?php echo do_shortcode($tutorial_download_shortcode); ?>
-                                        </div>
-                                    <?php 
-                                } else { 
-                                    $tutorial_download_paid_url = get_field('tutorial_download_paid_url');    
-                                    $tutorial_download_paid_text = get_field('tutorial_download_paid_text');    
-                                ?>
-                                    <div class="post-video-download-btn">
-                                        <a href="<?php echo $tutorial_download_paid_url; ?>" target="_blank"><?php echo $tutorial_download_paid_text; ?></a>
-                                    </div>
-                                <?php
-                                }
-                            ?>
+$select_download = get_field('select_download');
+
+if ( ! empty($select_download['value']) && $select_download['value'] === 'download_shortcode' ) {
+    
+    $tutorial_download_shortcode = get_field('tutorial_download_shortcode');
+    
+    if ( ! empty($tutorial_download_shortcode) ) {
+        ?>
+        <div class="post-video-download">
+            <?php echo do_shortcode($tutorial_download_shortcode); ?>
+        </div>
+        <?php
+    }
+
+} else {
+
+    $tutorial_download_paid_url  = get_field('tutorial_download_paid_url');
+    $tutorial_download_paid_text = get_field('tutorial_download_paid_text');
+
+    if ( ! empty($tutorial_download_paid_url) && ! empty($tutorial_download_paid_text) ) {
+        ?>
+        <div class="post-video-download-btn">
+            <a href="<?php echo esc_url($tutorial_download_paid_url); ?>" target="_blank">
+                <?php echo esc_html($tutorial_download_paid_text); ?>
+            </a>
+        </div>
+        <?php
+    }
+}
+?>
+
                         </div>
                     </div> <!--/-->
                 </div>
-                <div class="col-lg-4">
-                    <?php get_sidebar();?>
+                <div class="col-lg-4 max-width">
+                    <div class="widget">
+    <div class="section-title">
+        <h5>Latest Courses</h5>
+    </div>
+    <ul class="widget-latest-posts">
+        <?php
+        $args = array(
+            'post_type'      => 'courses', // Tutor LMS course post type
+            'post__in'       => array(2273, 4263, 4345, 4969, 4853), // Replace with your course IDs
+            'orderby'        => 'post__in',
+            'posts_per_page' => 5,
+            'post_status'    => 'publish',
+        );
+
+        $query = new WP_Query($args);
+        if ($query->have_posts()) :
+            while ($query->have_posts()) : $query->the_post();
+                $price = tutor_utils()->get_course_price(get_the_ID());
+                ?>
+                <li class="last-post">
+                    <div class="image">
+                        <a href="<?php the_permalink(); ?>">
+                            <?php 
+                            if (has_post_thumbnail()) {
+                                the_post_thumbnail('mediun');
+                            } else {
+                                echo '<img src="' . esc_url(get_template_directory_uri() . '/assets/img/default-course.jpg') . '" alt="' . esc_attr(get_the_title()) . '">';
+                            }
+                            ?>
+                        </a>
+                    </div>
+                    <div class="content">
+                        <p>
+                            <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                        </p>
+                    </div>
+                </li>
+                <?php
+            endwhile;
+            wp_reset_postdata();
+        else :
+            echo '<li>No courses found.</li>';
+        endif;
+        ?>
+    </ul>
+</div>
+
                 </div>
             </div>
         </div>
