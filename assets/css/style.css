@@ -3026,3 +3026,47 @@ body.rtl {
 	max-width: 150px !important;
 	margin-right: 10px;
 }
+
+.theme-collection-img {
+  width: 100%;
+  padding-top: 55%;
+  background-size: cover;
+  background-position: center;
+}
+.theme-collection h4 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 20px 0;
+  line-height: 35px;
+}
+.theme-collection p {
+	font-size: 17px;
+	line-height: 27px;
+}
+.theme-collection-features h5 {
+  font-size: 22px;
+  font-weight: 600;
+}
+.theme-collection-features span {
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+}
+.theme-collection-link {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+.theme-collection-link a {
+  display: inline-block;
+  background-color: #0056b3;
+  color: #fff;
+  padding: 10px 25px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 18px;
+  transition: .3s;
+}
+.theme-collection-link a:hover {
+  background-color: #333;
+}

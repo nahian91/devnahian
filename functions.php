@@ -196,16 +196,16 @@ require get_template_directory() . '/inc/widgets/search-box.php';
 require get_template_directory() . '/inc/widgets/about-me.php';
 
 
-
 /**
- * Register hero block
+ * Register custom ACF blocks
  */
-add_action('acf/init', 'hero');
-function hero() {
+add_action('acf/init', 'my_custom_acf_blocks');
+function my_custom_acf_blocks() {
     // check function exists
-    if( function_exists('acf_register_block') ) {
-        // register a collection block
-        acf_register_block(array(
+    if( function_exists('acf_register_block_type') ) {
+
+        // Collection Block
+        acf_register_block_type(array(
             'name'              => 'collection',
             'title'             => __('Collection'),
             'description'       => __('Image background with text & call to action.'),
@@ -215,81 +215,28 @@ function hero() {
             'mode'              => 'preview',
             'keywords'          => array( 'collection', 'image' ),
         ));
+
+        // Theme & Plugin Collection Block
+        acf_register_block_type(array(
+            'name'              => 'theme-collections',
+            'title'             => __('Theme Collections'),
+            'description'       => __('Full width hero banner with title & button.'),
+            'render_callback'   => 'theme_collections_render_callback',
+            'category'          => 'layout',
+            'icon'              => 'cover-image',
+            'mode'              => 'preview',
+            'keywords'          => array( 'theme', 'collection' ),
+        ));
     }
 }
 
-/**
- * This is the callback that displays the hero block
- *
- * @param array $block The block settings and attributes.
- * @param string $content The block content (empty string).
- * @param bool $is_preview True during AJAX preview.
- */
-function collection_render_callback( $block, $content = '', $is_preview = false ) {
-    // create id attribute for specific styling
-    $id = 'collection-' . $block['id'];
-
-    // create align class ("alignwide") from block setting ("wide")
-    $align_class = $block['align'] ? 'align' . $block['align'] : '';
-
-    // ACF field variables
-    $item_image = get_field('item_image');
-    $item_author_name = get_field('item_author_name');
-    $item_link = get_field('item_link');
-    $item_made_with = get_field('item_made_with');
-    $item_title = get_field('item_title');
-    $item_description = get_field('item_description');
-    $item_compatible_browsers = get_field('item_compatible_browsers');
-    $item_responsive = get_field('item_responsive');
-    $item_dependencies = get_field('item_dependencies');
-    ?>
-
-    <div class="item">
-        <div class="item-file">
-            <img src="<?php echo esc_url($item_image['url']); ?>" alt="">
-        </div>
-        <div class="item-meta">
-            <div class="single-item-meta">
-                <span>Author</span>
-                <p><?php echo esc_html($item_author_name); ?></p>
-            </div>
-            <div class="single-item-meta">
-                <span>Links</span>
-                <p><a href="<?php echo esc_url($item_link); ?>">Preview & Download</a></p>
-            </div>
-            <div class="single-item-meta">
-                <span>Made With</span>
-                <p><?php echo esc_html($item_made_with); ?></p>
-            </div>
-        </div>
-
-        <div class="item-content">
-            <span>About Code</span>
-            <h4><?php echo esc_html($item_title); ?></h4>
-            <p><?php echo esc_html($item_description); ?></p>
-        </div>
-
-        <div class="item-bottom">
-            <table>
-                <tr>
-                    <td>Compatible browsers:</td>
-                    <td><?php echo esc_html(implode(', ', $item_compatible_browsers)); ?></td>
-                </tr>
-                <tr>
-                    <td>Responsive:</td>
-                    <td><?php echo esc_html($item_responsive); ?></td>
-                </tr>
-                <tr>
-                    <td>Dependencies:</td>
-                    <td><?php echo esc_html($item_dependencies); ?></td>
-                </tr>
-            </table>
-        </div>
-    </div>
-    
-    <?php
+function collection_render_callback($block) {
+    include get_theme_file_path('/template-parts/blocks/collection.php');
 }
 
+function theme_collections_render_callback($block) {
+    include get_theme_file_path('/template-parts/blocks/theme-collection.php');
+}
 
 if (!function_exists('track_unique_post_views')) {
     function track_unique_post_views($post_id) {
