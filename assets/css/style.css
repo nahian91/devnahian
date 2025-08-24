@@ -3027,6 +3027,11 @@ body.rtl {
 	margin-right: 10px;
 }
 
+.theme-collection {
+	margin-bottom: 40px;
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 50px;
+}
 .theme-collection-img {
   width: 100%;
   padding-top: 55%;
@@ -3044,13 +3049,21 @@ body.rtl {
 	line-height: 27px;
 }
 .theme-collection-features h5 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
 }
 .theme-collection-features span {
-  display: block;
-  font-size: 18px;
-  font-weight: 500;
+	display: block;
+	font-size: 18px;
+	font-weight: 500;
+	margin-bottom: 5px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #f4f4f4;
+}
+.theme-collection-features span:last-child{
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 .theme-collection-link {
   display: flex;
@@ -3069,4 +3082,27 @@ body.rtl {
 }
 .theme-collection-link a:hover {
   background-color: #333;
+}
+
+.vscode-code-widget {
+    position: relative;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: Consolas, 'Courier New', monospace;
+}
+
+.vscode-code-widget .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #0077b7;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.vscode-code-widget .copy-btn:hover {
+    background: #005a9e;
 }

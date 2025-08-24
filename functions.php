@@ -238,42 +238,6 @@ function theme_collections_render_callback($block) {
     include get_theme_file_path('/template-parts/blocks/theme-collection.php');
 }
 
-if (!function_exists('track_unique_post_views')) {
-    function track_unique_post_views($post_id) {
-        if (!is_single()) return;
-
-        // Check if the user has already viewed this post using cookies
-        $cookie_name = 'post_viewed_' . $post_id;
-        if (!isset($_COOKIE[$cookie_name])) {
-            // Update the view count if the cookie doesn't exist
-            $count_key = 'post_views_count';
-            $count = get_post_meta($post_id, $count_key, true);
-
-            if ($count == '') {
-                $count = 0;
-                delete_post_meta($post_id, $count_key);
-                add_post_meta($post_id, $count_key, '0');
-            } else {
-                $count++;
-                update_post_meta($post_id, $count_key, $count);
-            }
-
-            // Set the cookie to mark this post as viewed by the user
-            setcookie($cookie_name, '1', time() + 3600 * 24, '/'); // Expires in 24 hours
-        }
-    }
-}
-
-if (!function_exists('set_unique_post_views')) {
-    function set_unique_post_views() {
-        if (is_single()) {
-            global $post;
-            track_unique_post_views($post->ID);
-        }
-    }
-    add_action('wp_head', 'set_unique_post_views');
-}
-
 if (!function_exists('get_post_views')) {
     function get_post_views($post_id) {
         $count_key = 'post_views_count';
@@ -281,43 +245,6 @@ if (!function_exists('get_post_views')) {
         return $count ? $count : '0';
     }
 }
-
-
-// Add a new column to the post list
-function add_views_column($columns) {
-    $columns['post_views'] = 'Views';
-    return $columns;
-}
-add_filter('manage_posts_columns', 'add_views_column');
-
-// Populate the new column with the post view count
-function display_views_column($column_name, $post_id) {
-    if ($column_name === 'post_views') {
-        $views = get_post_meta($post_id, 'post_views_count', true);
-        echo $views ? $views : '0';
-    }
-}
-add_action('manage_posts_custom_column', 'display_views_column', 10, 2);
-
-// Make the new column sortable
-function make_views_column_sortable($columns) {
-    $columns['post_views'] = 'post_views';
-    return $columns;
-}
-add_filter('manage_edit-post_sortable_columns', 'make_views_column_sortable');
-
-// Set the query to sort by views
-function sort_by_views_column($query) {
-    if (!is_admin()) return;
-
-    $orderby = $query->get('orderby');
-    if ($orderby === 'post_views') {
-        $query->set('meta_key', 'post_views_count');
-        $query->set('orderby', 'meta_value_num');
-    }
-}
-add_action('pre_get_posts', 'sort_by_views_column');
-
 
 
 /**
@@ -378,23 +305,30 @@ function handle_course_retake_action() {
     }
 }
 
-// Track unique post views
-function track_unique_post_views($post_id) {
-    if (is_single() && !isset($_COOKIE['viewed_post_' . $post_id])) {
-        $count_key = 'post_views_count';
-        $count = get_post_meta($post_id, $count_key, true);
-        
-        if ($count == '') {
-            $count = 0;
-            delete_post_meta($post_id, $count_key);
-            add_post_meta($post_id, $count_key, '1');
-        } else {
-            $count++;
-            update_post_meta($post_id, $count_key, $count);
-        }
+/**
+ * Track unique post views (cookie-based)
+ */
+function track_unique_post_views() {
+    if (is_single()) {
+        global $post;
+        $post_id = $post->ID;
+        $cookie_name = 'viewed_post_' . $post_id;
 
-        // Set a cookie to prevent counting repeated views by the same user
-        setcookie('viewed_post_' . $post_id, 'true', time() + 3600, '/');
+        if (!isset($_COOKIE[$cookie_name])) {
+            $count_key = 'post_views_count';
+            $count = get_post_meta($post_id, $count_key, true);
+
+            if ($count == '') {
+                $count = 1;
+                update_post_meta($post_id, $count_key, $count);
+            } else {
+                $count++;
+                update_post_meta($post_id, $count_key, $count);
+            }
+
+            // prevent recount for 1 hour
+            setcookie($cookie_name, 'true', time() + 3600, '/');
+        }
     }
 }
 add_action('wp_head', 'track_unique_post_views');

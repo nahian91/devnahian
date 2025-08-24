@@ -17,13 +17,29 @@
         $('.single-theme-tab-content').removeClass('active').fadeOut('fast');
         $(target).addClass('active').fadeIn('fast');
     });
-    
+
+    // Copy to Clipboard
+    $(document).on('click', '.copy-btn', function () {
+        var $btn = $(this);
+        var codeBlock = $btn.closest('pre').find('code');
+
+        if (codeBlock.length) {
+            var text = codeBlock.text().trim();
+            navigator.clipboard.writeText(text).then(function () {
+                $btn.text('Copied!').css('background', '#28a745');
+                setTimeout(function () {
+                    $btn.text('Copy').css('background', '#007acc');
+                }, 2000);
+            }).catch(function(err) {
+                console.error("Failed to copy: ", err);
+            });
+        }
+    });
 
     /* -----------------------------------
             Preloader
     ----------------------------------- */
     $('.loading').delay(500).fadeOut(500);
-
 
     /* -----------------------------------
             Navigation
@@ -39,7 +55,6 @@
     $('.navbar-toggler').on('click', function () {
         $('.navbar-collapse').collapse('show');
     });
-
 
     /* -----------------------------------
            Back-top
@@ -58,19 +73,10 @@
         return false;
     });
 
-
     $(".video")
-    .on("mouseover", function (event) {
-      this.play();
-    })
-    .on("mouseout", function (event) {
-      this.pause();
-    });
+    .on("mouseover", function () { this.play(); })
+    .on("mouseout", function () { this.pause(); });
 
     $('#mainmenu').slicknav();
 
-
-   
 })(jQuery);
-
-
