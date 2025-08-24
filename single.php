@@ -23,12 +23,11 @@ get_header();
                             <div class="post-single-info">
                                 <ul class="list-inline">
                                     <li class="dot"></li>
-                                    <li>Published: <?php echo get_the_date(); ?></li>
-                                    <li class="dot"></li>
                                     <li>Updated: <?php echo get_the_modified_date(); ?></li>
                                     <li class="dot"></li>
                                     <li><?php echo get_post_views(get_the_ID()) . ' Views';?></li>
-                                    
+                                    <li class="dot"></li>
+                                    <li>Reading Time: <?php echo get_post_reading_time(); ?> Mins</li>
                                 </ul>
                             </div>
                         </div> 

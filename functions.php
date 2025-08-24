@@ -393,4 +393,18 @@ function allow_webp_uploads($mime_types) {
 }
 add_filter('upload_mimes', 'allow_webp_uploads');
 
+// Calculate post reading time
+function get_post_reading_time($post_id = null) {
+    if (!$post_id) {
+        $post_id = get_the_ID();
+    }
 
+    // Get content & strip HTML tags
+    $content = get_post_field('post_content', $post_id);
+    $word_count = str_word_count(strip_tags($content));
+
+    // Average reading speed: 200 words/min
+    $reading_time = ceil($word_count / 200);
+
+    return $reading_time;
+}
