@@ -3106,3 +3106,34 @@ body.rtl {
 .vscode-code-widget .copy-btn:hover {
     background: #005a9e;
 }
+
+.plugin-card-img-top {
+  border: 1px solid #ddd;
+  padding: 3px;
+}
+.plugin-card-body {
+  padding: 15px;
+}
+.plugin-card-title {
+  font-size: 24px;
+  line-height: 35px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+.plugin-card-info.list-unstyled li {
+  display: flex;
+  flex-direction: ;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.plugin-card-info.list-unstyled li:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  margin-top: 30px;
+}
+.plugin-card {
+  margin-bottom: 40px;
+}
