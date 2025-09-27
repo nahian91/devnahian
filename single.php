@@ -27,7 +27,7 @@ get_header();
                                     <li class="dot"></li>
                                     <li><?php echo get_post_views(get_the_ID()) . ' Views';?></li>
                                     <li class="dot"></li>
-                                    <li>Reading Time: <?php echo get_post_reading_time(); ?> Mins</li>
+                                    <li>Reading Time: <?php echo get_post_reading_time (); ?> Mins</li>
                                 </ul>
                             </div>
                         </div> 
