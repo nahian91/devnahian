@@ -73,16 +73,17 @@ get_header();
                 ?>
                 <li class="last-post">
                     <div class="image">
-                        <a href="<?php the_permalink(); ?>">
-                            <?php 
-                            if (has_post_thumbnail()) {
-                                the_post_thumbnail('mediun');
-                            } else {
-                                echo '<img src="' . esc_url(get_template_directory_uri() . '/assets/img/default-course.jpg') . '" alt="' . esc_attr(get_the_title()) . '">';
-                            }
-                            ?>
-                        </a>
-                    </div>
+    <a href="<?php the_permalink(); ?>" 
+       style="background-image: url('<?php 
+            if ( has_post_thumbnail() ) {
+                echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium' ) );
+            } else {
+                echo esc_url( get_template_directory_uri() . '/assets/img/default-course.jpg' );
+            }
+        ?>');">
+    </a>
+</div>
+
                     <div class="content">
                         <p>
                             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
@@ -154,16 +155,17 @@ get_header();
                 ?>
                 <li class="last-post">
                     <div class="image">
-                        <a href="<?php the_permalink(); ?>">
-                            <?php 
-                            if ( has_post_thumbnail() ) {
-                                the_post_thumbnail( 'thumbnail', array( 'alt' => get_the_title() ) );
-                            } else {
-                                echo '<img src="' . esc_url( get_template_directory_uri() . '/assets/img/default.jpg' ) . '" alt="default">';
-                            }
-                            ?>
-                        </a>
-                    </div>
+    <a href="<?php the_permalink(); ?>"
+       style="background-image: url('<?php 
+            if ( has_post_thumbnail() ) {
+                echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'thumbnail' ) );
+            } else {
+                echo esc_url( get_template_directory_uri() . '/assets/img/default.jpg' );
+            }
+       ?>');">
+    </a>
+</div>
+
                     <div class="nb"><?php echo esc_html( $count ); ?></div>
                     <div class="content">
                         <p>

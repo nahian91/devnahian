@@ -3137,3 +3137,94 @@ body.rtl {
 .plugin-card {
   margin-bottom: 40px;
 }
+
+/* Code Collection Block Styling */
+.code-collection {
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.code-collection img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+/* Table styling */
+.code-collection table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.code-collection th,
+.code-collection td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.code-collection th {
+  width: 160px;
+  font-weight: 600;
+  color: #333;
+  border-radius: 6px 0 0 6px;
+}
+
+.code-collection td {
+  color: #555;
+}
+
+/* Links */
+.code-collection a {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #0073e6;
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.code-collection a:hover {
+  background: #005bb5;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .code-collection th {
+    display: block;
+    width: 100%;
+    background: none;
+    padding-top: 15px;
+  }
+  .code-collection td {
+    display: block;
+    width: 100%;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  .code-collection tr {
+    display: block;
+    margin-bottom: 10px;
+  }
+}
+
+.image a {
+  display: block;
+  width: 100%;
+  padding-top: 60%; /* maintains aspect ratio */
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.image a:hover {
+  transform: scale(1.03);
+}

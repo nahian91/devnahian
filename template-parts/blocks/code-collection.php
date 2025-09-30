@@ -1,52 +1,71 @@
-<?php 
-// শুধুমাত্র output, function define নয়
+<?php
+/**
+ * Code Collection Block Template.
+ */
 
-// create id attribute for styling
-$id = 'vscode-code-' . $block['id'];
+// Create id attribute allowing for custom "anchor" value.
+$id = 'code-collection-' . $block['id'];
+if ( ! empty( $block['anchor'] ) ) {
+    $id = sanitize_title( $block['anchor'] );
+}
 
-// create align class from block setting
-$align_class = $block['align'] ? 'align' . $block['align'] : '';
+// Create class attribute allowing for custom "className" and "align" values.
+$className = 'code-collection';
+if ( ! empty( $block['className'] ) ) {
+    $className .= ' ' . sanitize_html_class( $block['className'] );
+}
+if ( ! empty( $block['align'] ) ) {
+    $className .= ' align' . sanitize_html_class( $block['align'] );
+}
 
-// ACF fields
-$code     = get_field('code_text') ?: '';
-$language = get_field('code_language') ?: 'php'; // default language
+// Load ACF fields.
+$thumb       = get_field( 'code_thumb' );
+$title       = get_field( 'code_title' );
+$author      = get_field( 'code_author' );
+$tech_used   = get_field( 'code_tech_used' );
+$description = get_field( 'code_description' );
+$demo_link   = get_field( 'code_link' );
 ?>
 
-<div id="<?php echo esc_attr($id); ?>" class="vscode-code-widget <?php echo esc_attr($align_class); ?>">
-    <pre><code class="language-<?php echo esc_attr($language); ?>" id="<?php echo esc_attr($id); ?>-code"><?php echo esc_html($code); ?></code></pre>
-    <button class="copy-btn" data-target="<?php echo esc_attr($id); ?>-code">Copy</button>
+<div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $className ); ?>">
+
+    <?php if ( $thumb ) : ?>
+    <img src="<?php echo $thumb;?>" alt="">
+<?php endif; ?>
+        <h4><?php echo esc_html( $title ); ?></h4>
+
+    <table>
+
+        <?php if ( $author ) : ?>
+        <tr>
+            <th><?php esc_html_e( 'Author', 'textdomain' ); ?></th>
+            <td itemprop="author"><?php echo esc_html( $author ); ?></td>
+        </tr>
+        <?php endif; ?>
+
+        <?php if ( $tech_used ) : ?>
+        <tr>
+            <th><?php esc_html_e( 'Tech used', 'textdomain' ); ?></th>
+            <td itemprop="programmingLanguage"><?php echo esc_html( $tech_used ); ?></td>
+        </tr>
+        <?php endif; ?>
+
+        <?php if ( $description ) : ?>
+        <tr>
+            <th><?php esc_html_e( 'Description', 'textdomain' ); ?></th>
+            <td itemprop="description"><?php echo esc_html( $description ); ?></td>
+        </tr>
+        <?php endif; ?>
+
+        <?php if ( $demo_link ) : ?>
+        <tr>
+            <th><?php esc_html_e( 'Live Preview', 'textdomain' ); ?></th>
+            <td>
+                <a href="<?php echo esc_url( $demo_link ); ?>" target="_blank" rel="noopener" itemprop="codeRepository">
+                    <?php esc_html_e( 'Demo & Code', 'textdomain' ); ?>
+                </a>
+            </td>
+        </tr>
+        <?php endif; ?>
+    </table>
 </div>
-
-<style>
-.vscode-code-widget {
-    position: relative;
-    background: #1e1e1e;
-    border-radius: 6px;
-    overflow-x: auto;
-    padding: 15px;
-    margin: 1em 0;
-}
-
-.vscode-code-widget code {
-    font-family: 'Fira Code', monospace;
-    font-size: 14px;
-    color: #f8f8f2;
-    white-space: pre;
-}
-
-.vscode-code-widget .copy-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #0073aa;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.vscode-code-widget .copy-btn:hover {
-    background: #005177;
-}
-</style>

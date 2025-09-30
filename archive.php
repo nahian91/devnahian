@@ -76,6 +76,15 @@ get_header();
 						endif;
 						?>
                         </div> 
+						<div class="pagination-main">
+                            <?php
+                            // Pagination links
+                            the_posts_pagination(array(
+                                'prev_text' => __('Previous', 'devnahian'),
+                                'next_text' => __('Next', 'devnahian'),
+                            ));
+                            ?>
+                        </div>
                     </div>
                 </div>
             </div>
