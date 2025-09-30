@@ -52,7 +52,6 @@ get_header();
                     </div> <!--/-->
                 </div>
                 <div class="col-lg-4">
-                    <?php get_sidebar();?>
                     <div class="widget">
     <div class="section-title">
         <h5>Latest Courses</h5>
@@ -99,6 +98,94 @@ get_header();
         ?>
     </ul>
 </div>
+
+<div class="widget">
+    <div class="section-title">
+        <h5><?php esc_html_e( 'Categories', 'textdomain' ); ?></h5>
+    </div>
+    <ul class="widget-categories">
+        <?php
+        $args = array(
+            'taxonomy'   => 'category',
+            'orderby'    => 'count',
+            'order'      => 'DESC',
+            'number'     => 5, // show only 5 categories
+            'hide_empty' => true,
+        );
+        $categories = get_categories( $args );
+
+        if ( ! empty( $categories ) ) {
+            foreach ( $categories as $cat ) {
+                $cat_link  = get_category_link( $cat->term_id );
+                $cat_name  = $cat->name;
+                $cat_count = $cat->count;
+                ?>
+                <li>
+                    <a href="<?php echo esc_url( $cat_link ); ?>" class="categorie">
+                        <?php echo esc_html( $cat_name ); ?>
+                    </a>
+                    <span class="ml-auto">
+                        <?php echo esc_html( $cat_count ); ?> <?php echo esc_html__( 'Posts', 'textdomain' ); ?>
+                    </span>
+                </li>
+                <?php
+            }
+        }
+        ?>
+    </ul>
+</div>
+
+<div class="widget">
+    <div class="section-title">
+        <h5><?php esc_html_e( 'Most Popular Posts', 'textdomain' ); ?></h5>
+    </div>
+    <ul class="widget-latest-posts">
+        <?php
+        $popular_posts = new WP_Query( array(
+            'posts_per_page'      => 5,
+            'orderby'             => 'comment_count',
+            'order'               => 'DESC',
+            'ignore_sticky_posts' => true,
+        ) );
+
+        $count = 1;
+        if ( $popular_posts->have_posts() ) :
+            while ( $popular_posts->have_posts() ) : $popular_posts->the_post();
+                ?>
+                <li class="last-post">
+                    <div class="image">
+                        <a href="<?php the_permalink(); ?>">
+                            <?php 
+                            if ( has_post_thumbnail() ) {
+                                the_post_thumbnail( 'thumbnail', array( 'alt' => get_the_title() ) );
+                            } else {
+                                echo '<img src="' . esc_url( get_template_directory_uri() . '/assets/img/default.jpg' ) . '" alt="default">';
+                            }
+                            ?>
+                        </a>
+                    </div>
+                    <div class="nb"><?php echo esc_html( $count ); ?></div>
+                    <div class="content">
+                        <p>
+                            <a href="<?php the_permalink(); ?>">
+                                <?php the_title(); ?>
+                            </a>
+                        </p>
+                        <small>
+                            <span class="icon_clock_alt"></span> 
+                            <?php echo esc_html( get_the_date() ); ?>
+                        </small>
+                    </div>
+                </li>
+                <?php
+                $count++;
+            endwhile;
+            wp_reset_postdata();
+        endif;
+        ?>
+    </ul>
+</div>
+
                 </div>
             </div>
         </div>

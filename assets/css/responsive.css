@@ -34,6 +34,19 @@
   .header-profile {
     justify-content: center;
   }
+  .breadcumb-area h4 {
+	font-size: 30px;
+	line-height: 40px;
+}
+.breadcumb-area ul {
+	flex-direction: column;
+}
+.breadcumb-area ul .dot{
+  display: none;
+}
+.breadcumb-area ul li {
+	margin: 5px 10px;
+}
 }
 
 

@@ -190,10 +190,6 @@ if ( defined( 'JETPACK__VERSION' ) ) {
  * Load Custom Post
  */
 require get_template_directory() . '/inc/custom-post.php';
-require get_template_directory() . '/inc/widgets/popular-posts.php';
-require get_template_directory() . '/inc/widgets/categories-list.php';
-require get_template_directory() . '/inc/widgets/search-box.php';
-require get_template_directory() . '/inc/widgets/about-me.php';
 
 
 /**
