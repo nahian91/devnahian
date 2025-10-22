@@ -246,10 +246,6 @@ function theme_collections_render_callback($block) {
     include get_theme_file_path('/template-parts/blocks/theme-collection.php');
 }
 
-function code_collections_render_callback($block) {
-    include get_theme_file_path('/template-parts/blocks/code-collection.php');
-}
-
 if (!function_exists('get_post_views')) {
     function get_post_views($post_id) {
         $count_key = 'post_views_count';
@@ -413,72 +409,4 @@ function get_post_reading_time( $post_id = null ) {
     $word_count = str_word_count( wp_strip_all_tags( $content ) );
     $reading_time = max( 1, ceil( $word_count / 200 ) ); // at least 1 min
     return $reading_time;
-}
-
-// Add "Reports" submenu under "Posts"
-add_action('admin_menu', 'devnahian_post_reports_menu');
-function devnahian_post_reports_menu() {
-    add_submenu_page(
-        'edit.php',                 // Parent menu: "Posts"
-        'Post Reports',             // Page title
-        'Reports',                  // Menu title
-        'manage_options',           // Capability
-        'post-reports',             // Slug
-        'devnahian_post_reports_page' // Callback
-    );
-}
-
-// Display the Post Reports page
-function devnahian_post_reports_page() {
-    global $wpdb;
-
-    // Get top 10 posts from the last 7 days based on _post_views meta
-    $top_posts = $wpdb->get_results("
-        SELECT p.ID, p.post_title, pm.meta_value AS views
-        FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-        WHERE pm.meta_key = '_post_views'
-          AND p.post_status = 'publish'
-          AND p.post_type = 'post'
-          AND p.post_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-        ORDER BY CAST(pm.meta_value AS UNSIGNED) DESC
-        LIMIT 10
-    ");
-    ?>
-    <div class="wrap">
-        <h1>📊 Post Reports (Last 7 Days)</h1>
-        <p>Showing the most viewed posts published or viewed in the last 7 days.</p>
-
-        <table class="widefat striped" style="margin-top:20px;">
-            <thead>
-                <tr>
-                    <th style="width:60%">Post Title</th>
-                    <th style="width:20%">Views</th>
-                    <th style="width:20%">Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($top_posts): ?>
-                    <?php foreach ($top_posts as $post): ?>
-                        <tr>
-                            <td>
-                                <a href="<?php echo esc_url(get_permalink($post->ID)); ?>" target="_blank">
-                                    <?php echo esc_html($post->post_title); ?>
-                                </a>
-                            </td>
-                            <td><?php echo esc_html($post->views ? $post->views : 0); ?></td>
-                            <td><?php echo esc_html(get_the_date('', $post->ID)); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="3">No posts found in the last 7 days.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-    <style>
-        .wrap h1 { margin-bottom: 10px; }
-        .widefat th, .widefat td { text-align: left; }
-    </style>
-    <?php
 }

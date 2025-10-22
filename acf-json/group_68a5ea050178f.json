@@ -1,6 +1,6 @@
 {
     "key": "group_68a5ea050178f",
-    "title": "Code Collections",
+    "title": "Collection",
     "fields": [
         {
             "key": "field_68db686f9e6d2",
@@ -136,7 +136,7 @@
             {
                 "param": "block",
                 "operator": "==",
-                "value": "all"
+                "value": "acf\/collection"
             }
         ]
     ],
@@ -149,5 +149,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1759209605
+    "modified": 1761151216
 }

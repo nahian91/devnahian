@@ -2,13 +2,8 @@
 /**
  * The header for our theme
  *
- * This is the template that displays all of the <head> section and everything up until <div id="content">
- *
- * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
- *
  * @package devnahian
  */
-
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -17,14 +12,25 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google-adsense-account" content="ca-pub-5810116187271532">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
-    <!-- Paste your Google Analytics code here -->
-   <script async src="https://www.googletagmanager.com/gtag/js?id=G-F2ER1G9M45"></script>
-   <script>
-   window.dataLayer = window.dataLayer || [];
-   function gtag(){dataLayer.push(arguments);}
-   gtag('js', new Date());
-   gtag('config', 'G-F2ER1G9M45');
-   </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F2ER1G9M45"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-F2ER1G9M45');
+    </script>
+
+    <?php
+    // ✅ Show AdSense only on blog-related pages
+    if ( is_single() || is_home() || is_category() || is_tag() ) :
+    ?>
+        <!-- Google AdSense Code -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810116187271532"
+                crossorigin="anonymous"></script>
+    <?php endif; ?>
+
 	<?php wp_head(); ?>
 </head>
 

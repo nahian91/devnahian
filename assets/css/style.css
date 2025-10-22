@@ -3228,3 +3228,57 @@ body.rtl {
 .image a:hover {
   transform: scale(1.03);
 }
+
+.collection {
+  border: 1px solid #f4f4f4;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.collection h4 {
+  font-size: 28px;
+  margin: 25px;
+  font-weight: 600;
+  color: #333;
+}
+
+.collection table {
+  width: calc(100% - 50px);
+  margin: 0 25px 25px;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.collection table th,
+.collection table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: middle;
+  color: #444;
+}
+
+.collection table th {
+  background-color: #f8f9fb;
+  font-weight: 600;
+  color: #222;
+}
+
+.collection table tr:last-child td {
+  border-bottom: none;
+}
+
+.collection table tr:hover {
+  background-color: #f5f7fa;
+  transition: background-color 0.2s ease;
+}
+
+.collection table tr td a {
+  background-color: #0077b7;
+  display: inline-block;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 7px;
+}
