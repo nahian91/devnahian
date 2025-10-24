@@ -56,7 +56,7 @@ get_header();
     <div class="section-title">
         <h5>Latest Courses</h5>
     </div>
-    <ul class="widget-latest-posts">
+    <ul class="widget-post-box">
         <?php
         $args = array(
             'post_type'      => 'courses', // Tutor LMS course post type
@@ -71,8 +71,8 @@ get_header();
             while ($query->have_posts()) : $query->the_post();
                 $price = tutor_utils()->get_course_price(get_the_ID());
                 ?>
-                <li class="last-post">
-                    <div class="image">
+                <li>
+                    <div class="widget-post-box-image">
     <a href="<?php the_permalink(); ?>" 
        style="background-image: url('<?php 
             if ( has_post_thumbnail() ) {
@@ -84,7 +84,7 @@ get_header();
     </a>
 </div>
 
-                    <div class="content">
+                    <div class="widget-post-box-content">
                         <p>
                             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                         </p>
@@ -140,53 +140,54 @@ get_header();
     <div class="section-title">
         <h5><?php esc_html_e( 'Most Popular Posts', 'textdomain' ); ?></h5>
     </div>
-    <ul class="widget-latest-posts">
+    <ul class="widget-post-box">
         <?php
         $popular_posts = new WP_Query( array(
+            'post_type'           => array('post', 'tutorial', 'themes'),
             'posts_per_page'      => 5,
-            'orderby'             => 'comment_count',
+            'meta_key'            => 'post_views_count',
+            'orderby'             => 'meta_value_num',
             'order'               => 'DESC',
             'ignore_sticky_posts' => true,
         ) );
 
-        $count = 1;
         if ( $popular_posts->have_posts() ) :
             while ( $popular_posts->have_posts() ) : $popular_posts->the_post();
                 ?>
-                <li class="last-post">
-                    <div class="image">
-    <a href="<?php the_permalink(); ?>"
-       style="background-image: url('<?php 
-            if ( has_post_thumbnail() ) {
-                echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'thumbnail' ) );
-            } else {
-                echo esc_url( get_template_directory_uri() . '/assets/img/default.jpg' );
-            }
-       ?>');">
-    </a>
-</div>
+                <li>                    
+                    <div class="widget-post-box-image">
+                        <a href="<?php the_permalink(); ?>"
+                           style="background-image: url('<?php 
+                                echo has_post_thumbnail() 
+                                    ? esc_url( get_the_post_thumbnail_url( get_the_ID(), 'thumbnail' ) ) 
+                                    : esc_url( get_template_directory_uri() . '/assets/img/default.jpg' );
+                           ?>');">
+                        </a>
+                    </div>
 
-                    <div class="nb"><?php echo esc_html( $count ); ?></div>
-                    <div class="content">
+                    <div class="widget-post-box-content">
                         <p>
                             <a href="<?php the_permalink(); ?>">
                                 <?php the_title(); ?>
                             </a>
                         </p>
+
                         <small>
-                            <span class="icon_clock_alt"></span> 
-                            <?php echo esc_html( get_the_date() ); ?>
+                            <span class="fa fa-eye"></span>
+                            <?php echo esc_html( number_format( get_post_views( get_the_ID() ) ) ); ?> Views
                         </small>
                     </div>
+
                 </li>
                 <?php
-                $count++;
             endwhile;
             wp_reset_postdata();
         endif;
         ?>
     </ul>
 </div>
+
+
 
                 </div>
             </div>

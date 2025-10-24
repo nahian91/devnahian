@@ -3282,3 +3282,35 @@ body.rtl {
   padding: 5px 10px;
   border-radius: 7px;
 }
+
+.widget-post-box li {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.widget-post-box-image a {
+  display: block;
+  padding-top: 60%;
+  width: 120px;
+  background-size: cover;
+  background-position: center;
+  vertical-align: middle;
+  border: 1px solid #ddd;
+}
+.widget-post-box {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.widget-post-box-content p a {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 27px;
+}
+.widget-post-box-content p {
+  margin-bottom: 3px;
+}
+.widget-post-box-content small {
+  font-weight: 600;
+  font-size: 15px;
+}
