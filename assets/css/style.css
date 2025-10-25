@@ -2737,7 +2737,7 @@ body.rtl {
   color: #fff;
   z-index: 2;
 }
-.breadcumb-area:after {
+/* .breadcumb-area:after {
   position: absolute;
   content: "";
   width: 100%;
@@ -2746,12 +2746,13 @@ body.rtl {
   top: 0;
   background-color: #000;
   z-index: -1;
-  opacity: .95;
-}
+  opacity: .55;
+} */
 .breadcumb-area h4 {
-  color: #fff;
-  font-size: 50px;
-  font-weight: 700;
+	color: #fff;
+	font-size: 40px;
+	font-weight: 700;
+	line-height: 50px;
 }
 .breadcumb-area ul {
   display: flex;
