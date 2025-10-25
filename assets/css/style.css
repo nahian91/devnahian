@@ -3314,3 +3314,23 @@ body.rtl {
   font-weight: 600;
   font-size: 15px;
 }
+
+/* Add dropdown arrow */
+#mainmenu .menu-item-has-children > a {
+    position: relative;
+    padding-right: 18px; /* space for arrow */
+}
+
+#mainmenu .menu-item-has-children > a::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    transform: translateY(-50%);
+    background-repeat: no-repeat;
+    background-size: 12px;
+    /* ↓ SVG Arrow Icon ↓ */
+    background-image: url("data:image/svg+xml,%3Csvg fill='currentColor' width='12' height='12' viewBox='0 0 320 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M143 352.3L7 216.3c-9.4-9.4-9.4-24.6 0-33.9l22.6-22.6c9.4-9.4 24.6-9.4 33.9 0l96.4 96.4 96.4-96.4c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9l-136 136c-9.5 9.3-24.7 9.3-34 .0z'/%3E%3C/svg%3E");
+}

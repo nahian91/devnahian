@@ -17,13 +17,13 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="single-footer">
-                        <h4>আমার সম্পর্কে</h4>
-                        <p>আমি একজন ওয়েব ডেভেলপার এবং ফ্রিল্যান্সার, যে শিক্ষকতা, ভিডিও টিউটোরিয়াল তৈরি এবং ওয়েব ডেভেলপমেন্ট সম্পর্কে ব্লগিং করতে ভালোবাসে যাতে অন্যরা বিষয়টি আরও ভালোভাবে শিখতে এবং বুঝতে পারে।</p>
+                        <h4>About Me</h4>
+                        <p>I am a web developer and freelancer with a passion for teaching, creating video tutorials, and blogging about web development to help others learn and understand the subject more effectively.</p>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="single-footer">
-                    <h4>জনপ্রিয় কোর্স</h4>
+                    <h4>Popular Courses</h4>
                     <?php
                     wp_nav_menu(
                         array(
@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="single-footer">
-                    <h4>লিঙ্ক</h4>
+                    <h4>Quick Links</h4>
                     <?php
                     wp_nav_menu(
                         array(
@@ -47,7 +47,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="single-footer">
-                        <h4>যোগাযোগ করুন</h4>
+                        <h4>Contact Me</h4>
                         <ul>
                             <li>
                                 <a href="mailto: nahiansylhet@gmail.com" target="_blank"><i class="fa fa-envelope"></i>
@@ -71,7 +71,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="copyright">
-                        <p><?php echo "&copy; " . date("Y") . " আব্দুল্লাহ নাহিয়ান. সর্বস্বত্ব সংরক্ষিত।";?></p>
+                        <p><?php echo "&copy; " . date("Y") . " Abdullah Nahian. All Rights Reserved.";?></p>
                     </div>
                     <div class="back">
                         <a href="#" class="back-top">
