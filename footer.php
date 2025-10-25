@@ -15,13 +15,13 @@
     <footer class="footer">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="single-footer">
                         <h4>About Me</h4>
                         <p>I am a web developer and freelancer with a passion for teaching, creating video tutorials, and blogging about web development to help others learn and understand the subject more effectively.</p>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="single-footer">
                     <h4>Popular Courses</h4>
                     <?php
