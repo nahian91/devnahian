@@ -23,7 +23,6 @@
     </script>
 
     <?php
-    // ✅ Show AdSense only on blog-related pages
     if ( is_single() || is_home() || is_category() || is_tag() ) :
     ?>
         <!-- Google AdSense Code -->
@@ -66,7 +65,7 @@
     </section>
 
     <!-- Navigation -->
-    <nav class="header-area">
+    <nav class="header-area" >
         <div class="container-fluid">
             <div class="row align-items-center">
                 <div class="col-md-2">

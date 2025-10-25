@@ -12,7 +12,7 @@
 ?>
     
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" style="background-image: url('<?php echo get_template_directory_uri(); ?>/assets/img/bg-footer.jpg');">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-3">

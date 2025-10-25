@@ -2718,7 +2718,7 @@ body.rtl {
   color: #fff;
 }
 .header-top-area {
-  background-color: #111;
+  background-color: #000d16;
   color: #fff;
   padding: 10px 0;
 }
@@ -2972,23 +2972,30 @@ body.rtl {
 	padding: 0;
 	font-size: 16px;
 	font-weight: 500;
+  color: #fff;
 }
 .single-footer ul li {
   margin-bottom: 5px;
   padding-bottom: 5px;
 }
 .footer {
-  padding: 40px 0;
+	padding: 80px 0;
+	background-size: cover;
+	background-position: center;
+	color: #fff;
 }
 .single-footer h4 {
-  text-transform: capitalize;
-  font-weight: 600;
-  font-size: 20px;
-  margin-bottom: 15px;
+	text-transform: capitalize;
+	font-weight: 700;
+	font-size: 22px;
+	margin-bottom: 20px;
+	color: #fff;
 }
 .footer-bottom {
-  text-align: center;
-  padding: 15px 0;
+	text-align: center;
+	padding: 20px 0;
+	background-color: #000d16;
+	color: #fff;
 }
 .footer-bottom p {
   margin-bottom: 0;
@@ -3334,3 +3341,4 @@ body.rtl {
     /* ↓ SVG Arrow Icon ↓ */
     background-image: url("data:image/svg+xml,%3Csvg fill='currentColor' width='12' height='12' viewBox='0 0 320 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M143 352.3L7 216.3c-9.4-9.4-9.4-24.6 0-33.9l22.6-22.6c9.4-9.4 24.6-9.4 33.9 0l96.4 96.4 96.4-96.4c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9l-136 136c-9.5 9.3-24.7 9.3-34 .0z'/%3E%3C/svg%3E");
 }
+
