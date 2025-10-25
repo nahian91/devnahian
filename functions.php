@@ -410,3 +410,62 @@ function get_post_reading_time( $post_id = null ) {
     $reading_time = max( 1, ceil( $word_count / 200 ) ); // at least 1 min
     return $reading_time;
 }
+
+// ===== VISITOR TRACKING SYSTEM =====
+function mysite_track_daily_visitors() {
+    $ip = $_SERVER['REMOTE_ADDR'];
+
+    // Get today's date
+    $today = date('Y-m-d');
+
+    // Get stored visitor logs
+    $visitor_logs = get_option('mysite_visitor_logs', array());
+
+    // Create new date entry if not exists
+    if (!isset($visitor_logs[$today])) {
+        $visitor_logs[$today] = array();
+    }
+
+    // Save unique visitor for today
+    if (!in_array($ip, $visitor_logs[$today])) {
+        $visitor_logs[$today][] = $ip;
+        update_option('mysite_visitor_logs', $visitor_logs);
+    }
+}
+add_action('init', 'mysite_track_daily_visitors');
+
+
+// ===== GET VISITOR STATS =====
+function mysite_get_visitor_stats() {
+    $logs = get_option('mysite_visitor_logs', array());
+    $today = date('Y-m-d');
+    $yesterday = date('Y-m-d', strtotime("-1 day"));
+    
+    // Today
+    $today_count = isset($logs[$today]) ? count($logs[$today]) : 0;
+    
+    // Yesterday
+    $yesterday_count = isset($logs[$yesterday]) ? count($logs[$yesterday]) : 0;
+    
+    // Last 7 Days
+    $last7 = 0;
+    for ($i = 0; $i < 7; $i++) {
+        $day = date('Y-m-d', strtotime("-$i day"));
+        if (isset($logs[$day])) {
+            $last7 += count($logs[$day]);
+        }
+    }
+    
+    // Total
+    $total = 0;
+    foreach ($logs as $day => $ips) {
+        $total += count($ips);
+    }
+    
+    return array(
+        'today'     => $today_count,
+        'yesterday' => $yesterday_count,
+        'last7'     => $last7,
+        'total'     => $total,
+    );
+}
