@@ -218,44 +218,6 @@ get_header();
     </ul>
 </div>
 
-<div class="widget">
-    <div class="section-title">
-        <h5>Visitor Statistics</h5>
-    </div>
-
-    <?php $stats = mysite_get_visitor_stats(); ?>
-
-    <ul class="widget-post-box">
-        <li>
-            <div class="widget-post-box-content">
-                <p>Today's Visitors</p>
-            </div>
-            <span class="ml-auto"><?php echo $stats['today']; ?></span>
-        </li>
-
-        <li>
-            <div class="widget-post-box-content">
-                <p>Yesterday</p>
-            </div>
-            <span class="ml-auto"><?php echo $stats['yesterday']; ?></span>
-        </li>
-
-        <li>
-            <div class="widget-post-box-content">
-                <p>Last 7 Days</p>
-            </div>
-            <span class="ml-auto"><?php echo $stats['last7']; ?></span>
-        </li>
-
-        <li>
-            <div class="widget-post-box-content">
-                <p>Total Visitors</p>
-            </div>
-            <span class="ml-auto"><?php echo $stats['total']; ?></span>
-        </li>
-    </ul>
-</div>
-
                 </div>
             </div>
         </div>
