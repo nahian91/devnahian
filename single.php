@@ -51,15 +51,55 @@ get_header();
                         </div>
                     </div> <!--/-->
                     <?php
-$related_posts = get_field('related_posts');
+// Get current post categories
+$categories = wp_get_post_categories(get_the_ID());
 
-if( $related_posts ):
+if($categories){
+    global $wpdb;
+
+    // Get related posts based on shared categories
+    $related_posts_ids = $wpdb->get_col(
+        $wpdb->prepare("
+            SELECT DISTINCT p.ID
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+            INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+            WHERE tt.term_id IN (" . implode(',', array_map('intval', $categories)) . ")
+            AND p.ID != %d
+            AND p.post_status = 'publish'
+            AND p.post_type = 'post'
+        ", get_the_ID())
+    );
+
+    if(!empty($related_posts_ids)){
+        // Count shared categories for each post
+        $post_score = [];
+        foreach($related_posts_ids as $pid){
+            $pid_cats = wp_get_post_categories($pid);
+            $shared = count(array_intersect($categories, $pid_cats));
+            $post_score[$pid] = $shared;
+        }
+
+        // Sort by shared categories descending
+        arsort($post_score);
+
+        // Take top 4 posts
+        $top_posts = array_slice(array_keys($post_score), 0, 4);
+
+        $args = [
+            'post__in'       => $top_posts,
+            'orderby'        => 'post__in',
+            'posts_per_page' => 4
+        ];
+
+        $related_query = new WP_Query($args);
+
+        if($related_query->have_posts()):
 ?>
 <div class="related-posts-section">
     <h3 class="related-posts-heading">Related Posts</h3>
     <div class="row related-posts-wrapper">
-        <?php foreach( $related_posts as $post ): 
-            setup_postdata($post); 
+        <?php while($related_query->have_posts()): $related_query->the_post(); 
             $category = get_the_category();
             $first_cat = $category ? $category[0] : null;
         ?>
@@ -69,18 +109,20 @@ if( $related_posts ):
                     <a href="<?php the_permalink(); ?>">
                         <?php 
                         if( has_post_thumbnail() ) {
-                            the_post_thumbnail('post-thumbnail', array(
+                            the_post_thumbnail('post-thumbnail', [
                                 'loading' => 'lazy',
-                                'width' => 1280,
-                                'height' => 720,
-                            )); 
+                                'width'   => 1280,
+                                'height'  => 720,
+                            ]); 
                         }
                         ?>
                     </a>
                 </div>
                 <div class="post-card-content">
                     <?php if($first_cat): ?>
-                        <a href="<?php echo get_category_link($first_cat->term_id); ?>" rel="category tag"><?php echo esc_html($first_cat->name); ?></a>
+                        <a href="<?php echo esc_url(get_category_link($first_cat->term_id)); ?>" rel="category tag">
+                            <?php echo esc_html($first_cat->name); ?>
+                        </a>
                     <?php endif; ?>
                     
                     <h5>
@@ -89,13 +131,16 @@ if( $related_posts ):
                 </div>
             </div>
         </div>
-        <?php endforeach; ?>
+        <?php endwhile; ?>
     </div>
 </div>
 <?php 
-    wp_reset_postdata();
-endif;
+            wp_reset_postdata();
+        endif;
+    }
+}
 ?>
+
 
                 </div>
                 <div class="col-lg-4">

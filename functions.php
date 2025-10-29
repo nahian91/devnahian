@@ -80,6 +80,8 @@ function devnahian_setup() {
 }
 add_action( 'after_setup_theme', 'devnahian_setup' );
 
+require get_template_directory() . '/inc/basic-seo.php';
+
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
  *
