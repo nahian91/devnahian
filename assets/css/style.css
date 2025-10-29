@@ -1406,7 +1406,7 @@ input:checked + .slider:before {
 }
 .post-single-body h5 {
   margin-top: 30px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .post-single-body .image {
@@ -3071,6 +3071,20 @@ body.rtl {
 	margin-bottom: 5px;
 	padding-bottom: 5px;
 	border-bottom: 1px solid #f4f4f4;
+	position: relative;
+	padding-left: 15px;
+	line-height: 27px;
+}
+.theme-collection-features span::before {
+	position: absolute;
+	content: "";
+	width: 5px;
+	height: 5px;
+	background-color: #111;
+	border-radius: 50%;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
 }
 .theme-collection-features span:last-child{
   margin-bottom: 0;

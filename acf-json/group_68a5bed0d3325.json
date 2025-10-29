@@ -116,6 +116,27 @@
             ]
         },
         {
+            "key": "field_6901ad4794273",
+            "label": "Demo Link Label",
+            "name": "demo_link_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_68a5c0c4f6fdc",
             "label": "Demo Link",
             "name": "demo_link",
@@ -132,6 +153,27 @@
             "default_value": "",
             "allow_in_bindings": 0,
             "placeholder": ""
+        },
+        {
+            "key": "field_6901ad5994274",
+            "label": "Download Link Label",
+            "name": "download_link_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         },
         {
             "key": "field_68a5c0d5f6fdd",
@@ -170,5 +212,6 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1755693700
+    "display_title": "",
+    "modified": 1761717615
 }

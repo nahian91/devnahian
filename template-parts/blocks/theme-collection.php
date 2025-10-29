@@ -19,15 +19,18 @@ if ( ! empty( $block['align'] ) ) {
 }
 
 // Load values and assign defaults.
-$image         = get_field( 'image' );
-$title         = get_field( 'title' );
-$description   = get_field( 'description' );
-$features      = get_field( 'features' );
-$demo_link     = get_field( 'demo_link' );
-$download_link = get_field( 'download_link' );
+$image                = get_field( 'image' );
+$title                = get_field( 'title' );
+$description          = get_field( 'description' );
+$features             = get_field( 'features' );
+$demo_link_label      = get_field( 'demo_link_label' );
+$demo_link            = get_field( 'demo_link' );
+$download_link_label  = get_field( 'download_link_label' );
+$download_link        = get_field( 'download_link' );
 ?>
 
 <div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $className ); ?>">
+
     <?php if ( $image ) : ?>
         <div class="theme-collection-img" style="background-image:url('<?php echo esc_url( $image ); ?>')"></div>
     <?php endif; ?>
@@ -54,16 +57,23 @@ $download_link = get_field( 'download_link' );
     <div class="theme-collection-link">
         <?php if ( $demo_link ) : ?>
             <a href="<?php echo esc_url( $demo_link ); ?>" target="_blank" rel="noopener">
-                <?php esc_html_e( 'Demo', 'devnahian' ); ?>
+                <?php 
+                // Use custom label if set, otherwise default 'Demo'
+                echo esc_html( $demo_link_label ? $demo_link_label : __( 'Demo', 'devnahian' ) ); 
+                ?>
             </a>
         <?php endif; ?>
 
         <?php if ( $download_link ) : ?>
             <a href="<?php echo esc_url( $download_link ); ?>" target="_blank" rel="noopener">
-                <?php esc_html_e( 'Download Now', 'devnahian' ); ?>
+                <?php 
+                // Use custom label if set, otherwise default 'Download Now'
+                echo esc_html( $download_link_label ? $download_link_label : __( 'Download Now', 'devnahian' ) ); 
+                ?>
             </a>
         <?php endif; ?>
     </div>
+
 </div>
 
 <!-- Theme Collection Section End -->
