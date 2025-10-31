@@ -193,16 +193,12 @@ if ( defined( 'JETPACK__VERSION' ) ) {
  */
 require get_template_directory() . '/inc/custom-post.php';
 
-
 /**
  * Register custom ACF blocks
  */
 add_action('acf/init', 'my_custom_acf_blocks');
 function my_custom_acf_blocks() {
-    // check function exists
     if( function_exists('acf_register_block_type') ) {
-
-        // Collection Block
         acf_register_block_type(array(
             'name'              => 'collection',
             'title'             => __('Collection'),
@@ -214,7 +210,6 @@ function my_custom_acf_blocks() {
             'keywords'          => array( 'collection', 'image' ),
         ));
 
-        // Theme & Plugin Collection Block
         acf_register_block_type(array(
             'name'              => 'theme-collections',
             'title'             => __('Theme Collections'),
@@ -226,7 +221,6 @@ function my_custom_acf_blocks() {
             'keywords'          => array( 'theme', 'collection' ),
         ));
 
-        // Code Collection Block
         acf_register_block_type(array(
             'name'              => 'code-collections',
             'title'             => __('Code Collections'),
@@ -243,19 +237,12 @@ function my_custom_acf_blocks() {
 function collection_render_callback($block) {
     include get_theme_file_path('/template-parts/blocks/collection.php');
 }
-
 function theme_collections_render_callback($block) {
     include get_theme_file_path('/template-parts/blocks/theme-collection.php');
 }
-
-if (!function_exists('get_post_views')) {
-    function get_post_views($post_id) {
-        $count_key = 'post_views_count';
-        $count = get_post_meta($post_id, $count_key, true);
-        return $count ? $count : '0';
-    }
+function code_collections_render_callback($block) {
+    include get_theme_file_path('/template-parts/blocks/code-collection.php');
 }
-
 
 /**
  * Change ACF JSON save point.
@@ -264,56 +251,6 @@ function my_acf_json_save_point( $path ) {
     return get_stylesheet_directory() . '/acf-json';
 }
 add_filter( 'acf/settings/save_json', 'my_acf_json_save_point' );
-
-
-function track_post_views($post_id) {
-    if (!is_single()) return;
-
-    $views = get_post_meta($post_id, 'post_views_count', true);
-
-    if ($views == '') {
-        $views = 0;
-        delete_post_meta($post_id, 'post_views_count');
-        add_post_meta($post_id, 'post_views_count', '0');
-    } else {
-        $views++;
-        update_post_meta($post_id, 'post_views_count', $views);
-    }
-}
-remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0); // Remove the prefetching for adjacent posts
-add_action('wp_head', 'track_post_views');
-
-// Remove multiple fields and sections from the WooCommerce checkout
-add_filter( 'woocommerce_checkout_fields', 'custom_remove_checkout_fields' );
-function custom_remove_checkout_fields( $fields ) {
-    // Unset individual fields
-    unset($fields['billing']['billing_company']); // Company name
-    unset($fields['billing']['billing_country']); // Country / Region
-    unset($fields['billing']['billing_address_1']); // Street address
-    unset($fields['billing']['billing_address_2']); // Apartment, suite, etc.
-    unset($fields['billing']['billing_city']); // Town / City
-    unset($fields['billing']['billing_district']); // District (if custom field)
-    unset($fields['billing']['billing_postcode']); // Postcode / ZIP
-    unset($fields['order']['order_comments']); // Additional information
-
-    return $fields;
-}
-
-add_action('init', 'handle_course_retake_action');
-
-function handle_course_retake_action() {
-    if (isset($_GET['action']) && $_GET['action'] === 'retake_course' && is_user_logged_in()) {
-        $course_id = get_the_ID();
-        $user_id = get_current_user_id();
-
-        // Reset course progress
-        tutor_utils()->delete_course_progress($user_id, $course_id);
-
-        // Redirect back to course page
-        wp_redirect(get_permalink($course_id));
-        exit;
-    }
-}
 
 /**
  * Track unique post views (cookie-based)
@@ -336,12 +273,38 @@ function track_unique_post_views() {
                 update_post_meta($post_id, $count_key, $count);
             }
 
-            // prevent recount for 1 hour
             setcookie($cookie_name, 'true', time() + 3600, '/');
         }
     }
 }
 add_action('wp_head', 'track_unique_post_views');
+
+/**
+ * Track total post views
+ */
+if (!function_exists('get_post_views')) {
+    function get_post_views($post_id) {
+        $count_key = 'post_views_count';
+        $count = get_post_meta($post_id, $count_key, true);
+        return $count ? $count : '0';
+    }
+}
+function track_post_views($post_id) {
+    if (!is_single()) return;
+
+    $views = get_post_meta($post_id, 'post_views_count', true);
+
+    if ($views == '') {
+        $views = 0;
+        delete_post_meta($post_id, 'post_views_count');
+        add_post_meta($post_id, 'post_views_count', '0');
+    } else {
+        $views++;
+        update_post_meta($post_id, 'post_views_count', $views);
+    }
+}
+remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
+add_action('wp_head', 'track_post_views');
 
 // Add a custom column to the admin posts table
 function add_post_views_column($columns) {
@@ -368,9 +331,7 @@ add_filter('manage_edit-post_sortable_columns', 'make_post_views_column_sortable
 
 // Handle the sorting for the custom column
 function post_views_column_orderby($query) {
-    if (!is_admin() || !$query->is_main_query()) {
-        return;
-    }
+    if (!is_admin() || !$query->is_main_query()) return;
     if ('post_views_count' === $query->get('orderby')) {
         $query->set('meta_key', 'post_views_count');
         $query->set('orderby', 'meta_value_num');
@@ -378,31 +339,132 @@ function post_views_column_orderby($query) {
 }
 add_action('pre_get_posts', 'post_views_column_orderby');
 
-function restrict_username_registration($user_login) {
-    // Define the disallowed pattern for "blogspot"
-    $disallowed_pattern = '/blogspot/i'; // The "i" makes the match case-insensitive
+// ==========================================================
+// 🧠 Post Unique Daily Views Tracker (Ordered by Most Views)
+// ==========================================================
 
-    // Check if the username contains the disallowed pattern
+// ✅ Track unique post views per day (by IP)
+function nahian_track_unique_post_views() {
+    if ( is_single() ) {
+        global $post;
+        if ( empty( $post->ID ) ) return;
+
+        $post_id   = $post->ID;
+        $today     = date( 'Y-m-d' );
+        $views_key = '_unique_views_' . $today;
+
+        $user_ip = $_SERVER['REMOTE_ADDR'];
+
+        $viewers = get_post_meta( $post_id, $views_key, true );
+        if ( ! is_array( $viewers ) ) $viewers = [];
+
+        if ( ! in_array( $user_ip, $viewers ) ) {
+            $viewers[] = $user_ip;
+            update_post_meta( $post_id, $views_key, $viewers );
+        }
+    }
+}
+add_action( 'wp_head', 'nahian_track_unique_post_views' );
+
+// ✅ Add submenu under Posts
+function nahian_add_views_report_submenu() {
+    add_submenu_page(
+        'edit.php',
+        'Today\'s Views Report',
+        'Today\'s Views',
+        'manage_options',
+        'today-views-report',
+        'nahian_today_views_report_page'
+    );
+}
+add_action( 'admin_menu', 'nahian_add_views_report_submenu' );
+
+// ✅ Display report page ordered by most unique views
+function nahian_today_views_report_page() {
+    $today = date( 'Y-m-d' );
+
+    echo '<div class="wrap">';
+    echo '<h1>Today\'s Unique Post Views (' . esc_html( $today ) . ')</h1>';
+
+    // Get all published posts
+    $posts = get_posts([
+        'post_type'   => 'post',
+        'post_status' => 'publish',
+        'numberposts' => -1,
+    ]);
+
+    $posts_with_views = [];
+
+    // Collect only posts with views today
+    foreach ( $posts as $post ) {
+        $viewers = get_post_meta( $post->ID, '_unique_views_' . $today, true );
+        $views   = is_array( $viewers ) ? count( $viewers ) : 0;
+
+        if ( $views > 0 ) {
+            $posts_with_views[] = [
+                'post'  => $post,
+                'views' => $views
+            ];
+        }
+    }
+
+    // Sort by views descending
+    usort( $posts_with_views, function( $a, $b ) {
+        return $b['views'] - $a['views'];
+    });
+
+    if ( $posts_with_views ) {
+        echo '<table class="widefat striped">';
+        echo '<thead><tr>';
+        echo '<th>Post Title</th>';
+        echo '<th style="width:150px;">Unique Views Today</th>';
+        echo '</tr></thead><tbody>';
+
+        foreach ( $posts_with_views as $item ) {
+            $post      = $item['post'];
+            $views     = $item['views'];
+            $edit_link = get_edit_post_link( $post->ID );
+
+            echo '<tr>';
+            echo '<td><a href="' . esc_url( $edit_link ) . '">' . esc_html( get_the_title( $post ) ) . '</a></td>';
+            echo '<td>' . esc_html( $views ) . '</td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody></table>';
+    } else {
+        echo '<p>No posts have unique views today.</p>';
+    }
+
+    echo '</div>';
+}
+
+// ==========================================================
+// 🔹 Other Custom Functions
+// ==========================================================
+
+// Restrict username registration for "blogspot"
+function restrict_username_registration($user_login) {
+    $disallowed_pattern = '/blogspot/i';
     if (preg_match($disallowed_pattern, $user_login)) {
-        // Throw an error if the username contains "blogspot"
         wp_die(
             'Registration failed: Usernames containing "blogspot" are not allowed.', 
             'Username Restriction Error', 
             array('back_link' => true)
         );
     }
-
     return $user_login;
 }
 add_filter('pre_user_login', 'restrict_username_registration');
 
-
+// Allow WebP uploads
 function allow_webp_uploads($mime_types) {
     $mime_types['webp'] = 'image/webp';
     return $mime_types;
 }
 add_filter('upload_mimes', 'allow_webp_uploads');
 
+// Get reading time
 function get_post_reading_time( $post_id = null ) {
     if ( ! $post_id ) {
         $post_id = get_the_ID();
@@ -411,4 +473,30 @@ function get_post_reading_time( $post_id = null ) {
     $word_count = str_word_count( wp_strip_all_tags( $content ) );
     $reading_time = max( 1, ceil( $word_count / 200 ) ); // at least 1 min
     return $reading_time;
+}
+
+// Remove multiple fields and sections from the WooCommerce checkout
+add_filter( 'woocommerce_checkout_fields', 'custom_remove_checkout_fields' );
+function custom_remove_checkout_fields( $fields ) {
+    unset($fields['billing']['billing_company']);
+    unset($fields['billing']['billing_country']);
+    unset($fields['billing']['billing_address_1']);
+    unset($fields['billing']['billing_address_2']);
+    unset($fields['billing']['billing_city']);
+    unset($fields['billing']['billing_district']);
+    unset($fields['billing']['billing_postcode']);
+    unset($fields['order']['order_comments']);
+    return $fields;
+}
+
+// Handle course retake action
+add_action('init', 'handle_course_retake_action');
+function handle_course_retake_action() {
+    if (isset($_GET['action']) && $_GET['action'] === 'retake_course' && is_user_logged_in()) {
+        $course_id = get_the_ID();
+        $user_id = get_current_user_id();
+        tutor_utils()->delete_course_progress($user_id, $course_id);
+        wp_redirect(get_permalink($course_id));
+        exit;
+    }
 }
