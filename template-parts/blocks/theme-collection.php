@@ -67,13 +67,11 @@ if ( $image ) {
     <?php if ( $features ) : ?>
         <div class="theme-collection-features">
             <h3><?php esc_html_e( 'Features', 'devnahian' ); ?></h3>
-            <ul>
             <?php foreach ( $features as $feature ) : ?>
                 <?php if ( ! empty( $feature['feature_title'] ) ) : ?>
-                    <li><?php echo esc_html( $feature['feature_title'] ); ?></li>
+                    <span><?php echo esc_html( $feature['feature_title'] ); ?></span>
                 <?php endif; ?>
             <?php endforeach; ?>
-            </ul>
         </div>
     <?php endif; ?>
 
