@@ -1,6 +1,6 @@
 <?php
 /**
- * Theme Collection Block Template.
+ * Theme Collection Block Template (SEO Optimized, No Inline CSS).
  */
 
 // Create id attribute allowing for custom "anchor" value.
@@ -27,16 +27,37 @@ $demo_link_label      = get_field( 'demo_link_label' );
 $demo_link            = get_field( 'demo_link' );
 $download_link_label  = get_field( 'download_link_label' );
 $download_link        = get_field( 'download_link' );
+
+// SEO-friendly image attributes
+$alt_text = '';
+$title_attr = '';
+
+if ( $image ) {
+    $attachment_id = attachment_url_to_postid( $image );
+    $alt_text = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+
+    if ( empty( $alt_text ) && $title ) {
+        $alt_text = $title . ' - Learn with Abdullah Nahian';
+    }
+
+    $title_attr = $title ? $title . ' - Explore Features & Demo' : '';
+}
 ?>
 
 <div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $className ); ?>">
 
     <?php if ( $image ) : ?>
-        <div class="theme-collection-img" style="background-image:url('<?php echo esc_url( $image ); ?>')"></div>
+        <img
+            class="theme-collection-img"
+            src="<?php echo esc_url( $image ); ?>"
+            alt="<?php echo esc_attr( $alt_text ); ?>"
+            <?php if ( $title_attr ) : ?>title="<?php echo esc_attr( $title_attr ); ?>"<?php endif; ?>
+            loading="lazy"
+        >
     <?php endif; ?>
 
     <?php if ( $title ) : ?>
-        <h4><?php echo esc_html( $title ); ?></h4>
+        <h2><?php echo esc_html( $title ); ?></h2>
     <?php endif; ?>
 
     <?php if ( $description ) : ?>
@@ -45,35 +66,61 @@ $download_link        = get_field( 'download_link' );
 
     <?php if ( $features ) : ?>
         <div class="theme-collection-features">
-            <h5><?php esc_html_e( 'Features', 'devnahian' ); ?></h5>
+            <h3><?php esc_html_e( 'Features', 'devnahian' ); ?></h3>
+            <ul>
             <?php foreach ( $features as $feature ) : ?>
                 <?php if ( ! empty( $feature['feature_title'] ) ) : ?>
-                    <span><?php echo esc_html( $feature['feature_title'] ); ?></span>
+                    <li><?php echo esc_html( $feature['feature_title'] ); ?></li>
                 <?php endif; ?>
             <?php endforeach; ?>
+            </ul>
         </div>
     <?php endif; ?>
 
     <div class="theme-collection-link">
         <?php if ( $demo_link ) : ?>
             <a href="<?php echo esc_url( $demo_link ); ?>" target="_blank" rel="noopener">
-                <?php 
-                // Use custom label if set, otherwise default 'Demo'
-                echo esc_html( $demo_link_label ? $demo_link_label : __( 'Demo', 'devnahian' ) ); 
-                ?>
+                <?php echo esc_html( $demo_link_label ? $demo_link_label : __( 'Demo', 'devnahian' ) ); ?>
             </a>
         <?php endif; ?>
 
         <?php if ( $download_link ) : ?>
             <a href="<?php echo esc_url( $download_link ); ?>" target="_blank" rel="noopener">
-                <?php 
-                // Use custom label if set, otherwise default 'Download Now'
-                echo esc_html( $download_link_label ? $download_link_label : __( 'Download Now', 'devnahian' ) ); 
-                ?>
+                <?php echo esc_html( $download_link_label ? $download_link_label : __( 'Download Now', 'devnahian' ) ); ?>
             </a>
         <?php endif; ?>
     </div>
 
 </div>
+
+<?php
+// JSON-LD Structured Data for SEO
+if ( $title ) {
+    $structured_data = [
+        "@context" => "https://schema.org",
+        "@type" => "SoftwareApplication",
+        "name" => $title,
+        "image" => $image ? esc_url( $image ) : '',
+        "description" => $description ? wp_strip_all_tags( $description ) : '',
+        "applicationCategory" => "WordPress Theme",
+        "url" => $demo_link ? esc_url( $demo_link ) : '',
+    ];
+
+    if ( $features ) {
+        $feature_list = [];
+        foreach ( $features as $feature ) {
+            if ( ! empty( $feature['feature_title'] ) ) {
+                $feature_list[] = $feature['feature_title'];
+            }
+        }
+        if ( $feature_list ) {
+            $structured_data["featureList"] = $feature_list;
+        }
+    }
+    ?>
+    <script type="application/ld+json">
+        <?php echo wp_json_encode( $structured_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT ); ?>
+    </script>
+<?php } ?>
 
 <!-- Theme Collection Section End -->

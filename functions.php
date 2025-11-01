@@ -352,8 +352,7 @@ function nahian_track_unique_post_views() {
         $post_id   = $post->ID;
         $today     = date( 'Y-m-d' );
         $views_key = '_unique_views_' . $today;
-
-        $user_ip = $_SERVER['REMOTE_ADDR'];
+        $user_ip   = $_SERVER['REMOTE_ADDR'];
 
         $viewers = get_post_meta( $post_id, $views_key, true );
         if ( ! is_array( $viewers ) ) $viewers = [];
@@ -379,14 +378,15 @@ function nahian_add_views_report_submenu() {
 }
 add_action( 'admin_menu', 'nahian_add_views_report_submenu' );
 
-// ✅ Display report page ordered by most unique views
+// ✅ Display admin table like “All Posts”
 function nahian_today_views_report_page() {
     $today = date( 'Y-m-d' );
 
-    echo '<div class="wrap">';
-    echo '<h1>Today\'s Unique Post Views (' . esc_html( $today ) . ')</h1>';
+    // Pagination setup
+    $paged       = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+    $posts_per_page = 20;
 
-    // Get all published posts
+    // Fetch posts
     $posts = get_posts([
         'post_type'   => 'post',
         'post_status' => 'publish',
@@ -395,49 +395,98 @@ function nahian_today_views_report_page() {
 
     $posts_with_views = [];
 
-    // Collect only posts with views today
+    // Collect posts with today's views
     foreach ( $posts as $post ) {
         $viewers = get_post_meta( $post->ID, '_unique_views_' . $today, true );
         $views   = is_array( $viewers ) ? count( $viewers ) : 0;
 
         if ( $views > 0 ) {
+            // Optional: all-time views (sum of all days)
+            $meta_keys = get_post_meta( $post->ID );
+            $total = 0;
+            foreach ( $meta_keys as $key => $value ) {
+                if ( strpos( $key, '_unique_views_' ) === 0 && is_array( maybe_unserialize( $value[0] ) ) ) {
+                    $total += count( maybe_unserialize( $value[0] ) );
+                }
+            }
+
             $posts_with_views[] = [
                 'post'  => $post,
-                'views' => $views
+                'views' => $views,
+                'total' => $total,
             ];
         }
     }
 
-    // Sort by views descending
-    usort( $posts_with_views, function( $a, $b ) {
-        return $b['views'] - $a['views'];
-    });
+    // Sort by today’s views descending
+    usort( $posts_with_views, fn($a, $b) => $b['views'] - $a['views'] );
 
-    if ( $posts_with_views ) {
-        echo '<table class="widefat striped">';
-        echo '<thead><tr>';
-        echo '<th>Post Title</th>';
-        echo '<th style="width:150px;">Unique Views Today</th>';
-        echo '</tr></thead><tbody>';
+    // Paginate results
+    $total_posts = count( $posts_with_views );
+    $offset = ( $paged - 1 ) * $posts_per_page;
+    $paged_posts = array_slice( $posts_with_views, $offset, $posts_per_page );
 
-        foreach ( $posts_with_views as $item ) {
-            $post      = $item['post'];
-            $views     = $item['views'];
-            $edit_link = get_edit_post_link( $post->ID );
+    echo '<div class="wrap">';
+    echo '<h1 class="wp-heading-inline">Today\'s Unique Post Views</h1>';
+    echo '<p><strong>Date:</strong> ' . esc_html( $today ) . '</p>';
+    echo '<hr class="wp-header-end">';
+
+    if ( ! empty( $paged_posts ) ) {
+        echo '<table class="wp-list-table widefat fixed striped posts">';
+        echo '<thead>
+                <tr>
+                    <th scope="col" class="manage-column column-title column-primary"><span>Post Title</span></th>
+                    <th scope="col" class="manage-column"><span>Unique Views Today</span></th>
+                    <th scope="col" class="manage-column"><span>Total Views (All Time)</span></th>
+                    <th scope="col" class="manage-column"><span>Date</span></th>
+                </tr>
+              </thead>';
+
+        echo '<tbody id="the-list">';
+
+        foreach ( $paged_posts as $item ) {
+            $post  = $item['post'];
+            $views = $item['views'];
+            $total = $item['total'];
 
             echo '<tr>';
-            echo '<td><a href="' . esc_url( $edit_link ) . '">' . esc_html( get_the_title( $post ) ) . '</a></td>';
+            echo '<td class="title column-title has-row-actions column-primary">
+                    <strong><a href="' . esc_url( get_permalink( $post->ID ) ) . '" target="_blank">' . esc_html( get_the_title( $post ) ) . '</a></strong>
+                    <div class="row-actions">
+                        <span class="view"><a href="' . esc_url( get_permalink( $post->ID ) ) . '" target="_blank">View</a></span>
+                    </div>
+                  </td>';
             echo '<td>' . esc_html( $views ) . '</td>';
+            echo '<td>' . esc_html( $total ) . '</td>';
+            echo '<td>' . esc_html( $today ) . '</td>';
             echo '</tr>';
         }
 
         echo '</tbody></table>';
+
+        // Pagination links
+        $total_pages = ceil( $total_posts / $posts_per_page );
+        if ( $total_pages > 1 ) {
+            echo '<div class="tablenav bottom">';
+            echo '<div class="tablenav-pages">';
+            echo paginate_links([
+                'base'      => add_query_arg( 'paged', '%#%' ),
+                'format'    => '',
+                'prev_text' => '&laquo;',
+                'next_text' => '&raquo;',
+                'total'     => $total_pages,
+                'current'   => $paged,
+            ]);
+            echo '</div></div>';
+        }
+
     } else {
         echo '<p>No posts have unique views today.</p>';
     }
 
     echo '</div>';
 }
+
 
 // ==========================================================
 // 🔹 Other Custom Functions
