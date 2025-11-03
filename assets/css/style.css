@@ -3063,6 +3063,8 @@ body.rtl {
 .theme-collection-features h3 {
   font-size: 24px;
   font-weight: 600;
+	margin-bottom: 20px;
+	margin-top: 35px;
 }
 .theme-collection-features span {
 	display: block;
@@ -3369,4 +3371,35 @@ body.rtl {
   text-align: center;
   border-bottom: 1px solid #ddd;
   padding-bottom: 15px;
+}
+
+/* Sticky TOC */
+.sticky-toc {
+    position: sticky;
+    top: 50px; /* distance from top */
+    max-height: calc(100vh - 120px);
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.sticky-toc .toc-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.sticky-toc .toc-list li {
+    margin-bottom: 10px;
+}
+
+.sticky-toc .toc-list li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.sticky-toc .toc-list li a.active {
+    color: #0077b7;
 }

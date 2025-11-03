@@ -56,9 +56,14 @@ if ( $image ) {
         >
     <?php endif; ?>
 
-    <?php if ( $title ) : ?>
-        <h2><?php echo esc_html( $title ); ?></h2>
-    <?php endif; ?>
+    <?php if ( $title ) : 
+    // Generate a safe ID for the title
+    $title_id = sanitize_title( $title );
+?>
+    <h2 id="<?php echo esc_attr( $title_id ); ?>">
+        <?php echo esc_html( $title ); ?>
+    </h2>
+<?php endif; ?>
 
     <?php if ( $description ) : ?>
         <p><?php echo esc_html( $description ); ?></p>
