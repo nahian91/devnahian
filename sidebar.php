@@ -20,7 +20,7 @@
             $content = $post->post_content;
 
             // Match only <h3> headings
-            preg_match_all('/<h3[^>]*>(.*?)<\/h3>/', $content, $matches, PREG_SET_ORDER);
+            preg_match_all('/<h2[^>]*>(.*?)<\/h2>/', $content, $matches, PREG_SET_ORDER);
 
             if ( ! empty( $matches ) ) {
                 echo '<ul class="toc-list">';
