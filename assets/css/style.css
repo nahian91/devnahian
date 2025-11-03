@@ -3373,33 +3373,54 @@ body.rtl {
   padding-bottom: 15px;
 }
 
-/* Sticky TOC */
-.sticky-toc {
-    position: sticky;
-    top: 50px; /* distance from top */
-    max-height: calc(100vh - 120px);
-    padding: 15px;
+
+/* -------------------------------
+   TOC Widget Sticky & Style
+---------------------------------*/
+.toc-widget {
     background: #fff;
-    border: 1px solid #ddd;
+    border: 1px solid #e2e2e2;
+    padding: 20px;
+    margin-bottom: 30px;
     border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.sticky-toc .toc-list {
+/* Sidebar TOC Sticky */
+.toc-widget.sticky-toc {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    top: 100px; /* distance from top of viewport, adjust as needed */
+    z-index: 99;
+}
+
+
+/* TOC List */
+.toc-list {
     list-style: none;
     padding-left: 0;
     margin: 0;
 }
 
-.sticky-toc .toc-list li {
+.toc-list li {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
     margin-bottom: 10px;
 }
 
-.sticky-toc .toc-list li a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
+.toc-list li:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
 }
 
-.sticky-toc .toc-list li a.active {
-    color: #0077b7;
+.toc-list li a {
+    color: #333;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.toc-list li a:hover {
+    color: #005a9e;
 }
