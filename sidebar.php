@@ -9,39 +9,45 @@
 <?php if ( is_single() ) : ?>
 
     <!-- Table of Contents Widget -->
-    <div class="widget toc-widget sticky-toc">
-        <div class="section-title">
-            <h5><?php esc_html_e( 'Table of Contents', 'textdomain' ); ?></h5>
-        </div>
-
-        <div id="post-toc">
-            <?php
-            global $post;
-            $content = $post->post_content;
-
-            // Match only <h3> headings
-            preg_match_all('/<h2[^>]*>(.*?)<\/h2>/', $content, $matches, PREG_SET_ORDER);
-
-            if ( ! empty( $matches ) ) {
-                echo '<ul class="toc-list">';
-                foreach ( $matches as $match ) {
-                    $title = strip_tags( $match[1] );
-                    $id    = sanitize_title( $title );
-
-                    // Add ID if missing in the original content
-                    if ( strpos( $content, 'id="' . $id . '"' ) === false ) {
-                        $content = str_replace( $match[0], '<h3 id="' . $id . '">' . $match[1] . '</h3>', $content );
-                    }
-
-                    echo '<li><a href="#' . esc_attr( $id ) . '">' . esc_html( $title ) . '</a></li>';
-                }
-                echo '</ul>';
-            } else {
-                echo '<p>' . esc_html__( 'No headings found in this post.', 'textdomain' ) . '</p>';
-            }
-            ?>
-        </div>
+<div class="widget toc-widget sticky-toc">
+    <div class="section-title">
+        <h5><?php esc_html_e( 'Table of Contents', 'textdomain' ); ?></h5>
     </div>
+
+    <div id="post-toc">
+        <?php
+        global $post;
+        $content = $post->post_content;
+
+        // Match <h2> headings
+        preg_match_all('/<h2[^>]*>(.*?)<\/h2>/', $content, $matches, PREG_SET_ORDER);
+
+        if ( ! empty( $matches ) ) {
+            echo '<ul class="toc-list">';
+            foreach ( $matches as $match ) {
+                $title = strip_tags( $match[1] );
+                $id    = sanitize_title( $title );
+
+                // Add ID to <h2> if missing
+                if ( strpos( $match[0], 'id="' . $id . '"' ) === false ) {
+                    $content = str_replace( $match[0], '<h2 id="' . $id . '">' . $match[1] . '</h2>', $content );
+                }
+
+                echo '<li><a href="#' . esc_attr( $id ) . '">' . esc_html( $title ) . '</a></li>';
+            }
+            echo '</ul>';
+
+            // Update the post content with IDs
+            remove_filter('the_content', 'wpautop'); // optional: prevent auto <p> wrapping
+            echo apply_filters('the_content', $content);
+
+        } else {
+            echo '<p>' . esc_html__( 'No headings found in this post.', 'textdomain' ) . '</p>';
+        }
+        ?>
+    </div>
+</div>
+
 
 <?php else : ?>
 
