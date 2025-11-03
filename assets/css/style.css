@@ -3424,3 +3424,24 @@ body.rtl {
 .toc-list li a:hover {
     color: #005a9e;
 }
+
+
+.internal-collection-link {
+  border: 2px solid #ddd;
+  border-radius: 7px;
+  padding: 20px;
+}
+.internal-collection-link h5 {
+  font-weight: 600;
+  margin: 0;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+.internal-collection-link span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.internal-collection-link span a {
+  text-transform: capitalize;
+}

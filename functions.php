@@ -231,6 +231,17 @@ function my_custom_acf_blocks() {
             'mode'              => 'preview',
             'keywords'          => array( 'code', 'collection' ),
         ));
+
+        acf_register_block_type(array(
+            'name'              => 'internal-collections',
+            'title'             => __('Internal Collections'),
+            'description'       => __('Full width hero banner with title & button.'),
+            'render_callback'   => 'internal_collections_render_callback',
+            'category'          => 'layout',
+            'icon'              => 'cover-image',
+            'mode'              => 'preview',
+            'keywords'          => array( 'internal', 'collection' ),
+        ));
     }
 }
 
@@ -242,6 +253,9 @@ function theme_collections_render_callback($block) {
 }
 function code_collections_render_callback($block) {
     include get_theme_file_path('/template-parts/blocks/code-collection.php');
+}
+function internal_collections_render_callback($block) {
+    include get_theme_file_path('/template-parts/blocks/internal-collection.php');
 }
 
 /**
