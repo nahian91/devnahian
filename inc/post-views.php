@@ -43,8 +43,8 @@ add_action( 'wp_head', 'infinity_track_unique_post_views' );
 function infinity_add_views_report_submenu() {
 	add_submenu_page(
 		'edit.php',
-		'Today\'s Unique Views',
-		'Today\'s Views',
+		'Analytics',
+		'Analytics',
 		'manage_options',
 		'today-views-report',
 		'infinity_today_views_report_page'
@@ -54,53 +54,23 @@ add_action( 'admin_menu', 'infinity_add_views_report_submenu' );
 
 
 // ==========================================================
-// 📊 Display Admin Report Page with Comparison Cards
+// 📊 Display Analytics Page (Top 5 Today + 7 Days)
 // ==========================================================
 function infinity_today_views_report_page() {
 	$today = gmdate( 'Y-m-d' );
-	$paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
-	$per_page = 20;
-
 	$all_posts = get_posts([
 		'post_type'   => 'post',
 		'post_status' => 'publish',
 		'numberposts' => -1,
 	]);
 
-	// ---------- 🧩 Today's Views ----------
-	$results = [];
-	foreach ( $all_posts as $post ) {
-		$today_key = '_infinity_unique_views_' . $today;
-		$viewers = get_post_meta( $post->ID, $today_key, true );
-		$today_views = is_array( $viewers ) ? count( $viewers ) : 0;
-
-		if ( $today_views > 0 ) {
-			$meta = get_post_meta( $post->ID );
-			$total = 0;
-			foreach ( $meta as $key => $val ) {
-				if ( strpos( $key, '_infinity_unique_views_' ) === 0 && is_array( maybe_unserialize( $val[0] ) ) ) {
-					$total += count( maybe_unserialize( $val[0] ) );
-				}
-			}
-			$results[] = [
-				'post'  => $post,
-				'today' => $today_views,
-				'total' => $total,
-			];
-		}
-	}
-
-	usort( $results, fn( $a, $b ) => $b['today'] - $a['today'] );
-
-
-	// ---------- 🏆 7-Day Comparison Cards ----------
-	$top_posts = [];
+	// ---------- 🏆 Top 5 Posts (Last 7 Days) ----------
+	$top_7_posts = [];
 
 	foreach ( $all_posts as $post ) {
 		$current_7 = 0;
 		$previous_7 = 0;
 
-		// last 7 days
 		for ( $i = 0; $i < 7; $i++ ) {
 			$date = gmdate( 'Y-m-d', strtotime( "-$i days", strtotime( $today ) ) );
 			$key = '_infinity_unique_views_' . $date;
@@ -108,7 +78,6 @@ function infinity_today_views_report_page() {
 			if ( is_array( $views ) ) $current_7 += count( $views );
 		}
 
-		// previous 7 days (8–14 days ago)
 		for ( $i = 7; $i < 14; $i++ ) {
 			$date = gmdate( 'Y-m-d', strtotime( "-$i days", strtotime( $today ) ) );
 			$key = '_infinity_unique_views_' . $date;
@@ -118,7 +87,7 @@ function infinity_today_views_report_page() {
 
 		if ( $current_7 > 0 ) {
 			$change = $previous_7 > 0 ? (($current_7 - $previous_7) / $previous_7) * 100 : 100;
-			$top_posts[] = [
+			$top_7_posts[] = [
 				'post'        => $post,
 				'current'     => $current_7,
 				'previous'    => $previous_7,
@@ -127,30 +96,66 @@ function infinity_today_views_report_page() {
 		}
 	}
 
-	usort( $top_posts, fn( $a, $b ) => $b['current'] - $a['current'] );
-	$top_posts = array_slice( $top_posts, 0, 5 ); // Top 5 posts
+	usort( $top_7_posts, fn( $a, $b ) => $b['current'] - $a['current'] );
+	$top_7_posts = array_slice( $top_7_posts, 0, 5 );
+
+
+	// ---------- 🌞 Top 5 Posts Today ----------
+	$today_key = '_infinity_unique_views_' . $today;
+	$top_today = [];
+
+	foreach ( $all_posts as $post ) {
+		$views = get_post_meta( $post->ID, $today_key, true );
+		if ( is_array( $views ) && count( $views ) > 0 ) {
+			$top_today[] = [
+				'post'  => $post,
+				'today' => count( $views ),
+			];
+		}
+	}
+
+	usort( $top_today, fn( $a, $b ) => $b['today'] - $a['today'] );
+	$top_today = array_slice( $top_today, 0, 5 );
 
 
 	// ---------- PAGE OUTPUT ----------
 	echo '<div class="wrap">';
-	echo '<h1 class="wp-heading-inline">🔥 Today\'s Unique Post Views</h1>';
+	echo '<h1 class="wp-heading-inline">📈 Infinity Analytics</h1>';
 	echo '<p><strong>Date:</strong> ' . esc_html( $today ) . '</p>';
 	echo '<hr class="wp-header-end" style="margin-bottom:20px;">';
 
-	// ---------- 🏆 Top Cards Section ----------
-	if ( ! empty( $top_posts ) ) {
-		echo '<h2>🏆 Top 5 Posts (Last 7 Days)</h2>';
+	// ---------- 🌞 Top 5 Posts Today ----------
+	if ( ! empty( $top_today ) ) {
+		echo '<h2>🌞 Top 5 Posts Today</h2>';
 		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;margin-bottom:30px;">';
 
-		foreach ( $top_posts as $item ) {
+		foreach ( $top_today as $item ) {
 			$post  = $item['post'];
-			$current = $item['current'];
-			$previous = $item['previous'];
-			$percentage = $item['percentage'];
-
+			$today_views = $item['today'];
 			$thumb = get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: 'https://via.placeholder.com/300x180?text=No+Image';
 
-			// Determine trend direction
+			echo '<div style="background:#fff;border:1px solid #ddd;border-radius:10px;width:250px;box-shadow:0 2px 6px rgba(0,0,0,0.05);overflow:hidden;">';
+			echo '<img src="' . esc_url( $thumb ) . '" style="width:100%;height:140px;object-fit:cover;">';
+			echo '<div style="padding:12px;">';
+			echo '<h3 style="margin:0 0 8px;font-size:14px;line-height:1.4;"><a href="' . esc_url( get_permalink( $post->ID ) ) . '" target="_blank">' . esc_html( get_the_title( $post ) ) . '</a></h3>';
+			echo '<p style="margin:0;font-size:13px;color:#333;">Today\'s Views: <strong>' . esc_html( $today_views ) . '</strong></p>';
+			echo '</div></div>';
+		}
+
+		echo '</div>';
+	}
+
+	// ---------- 🏆 Top 5 Posts (Last 7 Days) ----------
+	if ( ! empty( $top_7_posts ) ) {
+		echo '<h2>🏆 Top 5 Posts (Last 7 Days)</h2>';
+		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;">';
+
+		foreach ( $top_7_posts as $item ) {
+			$post  = $item['post'];
+			$current = $item['current'];
+			$percentage = $item['percentage'];
+			$thumb = get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: 'https://via.placeholder.com/300x180?text=No+Image';
+
 			if ( $percentage > 0 ) {
 				$trend = '<span style="color:#2ecc71;">▲ ' . esc_html( $percentage ) . '%</span>';
 			} elseif ( $percentage < 0 ) {
@@ -169,42 +174,8 @@ function infinity_today_views_report_page() {
 		}
 
 		echo '</div>';
-	}
-
-	// ---------- Today's Table ----------
-	if ( ! empty( $results ) ) {
-		echo '<table class="wp-list-table widefat fixed striped posts">';
-		echo '<thead>
-				<tr>
-					<th>Post Title</th>
-					<th>Unique Views Today</th>
-					<th>Total Views (All Time)</th>
-					<th>Date</th>
-				</tr>
-			  </thead><tbody>';
-
-		foreach ( $results as $row ) {
-			$post  = $row['post'];
-			$today_views = $row['today'];
-			$total_views = $row['total'];
-
-			echo '<tr>';
-			echo '<td class="column-primary">
-					<strong><a href="' . esc_url( get_permalink( $post->ID ) ) . '" target="_blank">' . esc_html( get_the_title( $post ) ) . '</a></strong>
-					<div class="row-actions">
-						<span class="view"><a href="' . esc_url( get_permalink( $post->ID ) ) . '" target="_blank">View</a></span>
-					</div>
-				  </td>';
-
-			echo '<td><span style="background:#2271b1;color:#fff;padding:4px 8px;border-radius:4px;">' . esc_html( $today_views ) . '</span></td>';
-			echo '<td><span style="background:#2ecc71;color:#fff;padding:4px 8px;border-radius:4px;">' . esc_html( $total_views ) . '</span></td>';
-			echo '<td>' . esc_html( $today ) . '</td>';
-			echo '</tr>';
-		}
-
-		echo '</tbody></table>';
 	} else {
-		echo '<p>😴 No posts have received unique views today.</p>';
+		echo '<p>😴 No posts have received views recently.</p>';
 	}
 
 	echo '</div>';
