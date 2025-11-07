@@ -151,7 +151,7 @@ function infinity_today_views_report_page() {
 		}
 	}
 	usort($top_7_posts, fn($a, $b) => $b['current'] - $a['current']);
-	$top_7_posts = array_slice($top_7_posts, 0, 5);
+	$top_7_posts = array_slice($top_7_posts, 0, 20);
 
 	// ---------- 🗓️ Top 5 Posts (Last 30 Days) ----------
 	$top_30_posts = [];
@@ -190,7 +190,7 @@ function infinity_today_views_report_page() {
 		}
 	}
 	usort($top_30_posts, fn($a, $b) => $b['current'] - $a['current']);
-	$top_30_posts = array_slice($top_30_posts, 0, 5);
+	$top_30_posts = array_slice($top_30_posts, 0, 20);
 
 	// ---------- 🌞 Top 5 Posts Today ----------
 	$top_today = [];
@@ -207,7 +207,7 @@ function infinity_today_views_report_page() {
 		}
 	}
 	usort($top_today, fn($a, $b) => $b['today'] - $a['today']);
-	$top_today = array_slice($top_today, 0, 5);
+	$top_today = array_slice($top_today, 0, 20);
 
 	// ---------- PAGE OUTPUT ----------
 	echo '<div class="wrap">';
@@ -245,7 +245,7 @@ function infinity_today_views_report_page() {
 
 	// ---------- 🌞 Top 5 Today ----------
 	if (!empty($top_today)) {
-		echo '<h2>🌞 Top 5 Posts Today</h2>';
+		echo '<h2>🌞 Top 20 Posts Today</h2>';
 		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;margin-bottom:30px;">';
 		foreach ($top_today as $item) {
 			$post = $item['post'];
@@ -263,7 +263,7 @@ function infinity_today_views_report_page() {
 
 	// ---------- 🏆 Top 5 Posts Last 7 Days ----------
 	if (!empty($top_7_posts)) {
-		echo '<h2>🏆 Top 5 Posts (Last 7 Days)</h2>';
+		echo '<h2>🏆 Top 20 Posts (Last 7 Days)</h2>';
 		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;">';
 		foreach ($top_7_posts as $item) {
 			$post = $item['post'];
@@ -284,7 +284,7 @@ function infinity_today_views_report_page() {
 
 	// ---------- 🗓️ Top 5 Posts Last 30 Days ----------
 	if (!empty($top_30_posts)) {
-		echo '<h2>🗓️ Top 5 Posts (Last 30 Days)</h2>';
+		echo '<h2>🗓️ Top 20 Posts (Last 30 Days)</h2>';
 		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;">';
 		foreach ($top_30_posts as $item) {
 			$post = $item['post'];
