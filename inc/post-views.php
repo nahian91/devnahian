@@ -52,256 +52,226 @@ function infinity_add_views_report_submenu() {
 }
 add_action( 'admin_menu', 'infinity_add_views_report_submenu' );
 
-
 // ==========================================================
-// 📊 Display Analytics Page (Today + Yesterday + 7 Days + 30 Days)
+// 📊 Infinity Analytics with Modern Cards & Tabs
 // ==========================================================
 function infinity_today_views_report_page() {
 
-	// ---------- 🕒 Bangladesh time ----------
-	$today = current_time('Y-m-d'); // site time in WP
-	$yesterday = date('Y-m-d', strtotime($today . ' -1 day'));
+    $today = current_time('Y-m-d'); 
+    $yesterday = date('Y-m-d', strtotime($today.' -1 day'));
 
-	$all_posts = get_posts([
-		'post_type'   => 'post',
-		'post_status' => 'publish',
-		'numberposts' => -1,
-	]);
+    $all_posts = get_posts([
+        'post_type'   => 'post',
+        'post_status' => 'publish',
+        'numberposts' => -1,
+    ]);
 
-	// ---------- 📦 Calculate Totals ----------
-	$total_today_views = 0;
-	$total_today_unique = 0;
-	$total_yesterday_views = 0;
-	$total_yesterday_unique = 0;
+    // ---------- Calculate totals ----------
+    $total_today_views = 0;
+    $total_today_unique = 0;
+    $total_yesterday_views = 0;
+    $total_yesterday_unique = 0;
 
-	foreach ($all_posts as $post) {
-		// --- Today views ---
-		$today_key = '_infinity_unique_views_' . $today;
-		$today_views = get_post_meta($post->ID, $today_key, true);
+    foreach($all_posts as $post){
+        // Today
+        $today_views = get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
+        if(!empty($today_views)){
+            if(!is_array($today_views)) $today_views = maybe_unserialize($today_views);
+            if(is_array($today_views)){
+                $total_today_views += count($today_views);
+                $total_today_unique += count(array_unique($today_views));
+            }
+        }
+        // Yesterday
+        $yesterday_views = get_post_meta($post->ID,'_infinity_unique_views_'.$yesterday,true);
+        if(!empty($yesterday_views)){
+            if(!is_array($yesterday_views)) $yesterday_views = maybe_unserialize($yesterday_views);
+            if(is_array($yesterday_views)){
+                $total_yesterday_views += count($yesterday_views);
+                $total_yesterday_unique += count(array_unique($yesterday_views));
+            }
+        }
+    }
 
-		if (!empty($today_views)) {
-			if (!is_array($today_views)) $today_views = maybe_unserialize($today_views);
-			if (is_array($today_views)) {
-				$total_today_views += count($today_views);
-				$total_today_unique += count(array_unique($today_views));
-			}
-		}
+    // Comparison
+    $compare_percent = $total_yesterday_views>0?(($total_today_views-$total_yesterday_views)/$total_yesterday_views)*100:100;
+    $compare_trend = '';
+    if($compare_percent>0) $compare_trend = '<span style="color:#2ecc71;">▲ '.round($compare_percent,1).'%</span>';
+    elseif($compare_percent<0) $compare_trend = '<span style="color:#e74c3c;">▼ '.abs(round($compare_percent,1)).'%</span>';
+    else $compare_trend = '<span style="color:#888;">▬ 0%</span>';
 
-		// --- Yesterday views ---
-		$yesterday_key = '_infinity_unique_views_' . $yesterday;
-		$yesterday_views = get_post_meta($post->ID, $yesterday_key, true);
+    $active_tab = isset($_GET['tab'])?$_GET['tab']:'today';
+    ?>
+    <div class="wrap">
+        <h1 class="wp-heading-inline">📈 Infinity Analytics</h1>
+        <p><strong>Date:</strong> <?php echo esc_html($today); ?></p>
 
-		if (!empty($yesterday_views)) {
-			if (!is_array($yesterday_views)) $yesterday_views = maybe_unserialize($yesterday_views);
-			if (is_array($yesterday_views)) {
-				$total_yesterday_views += count($yesterday_views);
-				$total_yesterday_unique += count(array_unique($yesterday_views));
-			}
-		}
-	}
+        <!-- ---------- Summary Cards ---------- -->
+        <div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">
+            <?php
+            $cards = [
+                ['title'=>'📅 Today Total Views','value'=>$total_today_views,'color'=>'#0073aa'],
+                ['title'=>'👥 Today Unique Views','value'=>$total_today_unique,'color'=>'#16a085'],
+                ['title'=>'📆 Yesterday Views','value'=>$total_yesterday_views,'color'=>'#f39c12'],
+                ['title'=>'📊 Today vs Yesterday','value'=>$compare_trend,'color'=>'#333'],
+            ];
+            foreach($cards as $card){
+                ?>
+                <div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">
+                    <h3 style="margin:0 0 10px;font-size:16px;"><?php echo $card['title']; ?></h3>
+                    <p style="font-size:22px;font-weight:bold;color:<?php echo $card['color']; ?>;"><?php echo $card['value']; ?></p>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
 
-	// ---------- 📈 Compare Today vs Yesterday ----------
-	$compare_percent = $total_yesterday_views > 0
-		? (($total_today_views - $total_yesterday_views) / $total_yesterday_views) * 100
-		: 100;
+        <!-- ---------- Tabs ---------- -->
+        <h2 class="nav-tab-wrapper">
+            <a href="?page=today-views-report&tab=today" class="nav-tab <?php echo $active_tab=='today'?'nav-tab-active':''; ?>">Today</a>
+            <a href="?page=today-views-report&tab=7days" class="nav-tab <?php echo $active_tab=='7days'?'nav-tab-active':''; ?>">Last 7 Days</a>
+            <a href="?page=today-views-report&tab=30days" class="nav-tab <?php echo $active_tab=='30days'?'nav-tab-active':''; ?>">Last 30 Days</a>
+            <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
+        </h2>
 
-	$compare_trend = '';
-	if ($compare_percent > 0) {
-		$compare_trend = '<span style="color:#2ecc71;">▲ ' . round($compare_percent, 1) . '%</span>';
-	} elseif ($compare_percent < 0) {
-		$compare_trend = '<span style="color:#e74c3c;">▼ ' . abs(round($compare_percent, 1)) . '%</span>';
-	} else {
-		$compare_trend = '<span style="color:#888;">▬ 0%</span>';
-	}
+        <div class="tab-content" style="margin-top:20px;">
+        <?php
+        // ---------- TODAY TAB ----------
+        if($active_tab=='today'){
+            echo '<h2>🌞 Top Posts Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
+            $top_today = [];
+            foreach($all_posts as $post){
+                $views=get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
+                if(!empty($views)){
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(is_array($views)){
+                        $top_today[] = ['post'=>$post,'count'=>count($views)];
+                    }
+                }
+            }
+            usort($top_today,fn($a,$b)=>$b['count']-$a['count']);
+            $top_today=array_slice($top_today,0,20);
+            foreach($top_today as $item){
+                $thumb = get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+                ?>
+                <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+                    <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+                    <div style="padding:12px;text-align:center;">
+                        <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:6px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+                        <p style="margin:0;color:#555;font-size:13px;">Views: <strong><?php echo esc_html($item['count']); ?></strong></p>
+                    </div>
+                </div>
+                <?php
+            }
+            echo '</div>';
+        }
 
-	// ---------- 🏆 Top 5 Posts (Last 7 Days) ----------
-	$top_7_posts = [];
-	foreach ($all_posts as $post) {
-		$current_7 = 0;
-		$previous_7 = 0;
+        // ---------- 7 DAYS TAB ----------
+        if($active_tab=='7days'){
+            echo '<h2>🏆 Top Posts Last 7 Days</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
+            $top_7_posts = [];
+            foreach($all_posts as $post){
+                $current=0;$previous=0;
+                for($d=0;$d<7;$d++){
+                    $date=date('Y-m-d', strtotime($today."-$d days"));
+                    $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
+                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $current += is_array($views)?count($views):0; }
+                }
+                for($d=7;$d<14;$d++){
+                    $date=date('Y-m-d', strtotime($today."-$d days"));
+                    $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
+                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $previous += is_array($views)?count($views):0; }
+                }
+                if($current>0){
+                    $change=$previous>0?(($current-$previous)/$previous)*100:100;
+                    $top_7_posts[]=['post'=>$post,'current'=>$current,'percentage'=>round($change,1)];
+                }
+            }
+            usort($top_7_posts,fn($a,$b)=>$b['current']-$a['current']);
+            $top_7_posts=array_slice($top_7_posts,0,20);
+            foreach($top_7_posts as $item){
+                $thumb=get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+                ?>
+                <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+                    <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+                    <div style="padding:12px;text-align:center;">
+                        <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:4px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+                        <p style="margin:0;color:#555;font-size:13px;">Views: <strong><?php echo esc_html($item['current']); ?></strong></p>
+                        <p style="margin:0;color:<?php echo $item['percentage']>=0?'#2ecc71':'#e74c3c'; ?>;font-size:13px;">Change: <?php echo esc_html($item['percentage']); ?>%</p>
+                    </div>
+                </div>
+                <?php
+            }
+            echo '</div>';
+        }
 
-		for ($i = 0; $i < 7; $i++) {
-			$date = date('Y-m-d', strtotime($today . "-$i days"));
-			$key = '_infinity_unique_views_' . $date;
-			$views = get_post_meta($post->ID, $key, true);
-			if (!empty($views)) {
-				if (!is_array($views)) $views = maybe_unserialize($views);
-				if (is_array($views)) $current_7 += count($views);
-			}
-		}
+        // ---------- 30 DAYS TAB ----------
+        if($active_tab=='30days'){
+            echo '<h2>🗓️ Top Posts Last 30 Days</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
+            $top_30_posts=[];
+            foreach($all_posts as $post){
+                $current=0;$previous=0;
+                for($d=0;$d<30;$d++){
+                    $date=date('Y-m-d', strtotime($today."-$d days"));
+                    $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
+                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $current += is_array($views)?count($views):0; }
+                }
+                for($d=30;$d<60;$d++){
+                    $date=date('Y-m-d', strtotime($today."-$d days"));
+                    $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
+                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $previous += is_array($views)?count($views):0; }
+                }
+                if($current>0){
+                    $change=$previous>0?(($current-$previous)/$previous)*100:100;
+                    $top_30_posts[]=['post'=>$post,'current'=>$current,'percentage'=>round($change,1)];
+                }
+            }
+            usort($top_30_posts,fn($a,$b)=>$b['current']-$a['current']);
+            $top_30_posts=array_slice($top_30_posts,0,20);
+            foreach($top_30_posts as $item){
+                $thumb=get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+                ?>
+                <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+                    <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+                    <div style="padding:12px;text-align:center;">
+                        <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:4px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+                        <p style="margin:0;color:#555;font-size:13px;">Views: <strong><?php echo esc_html($item['current']); ?></strong></p>
+                        <p style="margin:0;color:<?php echo $item['percentage']>=0?'#2ecc71':'#e74c3c'; ?>;font-size:13px;">Change: <?php echo esc_html($item['percentage']); ?>%</p>
+                    </div>
+                </div>
+                <?php
+            }
+            echo '</div>';
+        }
 
-		for ($i = 7; $i < 14; $i++) {
-			$date = date('Y-m-d', strtotime($today . "-$i days"));
-			$key = '_infinity_unique_views_' . $date;
-			$views = get_post_meta($post->ID, $key, true);
-			if (!empty($views)) {
-				if (!is_array($views)) $views = maybe_unserialize($views);
-				if (is_array($views)) $previous_7 += count($views);
-			}
-		}
-
-		if ($current_7 > 0) {
-			$change = $previous_7 > 0 ? (($current_7 - $previous_7) / $previous_7) * 100 : 100;
-			$top_7_posts[] = [
-				'post'        => $post,
-				'current'     => $current_7,
-				'previous'    => $previous_7,
-				'percentage'  => round($change, 1),
-			];
-		}
-	}
-	usort($top_7_posts, fn($a, $b) => $b['current'] - $a['current']);
-	$top_7_posts = array_slice($top_7_posts, 0, 20);
-
-	// ---------- 🗓️ Top 5 Posts (Last 30 Days) ----------
-	$top_30_posts = [];
-	foreach ($all_posts as $post) {
-		$current_30 = 0;
-		$previous_30 = 0;
-
-		for ($i = 0; $i < 30; $i++) {
-			$date = date('Y-m-d', strtotime($today . "-$i days"));
-			$key = '_infinity_unique_views_' . $date;
-			$views = get_post_meta($post->ID, $key, true);
-			if (!empty($views)) {
-				if (!is_array($views)) $views = maybe_unserialize($views);
-				if (is_array($views)) $current_30 += count($views);
-			}
-		}
-
-		for ($i = 30; $i < 60; $i++) {
-			$date = date('Y-m-d', strtotime($today . "-$i days"));
-			$key = '_infinity_unique_views_' . $date;
-			$views = get_post_meta($post->ID, $key, true);
-			if (!empty($views)) {
-				if (!is_array($views)) $views = maybe_unserialize($views);
-				if (is_array($views)) $previous_30 += count($views);
-			}
-		}
-
-		if ($current_30 > 0) {
-			$change = $previous_30 > 0 ? (($current_30 - $previous_30) / $previous_30) * 100 : 100;
-			$top_30_posts[] = [
-				'post'       => $post,
-				'current'    => $current_30,
-				'previous'   => $previous_30,
-				'percentage' => round($change, 1),
-			];
-		}
-	}
-	usort($top_30_posts, fn($a, $b) => $b['current'] - $a['current']);
-	$top_30_posts = array_slice($top_30_posts, 0, 20);
-
-	// ---------- 🌞 Top 5 Posts Today ----------
-	$top_today = [];
-	foreach ($all_posts as $post) {
-		$views = get_post_meta($post->ID, '_infinity_unique_views_' . $today, true);
-		if (!empty($views)) {
-			if (!is_array($views)) $views = maybe_unserialize($views);
-			if (is_array($views) && count($views) > 0) {
-				$top_today[] = [
-					'post'  => $post,
-					'today' => count($views),
-				];
-			}
-		}
-	}
-	usort($top_today, fn($a, $b) => $b['today'] - $a['today']);
-	$top_today = array_slice($top_today, 0, 20);
-
-	// ---------- PAGE OUTPUT ----------
-	echo '<div class="wrap">';
-	echo '<h1 class="wp-heading-inline">📈 Infinity Analytics</h1>';
-	echo '<p><strong>Date:</strong> ' . esc_html($today) . '</p>';
-	echo '<hr class="wp-header-end" style="margin-bottom:20px;">';
-
-	// ---------- Summary Cards ----------
-	echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:30px;">';
-
-	// Today Total Views
-	echo '<div style="flex:1;min-width:200px;background:#fff;padding:20px;border:1px solid #ddd;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">';
-	echo '<h3 style="margin:0;font-size:16px;">📅 Today Total Views</h3>';
-	echo '<p style="font-size:22px;margin:8px 0 0;font-weight:bold;color:#0073aa;">' . esc_html($total_today_views) . '</p>';
-	echo '</div>';
-
-	// Today Unique Views
-	echo '<div style="flex:1;min-width:200px;background:#fff;padding:20px;border:1px solid #ddd;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">';
-	echo '<h3 style="margin:0;font-size:16px;">👥 Today Unique Views</h3>';
-	echo '<p style="font-size:22px;margin:8px 0 0;font-weight:bold;color:#16a085;">' . esc_html($total_today_unique) . '</p>';
-	echo '</div>';
-
-	// Yesterday Views
-	echo '<div style="flex:1;min-width:200px;background:#fff;padding:20px;border:1px solid #ddd;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">';
-	echo '<h3 style="margin:0;font-size:16px;">📆 Yesterday Views</h3>';
-	echo '<p style="font-size:22px;margin:8px 0 0;font-weight:bold;color:#f39c12;">' . esc_html($total_yesterday_views) . '</p>';
-	echo '</div>';
-
-	// Comparison Card
-	echo '<div style="flex:1;min-width:200px;background:#fff;padding:20px;border:1px solid #ddd;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">';
-	echo '<h3 style="margin:0;font-size:16px;">📊 Today vs Yesterday</h3>';
-	echo '<p style="font-size:22px;margin:8px 0 0;font-weight:bold;">' . $compare_trend . '</p>';
-	echo '</div>';
-	echo '</div>';
-
-	// ---------- 🌞 Top 5 Today ----------
-	if (!empty($top_today)) {
-		echo '<h2>🌞 Top 20 Posts Today</h2>';
-		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;margin-bottom:30px;">';
-		foreach ($top_today as $item) {
-			$post = $item['post'];
-			$today_views = $item['today'];
-			$thumb = get_the_post_thumbnail_url($post->ID, 'medium') ?: 'https://via.placeholder.com/300x180?text=No+Image';
-			echo '<div style="background:#fff;border:1px solid #ddd;border-radius:10px;width:250px;box-shadow:0 2px 6px rgba(0,0,0,0.05);overflow:hidden;">';
-			echo '<img src="' . esc_url($thumb) . '" style="width:100%;height:140px;object-fit:cover;">';
-			echo '<div style="padding:12px;">';
-			echo '<h3 style="margin:0 0 8px;font-size:14px;line-height:1.4;"><a href="' . esc_url(get_permalink($post->ID)) . '" target="_blank">' . esc_html(get_the_title($post)) . '</a></h3>';
-			echo '<p style="margin:0;font-size:13px;color:#333;">Today\'s Views: <strong>' . esc_html($today_views) . '</strong></p>';
-			echo '</div></div>';
-		}
-		echo '</div>';
-	}
-
-	// ---------- 🏆 Top 5 Posts Last 7 Days ----------
-	if (!empty($top_7_posts)) {
-		echo '<h2>🏆 Top 20 Posts (Last 7 Days)</h2>';
-		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;">';
-		foreach ($top_7_posts as $item) {
-			$post = $item['post'];
-			$current = $item['current'];
-			$percentage = $item['percentage'];
-			$thumb = get_the_post_thumbnail_url($post->ID, 'medium') ?: 'https://via.placeholder.com/300x180?text=No+Image';
-			$trend = $percentage > 0 ? '<span style="color:#2ecc71;">▲ ' . esc_html($percentage) . '%</span>' : ($percentage < 0 ? '<span style="color:#e74c3c;">▼ ' . esc_html(abs($percentage)) . '%</span>' : '<span style="color:#888;">▬ 0%</span>');
-			echo '<div style="background:#fff;border:1px solid #ddd;border-radius:10px;width:250px;box-shadow:0 2px 6px rgba(0,0,0,0.05);overflow:hidden;">';
-			echo '<img src="' . esc_url($thumb) . '" style="width:100%;height:140px;object-fit:cover;">';
-			echo '<div style="padding:12px;">';
-			echo '<h3 style="margin:0 0 8px;font-size:14px;line-height:1.4;"><a href="' . esc_url(get_permalink($post->ID)) . '" target="_blank">' . esc_html(get_the_title($post)) . '</a></h3>';
-			echo '<p style="margin:4px 0;font-size:13px;color:#333;">7-Day Views: <strong>' . esc_html($current) . '</strong></p>';
-			echo '<p style="margin:0;font-size:13px;">Change vs Prev Week: ' . $trend . '</p>';
-			echo '</div></div>';
-		}
-		echo '</div>';
-	}
-
-	// ---------- 🗓️ Top 5 Posts Last 30 Days ----------
-	if (!empty($top_30_posts)) {
-		echo '<h2>🗓️ Top 20 Posts (Last 30 Days)</h2>';
-		echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:15px;">';
-		foreach ($top_30_posts as $item) {
-			$post = $item['post'];
-			$current = $item['current'];
-			$percentage = $item['percentage'];
-			$thumb = get_the_post_thumbnail_url($post->ID, 'medium') ?: 'https://via.placeholder.com/300x180?text=No+Image';
-			$trend = $percentage > 0 ? '<span style="color:#2ecc71;">▲ ' . esc_html($percentage) . '%</span>' : ($percentage < 0 ? '<span style="color:#e74c3c;">▼ ' . esc_html(abs($percentage)) . '%</span>' : '<span style="color:#888;">▬ 0%</span>');
-			echo '<div style="background:#fff;border:1px solid #ddd;border-radius:10px;width:250px;box-shadow:0 2px 6px rgba(0,0,0,0.05);overflow:hidden;">';
-			echo '<img src="' . esc_url($thumb) . '" style="width:100%;height:140px;object-fit:cover;">';
-			echo '<div style="padding:12px;">';
-			echo '<h3 style="margin:0 0 8px;font-size:14px;line-height:1.4;"><a href="' . esc_url(get_permalink($post->ID)) . '" target="_blank">' . esc_html(get_the_title($post)) . '</a></h3>';
-			echo '<p style="margin:4px 0;font-size:13px;color:#333;">30-Day Views: <strong>' . esc_html($current) . '</strong></p>';
-			echo '<p style="margin:0;font-size:13px;">Change vs Prev 30 Days: ' . $trend . '</p>';
-			echo '</div></div>';
-		}
-		echo '</div>';
-	}
-
-	echo '</div>'; // wrap end
+        // ---------- REPORTS TAB ----------
+        if($active_tab=='reports'){
+            echo '<h2>📊 Last 30 Days Reports</h2>';
+            echo '<table class="wp-list-table widefat fixed striped">';
+            echo '<thead><tr><th>Date</th><th>Total Views</th><th>Best Post</th><th>Views</th></tr></thead><tbody>';
+            for($i=0;$i<30;$i++){
+                $date=date('Y-m-d', strtotime($today."-$i days"));
+                $total_views=0;$best_post_title='-';$best_post_views=0;
+                foreach($all_posts as $post){
+                    $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
+                    if(!empty($views)){
+                        if(!is_array($views)) $views = maybe_unserialize($views);
+                        $count = is_array($views)?count($views):0;
+                        $total_views+=$count;
+                        if($count>$best_post_views){ $best_post_views=$count; $best_post_title=get_the_title($post);}
+                    }
+                }
+                echo '<tr>';
+                echo '<td>'.esc_html($date).'</td>';
+                echo '<td>'.esc_html($total_views).'</td>';
+                echo '<td>'.esc_html($best_post_title).'</td>';
+                echo '<td>'.esc_html($best_post_views).'</td>';
+                echo '</tr>';
+            }
+            echo '</tbody></table>';
+        }
+        ?>
+        </div>
+    </div>
+    <?php
 }
