@@ -36,7 +36,6 @@ function infinity_track_unique_post_views() {
 }
 add_action( 'wp_head', 'infinity_track_unique_post_views' );
 
-
 // ==========================================================
 // ⚙️ Add Admin Submenu under "Posts"
 // ==========================================================
@@ -76,12 +75,11 @@ function infinity_today_views_report_page() {
         // Today
         $today_views = get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
         if(!empty($today_views)){
-            if(!is_array($today_views)) $today_views = maybe_unserialize($today_views);
-            if(is_array($today_views)){
-                $total_today_views += count($today_views);
-                $total_today_unique += count(array_unique($today_views));
-            }
-        }
+    if(!is_array($today_views)) $today_views = maybe_unserialize($today_views);
+    if(!is_array($today_views)) $today_views = []; // <-- ensure array
+    $total_today_views += count($today_views);
+    $total_today_unique += count(array_unique($today_views));
+}
         // Yesterday
         $yesterday_views = get_post_meta($post->ID,'_infinity_unique_views_'.$yesterday,true);
         if(!empty($yesterday_views)){
@@ -108,22 +106,31 @@ function infinity_today_views_report_page() {
 
         <!-- ---------- Summary Cards ---------- -->
         <div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">
-            <?php
-            $cards = [
-                ['title'=>'📅 Today Total Views','value'=>$total_today_views,'color'=>'#0073aa'],
-                ['title'=>'👥 Today Unique Views','value'=>$total_today_unique,'color'=>'#16a085'],
-                ['title'=>'📆 Yesterday Views','value'=>$total_yesterday_views,'color'=>'#f39c12'],
-                ['title'=>'📊 Today vs Yesterday','value'=>$compare_trend,'color'=>'#333'],
-            ];
-            foreach($cards as $card){
-                ?>
-                <div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">
-                    <h3 style="margin:0 0 10px;font-size:16px;"><?php echo $card['title']; ?></h3>
-                    <p style="font-size:22px;font-weight:bold;color:<?php echo $card['color']; ?>;"><?php echo $card['value']; ?></p>
-                </div>
-                <?php
-            }
+        <?php
+        $cards = [
+            ['title'=>'📅 Today Total Views','value'=>$total_today_views,'color'=>'#0073aa','is_html'=>false],
+            ['title'=>'👥 Unique Post Views','value'=>$total_today_unique,'color'=>'#16a085','is_html'=>false],
+            ['title'=>'📆 Yesterday Views','value'=>$total_yesterday_views,'color'=>'#f39c12','is_html'=>false],
+            ['title'=>'📊 Today vs Yesterday','value'=>$compare_trend,'color'=>'#333','is_html'=>true],
+        ];
+
+        foreach($cards as $card){
             ?>
+            <div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">
+                <h3 style="margin:0 0 10px;font-size:16px;"><?php echo esc_html($card['title']); ?></h3>
+                <p style="font-size:22px;font-weight:bold;color:<?php echo $card['color']; ?>;">
+                    <?php 
+                    if($card['is_html']){
+                        echo $card['value']; // safe HTML
+                    } else {
+                        echo esc_html($card['value']); // plain number
+                    }
+                    ?>
+                </p>
+            </div>
+            <?php
+        }
+        ?>
         </div>
 
         <!-- ---------- Tabs ---------- -->
@@ -138,6 +145,39 @@ function infinity_today_views_report_page() {
         <?php
         // ---------- TODAY TAB ----------
         if($active_tab=='today'){
+
+            // Latest 5 posts with today views
+            $latest_today_views = [];
+            foreach($all_posts as $post){
+                $views = get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
+                if(!empty($views)){
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(is_array($views) && count($views) > 0){
+                        $latest_today_views[] = ['post'=>$post,'count'=>count($views),'time'=>get_the_date('Y-m-d H:i:s',$post->ID)];
+                    }
+                }
+            }
+            usort($latest_today_views, fn($a,$b) => strtotime($b['time']) - strtotime($a['time']));
+            $latest_today_views = array_slice($latest_today_views, 0, 5);
+
+            if(!empty($latest_today_views)){
+                echo '<h2>🆕 Latest Posts with Views Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
+                foreach($latest_today_views as $item){
+                    $thumb = get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+                    ?>
+                    <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+                        <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+                        <div style="padding:12px;text-align:center;">
+                            <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:6px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+                            <p style="margin:0;color:#555;font-size:13px;">Views: <strong><?php echo esc_html($item['count']); ?></strong></p>
+                        </div>
+                    </div>
+                    <?php
+                }
+                echo '</div><hr style="margin:20px 0;">';
+            }
+
+            // Top Posts Today
             echo '<h2>🌞 Top Posts Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
             $top_today = [];
             foreach($all_posts as $post){
