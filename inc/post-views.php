@@ -5,7 +5,8 @@
  * ==========================================================
  * Tracks unique post views and shows:
  * - Today's Views Table
- * - Top 5 Posts (Last 7 Days) with Comparison to Previous Week
+ * - Last 7/30 Days Analytics
+ * - Latest 5 posts with last view time
  * 
  * Author: Abdullah Nahian
  * Website: https://devnahian.com
@@ -16,23 +17,23 @@
 // 🧠 Track Unique Daily Post Views
 // ==========================================================
 function infinity_track_unique_post_views() {
-	if ( is_single() ) {
-		global $post;
-		if ( empty( $post->ID ) ) return;
+    if ( is_single() ) {
+        global $post;
+        if ( empty( $post->ID ) ) return;
 
-		$post_id   = $post->ID;
-		$today     = gmdate( 'Y-m-d' );
-		$meta_key  = '_infinity_unique_views_' . $today;
-		$user_ip   = sanitize_text_field( $_SERVER['REMOTE_ADDR'] );
+        $post_id   = $post->ID;
+        $today     = gmdate( 'Y-m-d' );
+        $meta_key  = '_infinity_unique_views_' . $today;
+        $user_ip   = sanitize_text_field( $_SERVER['REMOTE_ADDR'] );
 
-		$viewers = get_post_meta( $post_id, $meta_key, true );
-		if ( ! is_array( $viewers ) ) $viewers = [];
+        $viewers = get_post_meta( $post_id, $meta_key, true );
+        if ( ! is_array( $viewers ) ) $viewers = [];
 
-		if ( ! in_array( $user_ip, $viewers, true ) ) {
-			$viewers[] = $user_ip;
-			update_post_meta( $post_id, $meta_key, $viewers );
-		}
-	}
+        if ( ! in_array( $user_ip, array_column($viewers,'ip'), true ) ) {
+            $viewers[] = ['ip'=>$user_ip, 'time'=>current_time('mysql')];
+            update_post_meta( $post_id, $meta_key, $viewers );
+        }
+    }
 }
 add_action( 'wp_head', 'infinity_track_unique_post_views' );
 
@@ -40,23 +41,22 @@ add_action( 'wp_head', 'infinity_track_unique_post_views' );
 // ⚙️ Add Admin Submenu under "Posts"
 // ==========================================================
 function infinity_add_views_report_submenu() {
-	add_submenu_page(
-		'edit.php',
-		'Analytics',
-		'Analytics',
-		'manage_options',
-		'today-views-report',
-		'infinity_today_views_report_page'
-	);
+    add_submenu_page(
+        'edit.php',
+        'Analytics',
+        'Analytics',
+        'manage_options',
+        'today-views-report',
+        'infinity_today_views_report_page'
+    );
 }
 add_action( 'admin_menu', 'infinity_add_views_report_submenu' );
 
 // ==========================================================
-// 📊 Infinity Analytics with Modern Cards & Tabs
+// 📊 Infinity Analytics Admin Page
 // ==========================================================
 function infinity_today_views_report_page() {
-
-    $today = current_time('Y-m-d'); 
+    $today     = current_time('Y-m-d'); 
     $yesterday = date('Y-m-d', strtotime($today.' -1 day'));
 
     $all_posts = get_posts([
@@ -65,35 +65,30 @@ function infinity_today_views_report_page() {
         'numberposts' => -1,
     ]);
 
-    // ---------- Calculate totals ----------
-    $total_today_views = 0;
+    // ---------- Calculate Totals ----------
+    $total_today_views  = 0;
     $total_today_unique = 0;
-    $total_yesterday_views = 0;
+    $total_yesterday_views  = 0;
     $total_yesterday_unique = 0;
 
     foreach($all_posts as $post){
         // Today
         $today_views = get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
-        if(!empty($today_views)){
-    if(!is_array($today_views)) $today_views = maybe_unserialize($today_views);
-    if(!is_array($today_views)) $today_views = []; // <-- ensure array
-    $total_today_views += count($today_views);
-    $total_today_unique += count(array_unique($today_views));
-}
+        if(!is_array($today_views)) $today_views = maybe_unserialize($today_views);
+        if(!is_array($today_views)) $today_views = [];
+        $total_today_views += count($today_views);
+        $total_today_unique += count(array_unique(array_column($today_views,'ip')));
+
         // Yesterday
         $yesterday_views = get_post_meta($post->ID,'_infinity_unique_views_'.$yesterday,true);
-        if(!empty($yesterday_views)){
-            if(!is_array($yesterday_views)) $yesterday_views = maybe_unserialize($yesterday_views);
-            if(is_array($yesterday_views)){
-                $total_yesterday_views += count($yesterday_views);
-                $total_yesterday_unique += count(array_unique($yesterday_views));
-            }
-        }
+        if(!is_array($yesterday_views)) $yesterday_views = maybe_unserialize($yesterday_views);
+        if(!is_array($yesterday_views)) $yesterday_views = [];
+        $total_yesterday_views += count($yesterday_views);
+        $total_yesterday_unique += count(array_unique(array_column($yesterday_views,'ip')));
     }
 
-    // Comparison
-    $compare_percent = $total_yesterday_views>0?(($total_today_views-$total_yesterday_views)/$total_yesterday_views)*100:100;
-    $compare_trend = '';
+    // ---------- Comparison ----------
+    $compare_percent = $total_yesterday_views>0 ? (($total_today_views-$total_yesterday_views)/$total_yesterday_views)*100 : 100;
     if($compare_percent>0) $compare_trend = '<span style="color:#2ecc71;">▲ '.round($compare_percent,1).'%</span>';
     elseif($compare_percent<0) $compare_trend = '<span style="color:#e74c3c;">▼ '.abs(round($compare_percent,1)).'%</span>';
     else $compare_trend = '<span style="color:#888;">▬ 0%</span>';
@@ -113,19 +108,12 @@ function infinity_today_views_report_page() {
             ['title'=>'📆 Yesterday Views','value'=>$total_yesterday_views,'color'=>'#f39c12','is_html'=>false],
             ['title'=>'📊 Today vs Yesterday','value'=>$compare_trend,'color'=>'#333','is_html'=>true],
         ];
-
         foreach($cards as $card){
             ?>
             <div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">
                 <h3 style="margin:0 0 10px;font-size:16px;"><?php echo esc_html($card['title']); ?></h3>
                 <p style="font-size:22px;font-weight:bold;color:<?php echo $card['color']; ?>;">
-                    <?php 
-                    if($card['is_html']){
-                        echo $card['value']; // safe HTML
-                    } else {
-                        echo esc_html($card['value']); // plain number
-                    }
-                    ?>
+                    <?php echo $card['is_html'] ? $card['value'] : esc_html($card['value']); ?>
                 </p>
             </div>
             <?php
@@ -143,50 +131,57 @@ function infinity_today_views_report_page() {
 
         <div class="tab-content" style="margin-top:20px;">
         <?php
-        // ---------- TODAY TAB ----------
+        // =================== TODAY TAB ===================
         if($active_tab=='today'){
+            // ---------- Latest 5 Posts Viewed Today ----------
+echo '<h2>🌞 Latest 5 Posts Viewed Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
 
-            // Latest 5 posts with today views
-            $latest_today_views = [];
-            foreach($all_posts as $post){
-                $views = get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
-                if(!empty($views)){
-                    if(!is_array($views)) $views = maybe_unserialize($views);
-                    if(is_array($views) && count($views) > 0){
-                        $latest_today_views[] = ['post'=>$post,'count'=>count($views),'time'=>get_the_date('Y-m-d H:i:s',$post->ID)];
-                    }
-                }
-            }
-            usort($latest_today_views, fn($a,$b) => strtotime($b['time']) - strtotime($a['time']));
-            $latest_today_views = array_slice($latest_today_views, 0, 5);
+$latest_views = [];
 
-            if(!empty($latest_today_views)){
-                echo '<h2>🆕 Latest Posts with Views Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
-                foreach($latest_today_views as $item){
-                    $thumb = get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
-                    ?>
-                    <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
-                        <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
-                        <div style="padding:12px;text-align:center;">
-                            <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:6px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
-                            <p style="margin:0;color:#555;font-size:13px;">Views: <strong><?php echo esc_html($item['count']); ?></strong></p>
-                        </div>
-                    </div>
-                    <?php
-                }
-                echo '</div><hr style="margin:20px 0;">';
-            }
+foreach ($all_posts as $post) {
+    $views = get_post_meta($post->ID, '_infinity_unique_views_' . $today, true);
+    if (!is_array($views)) $views = maybe_unserialize($views);
+    if (!is_array($views)) $views = [];
 
-            // Top Posts Today
+    foreach ($views as $view) {
+        $latest_views[] = [
+            'post' => $post,
+            'time' => $view['time'] ?? '',
+        ];
+    }
+}
+
+// Sort by latest time descending
+usort($latest_views, fn($a, $b) => strtotime($b['time']) - strtotime($a['time']));
+
+// Take the latest 5 views overall
+$latest_views = array_slice($latest_views, 0, 5);
+
+foreach ($latest_views as $item) {
+    $thumb = get_the_post_thumbnail_url($item['post']->ID, 'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+    $time_only = $item['time'] ? date('h:i:s A', strtotime($item['time'])) : '-';
+    ?>
+    <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+        <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+        <div style="padding:12px;text-align:center;">
+            <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:4px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+            <p style="margin:0;color:#888;font-size:12px;">Viewed at: <?php echo esc_html($time_only); ?></p>
+        </div>
+    </div>
+    <?php
+}
+echo '</div>';
+
+
+            // ---------- Top Posts Today ----------
             echo '<h2>🌞 Top Posts Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
             $top_today = [];
             foreach($all_posts as $post){
                 $views=get_post_meta($post->ID,'_infinity_unique_views_'.$today,true);
+                if(!is_array($views)) $views = maybe_unserialize($views);
+                if(!is_array($views)) $views = [];
                 if(!empty($views)){
-                    if(!is_array($views)) $views = maybe_unserialize($views);
-                    if(is_array($views)){
-                        $top_today[] = ['post'=>$post,'count'=>count($views)];
-                    }
+                    $top_today[] = ['post'=>$post,'count'=>count($views)];
                 }
             }
             usort($top_today,fn($a,$b)=>$b['count']-$a['count']);
@@ -206,21 +201,26 @@ function infinity_today_views_report_page() {
             echo '</div>';
         }
 
-        // ---------- 7 DAYS TAB ----------
+        // =================== 7 DAYS TAB ===================
         if($active_tab=='7days'){
             echo '<h2>🏆 Top Posts Last 7 Days</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
             $top_7_posts = [];
-            foreach($all_posts as $post){
+            for($i=0;$i<count($all_posts);$i++){
+                $post = $all_posts[$i];
                 $current=0;$previous=0;
                 for($d=0;$d<7;$d++){
                     $date=date('Y-m-d', strtotime($today."-$d days"));
                     $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $current += is_array($views)?count($views):0; }
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(!is_array($views)) $views = [];
+                    $current += count($views);
                 }
                 for($d=7;$d<14;$d++){
                     $date=date('Y-m-d', strtotime($today."-$d days"));
                     $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $previous += is_array($views)?count($views):0; }
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(!is_array($views)) $views = [];
+                    $previous += count($views);
                 }
                 if($current>0){
                     $change=$previous>0?(($current-$previous)/$previous)*100:100;
@@ -245,7 +245,7 @@ function infinity_today_views_report_page() {
             echo '</div>';
         }
 
-        // ---------- 30 DAYS TAB ----------
+        // =================== 30 DAYS TAB ===================
         if($active_tab=='30days'){
             echo '<h2>🗓️ Top Posts Last 30 Days</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
             $top_30_posts=[];
@@ -254,12 +254,16 @@ function infinity_today_views_report_page() {
                 for($d=0;$d<30;$d++){
                     $date=date('Y-m-d', strtotime($today."-$d days"));
                     $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $current += is_array($views)?count($views):0; }
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(!is_array($views)) $views = [];
+                    $current += count($views);
                 }
                 for($d=30;$d<60;$d++){
                     $date=date('Y-m-d', strtotime($today."-$d days"));
                     $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!empty($views)){ if(!is_array($views)) $views=maybe_unserialize($views); $previous += is_array($views)?count($views):0; }
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(!is_array($views)) $views = [];
+                    $previous += count($views);
                 }
                 if($current>0){
                     $change=$previous>0?(($current-$previous)/$previous)*100:100;
@@ -284,7 +288,7 @@ function infinity_today_views_report_page() {
             echo '</div>';
         }
 
-        // ---------- REPORTS TAB ----------
+        // =================== REPORTS TAB ===================
         if($active_tab=='reports'){
             echo '<h2>📊 Last 30 Days Reports</h2>';
             echo '<table class="wp-list-table widefat fixed striped">';
@@ -294,12 +298,11 @@ function infinity_today_views_report_page() {
                 $total_views=0;$best_post_title='-';$best_post_views=0;
                 foreach($all_posts as $post){
                     $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!empty($views)){
-                        if(!is_array($views)) $views = maybe_unserialize($views);
-                        $count = is_array($views)?count($views):0;
-                        $total_views+=$count;
-                        if($count>$best_post_views){ $best_post_views=$count; $best_post_title=get_the_title($post);}
-                    }
+                    if(!is_array($views)) $views = maybe_unserialize($views);
+                    if(!is_array($views)) $views = [];
+                    $count = count($views);
+                    $total_views+=$count;
+                    if($count>$best_post_views){ $best_post_views=$count; $best_post_title=get_the_title($post);}
                 }
                 echo '<tr>';
                 echo '<td>'.esc_html($date).'</td>';
@@ -315,3 +318,4 @@ function infinity_today_views_report_page() {
     </div>
     <?php
 }
+?>
