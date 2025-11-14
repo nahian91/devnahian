@@ -127,6 +127,8 @@ function infinity_today_views_report_page() {
             <a href="?page=today-views-report&tab=7days" class="nav-tab <?php echo $active_tab=='7days'?'nav-tab-active':''; ?>">Last 7 Days</a>
             <a href="?page=today-views-report&tab=30days" class="nav-tab <?php echo $active_tab=='30days'?'nav-tab-active':''; ?>">Last 30 Days</a>
             <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
+            <a href="?page=today-views-report&tab=all_posts" class="nav-tab <?php echo $active_tab=='all_posts'?'nav-tab-active':''; ?>">All Posts</a>
+
         </h2>
 
         <div class="tab-content" style="margin-top:20px;">
@@ -378,6 +380,136 @@ if ($active_tab == 'reports') {
         <?php
     }
 }
+
+// =================== ALL POSTS TAB ===================
+if ($active_tab == 'all_posts') {
+
+    $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+    $posts_per_page = 20;
+    $offset = ($paged - 1) * $posts_per_page;
+
+    $total_posts = count($all_posts);
+    $pages = ceil($total_posts / $posts_per_page);
+
+    // ---------- Prepare posts with all counts ----------
+    $posts_data = [];
+    foreach ($all_posts as $post) {
+        $post_id = $post->ID;
+
+        // Category
+        $categories = get_the_category($post_id);
+        if (!empty($categories)) {
+            $category_list = [];
+            foreach ($categories as $cat) {
+                $category_list[] = esc_html($cat->name);
+            }
+            $category_names = implode(', ', $category_list);
+        } else {
+            $category_names = '-';
+        }
+
+        // Today
+        $today_views = get_post_meta($post_id, '_infinity_unique_views_' . $today, true);
+        if (!is_array($today_views)) $today_views = maybe_unserialize($today_views);
+        if (!is_array($today_views)) $today_views = [];
+        $today_count = count($today_views);
+
+        // Last 7 days
+        $last_7 = 0;
+        $prev_7 = 0;
+        for ($d = 0; $d < 7; $d++) {
+            $date = date('Y-m-d', strtotime($today . "-$d days"));
+            $views = get_post_meta($post_id, '_infinity_unique_views_' . $date, true);
+            if (!is_array($views)) $views = maybe_unserialize($views);
+            if (!is_array($views)) $views = [];
+            $last_7 += count($views);
+        }
+        for ($d = 7; $d < 14; $d++) {
+            $date = date('Y-m-d', strtotime($today . "-$d days"));
+            $views = get_post_meta($post_id, '_infinity_unique_views_' . $date, true);
+            if (!is_array($views)) $views = maybe_unserialize($views);
+            if (!is_array($views)) $views = [];
+            $prev_7 += count($views);
+        }
+        $change_7 = $prev_7 > 0 ? round((($last_7 - $prev_7) / $prev_7) * 100, 1) : 100;
+        $change_color = $change_7 >= 0 ? '#2ecc71' : '#e74c3c';
+
+        // Last 30 days
+        $last_30 = 0;
+        for ($d = 0; $d < 30; $d++) {
+            $date = date('Y-m-d', strtotime($today . "-$d days"));
+            $views = get_post_meta($post_id, '_infinity_unique_views_' . $date, true);
+            if (!is_array($views)) $views = maybe_unserialize($views);
+            if (!is_array($views)) $views = [];
+            $last_30 += count($views);
+        }
+
+        // Total views all time
+        $all_meta = get_post_meta($post_id);
+        $total_views = 0;
+        foreach ($all_meta as $key => $value) {
+            if (strpos($key, '_infinity_unique_views_') === 0) {
+                $views = maybe_unserialize($value[0]);
+                if (is_array($views)) $total_views += count($views);
+            }
+        }
+
+        $posts_data[] = [
+            'post' => $post,
+            'category' => $category_names,
+            'last_7' => $last_7,
+            'last_30' => $last_30,
+            'total' => $total_views,
+            'change' => $change_7,
+            'change_color' => $change_color,
+        ];
+    }
+
+    // ---------- Sort by Last 7 Days descending ----------
+    usort($posts_data, fn($a, $b) => $b['last_7'] - $a['last_7']);
+
+    // ---------- Paginate ----------
+    $display_posts = array_slice($posts_data, $offset, $posts_per_page);
+
+    // ---------- Table ----------
+    echo '<h2>📄 All Posts Analytics</h2>';
+    echo '<table class="widefat striped" style="margin-top:20px;">';
+    echo '<thead>
+            <tr>
+                <th>Post</th>
+                <th>Category</th>
+                <th>Last 7 Days</th>
+                <th>Last 30 Days</th>
+                <th>Total Views</th>
+                <th>Change (7d vs prev 7d)</th>
+            </tr>
+          </thead><tbody>';
+
+    foreach ($display_posts as $data) {
+        $post_id = $data['post']->ID;
+        echo '<tr>
+                <td><a href="'.esc_url(get_permalink($post_id)).'" target="_blank">'.esc_html(get_the_title($data['post'])).'</a></td>
+                <td>'.$data['category'].'</td>
+                <td>'.esc_html($data['last_7']).'</td>
+                <td>'.esc_html($data['last_30']).'</td>
+                <td>'.esc_html($data['total']).'</td>
+                <td style="color:'.$data['change_color'].';">'.esc_html($data['change']).'%</td>
+              </tr>';
+    }
+
+    echo '</tbody></table>';
+
+    // ---------- Pagination ----------
+    if ($pages > 1) {
+        echo '<div style="margin-top:20px;">';
+        for ($i = 1; $i <= $pages; $i++) {
+            $class = $i == $paged ? 'button button-primary' : 'button';
+            echo '<a class="'.$class.'" href="?page=today-views-report&tab=all_posts&paged='.$i.'">'.$i.'</a> ';
+        }
+        echo '</div>';
+    }
+}
+
 
         ?>
         </div>
