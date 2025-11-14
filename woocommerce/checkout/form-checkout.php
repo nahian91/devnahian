@@ -12,16 +12,17 @@
    }
    $order_button_text = __( 'Complete Payment', 'tutorstarter' );
    ?>
-<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
-   <div class="container">
-      <div class="row">
-         <div class="col-md-12">
-            <div class="post-single-content">
-               <h4><?php the_title();?></h4>
-            </div>
-         </div>
-      </div>
-   </div>
+<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/bg-footer.jpg')">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				
+			<div class="post-single-content">
+						<h4><?php the_title();?></h4>
+					</div> 
+			</div>
+		</div>
+	</div>
 </section>
 <section class="checkout-area">
    <div class="container">

@@ -10,17 +10,7 @@
    defined( 'ABSPATH' ) || exit;
    
     ?>
-<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
-   <div class="container">
-      <div class="row">
-         <div class="col-md-12">
-            <div class="post-single-content">
-               <h4><?php the_title();?></h4>
-            </div>
-         </div>
-      </div>
-   </div>
-</section>
+
 <section class="car-area pt-80 pb-80">
    <div class="container">
       <div class="row">

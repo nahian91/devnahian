@@ -289,30 +289,96 @@ echo '</div>';
         }
 
         // =================== REPORTS TAB ===================
-        if($active_tab=='reports'){
-            echo '<h2>📊 Last 30 Days Reports</h2>';
-            echo '<table class="wp-list-table widefat fixed striped">';
-            echo '<thead><tr><th>Date</th><th>Total Views</th><th>Best Post</th><th>Views</th></tr></thead><tbody>';
-            for($i=0;$i<30;$i++){
-                $date=date('Y-m-d', strtotime($today."-$i days"));
-                $total_views=0;$best_post_title='-';$best_post_views=0;
-                foreach($all_posts as $post){
-                    $views=get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!is_array($views)) $views = maybe_unserialize($views);
-                    if(!is_array($views)) $views = [];
-                    $count = count($views);
-                    $total_views+=$count;
-                    if($count>$best_post_views){ $best_post_views=$count; $best_post_title=get_the_title($post);}
-                }
-                echo '<tr>';
-                echo '<td>'.esc_html($date).'</td>';
-                echo '<td>'.esc_html($total_views).'</td>';
-                echo '<td>'.esc_html($best_post_title).'</td>';
-                echo '<td>'.esc_html($best_post_views).'</td>';
-                echo '</tr>';
+        // =================== REPORTS TAB ===================
+if ($active_tab == 'reports') {
+
+    echo '<h2>📊 Last 30 Days Reports</h2>';
+
+    for ($i = 0; $i < 30; $i++) {
+
+        $date = date('Y-m-d', strtotime($today . " -$i days"));
+        $total_views = 0;
+        $daily_posts = [];
+
+        // Collect counts
+        foreach ($all_posts as $post) {
+            $views = get_post_meta($post->ID, '_infinity_unique_views_' . $date, true);
+            if (!is_array($views)) $views = maybe_unserialize($views);
+            if (!is_array($views)) $views = [];
+
+            $count = count($views);
+            $total_views += $count;
+
+            if ($count > 0) {
+                $daily_posts[] = [
+                    'post'  => $post,
+                    'title' => get_the_title($post),
+                    'views' => $count,
+                    'thumb' => get_the_post_thumbnail_url($post->ID, 'medium')
+                        ?: 'https://via.placeholder.com/150?text=No+Image'
+                ];
             }
-            echo '</tbody></table>';
         }
+
+        // Top 3
+        usort($daily_posts, fn($a, $b) => $b['views'] - $a['views']);
+        $top_3 = array_slice($daily_posts, 0, 5);
+
+        ?>
+
+        <div style="background:#fff;padding:20px;border-radius:10px;margin-bottom:25px;
+                    box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+
+            <h2 style="margin-top:0;">
+                📅 <?php echo esc_html($date); ?>
+            </h2>
+
+            <p style="margin:5px 0 15px;font-size:15px;">
+                <strong>Total Views:</strong> <?php echo esc_html($total_views); ?>
+            </p>
+
+            <div style="display:flex;flex-wrap:wrap;gap:15px;">
+            
+                <?php if (!empty($top_3)) { ?>
+
+                    <?php foreach ($top_3 as $item) { ?>
+
+                    <div style="
+                        width:220px;background:#fff;border-radius:10px;overflow:hidden;
+                        box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:0.2s;">
+                        
+                        <img src="<?php echo esc_url($item['thumb']); ?>"
+                             style="width:100%;height:120px;object-fit:cover;">
+                        
+                        <div style="padding:12px;text-align:center;">
+                            <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>"
+                               target="_blank"
+                               style="font-weight:bold;font-size:14px;display:block;margin-bottom:6px;">
+                                <?php echo esc_html($item['title']); ?>
+                            </a>
+
+                            <p style="margin:0;color:#555;font-size:13px;">
+                                Views: <strong><?php echo esc_html($item['views']); ?></strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    <?php } ?>
+
+                <?php } else { ?>
+
+                    <p style="color:#888;">No views for this date.</p>
+
+                <?php } ?>
+
+            </div>
+
+        </div>
+
+        <?php
+    }
+}
+
         ?>
         </div>
     </div>

@@ -14,10 +14,10 @@ use TUTOR\Input;
 tutor_utils()->tutor_custom_header();
 
 ?>
-<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/breadcumb.jpg')">
+<section class="breadcumb-area" style="background-image:url('<?php echo get_template_directory_uri();?>/assets/img/bg-footer.jpg')">
 	<div class="container">
 		<div class="row">
-			<div class="col-md-12">                    
+			<div class="col-md-12">				
 				<div class="post-single-content">
 					<h4>Courses</h4>
 				</div> 
