@@ -267,93 +267,6 @@ function my_acf_json_save_point( $path ) {
 }
 add_filter( 'acf/settings/save_json', 'my_acf_json_save_point' );
 
-/**
- * Track unique post views (cookie-based)
- */
-function track_unique_post_views() {
-    if (is_single()) {
-        global $post;
-        $post_id = $post->ID;
-        $cookie_name = 'viewed_post_' . $post_id;
-
-        if (!isset($_COOKIE[$cookie_name])) {
-            $count_key = 'post_views_count';
-            $count = get_post_meta($post_id, $count_key, true);
-
-            if ($count == '') {
-                $count = 1;
-                update_post_meta($post_id, $count_key, $count);
-            } else {
-                $count++;
-                update_post_meta($post_id, $count_key, $count);
-            }
-
-            setcookie($cookie_name, 'true', time() + 3600, '/');
-        }
-    }
-}
-add_action('wp_head', 'track_unique_post_views');
-
-/**
- * Track total post views
- */
-if (!function_exists('get_post_views')) {
-    function get_post_views($post_id) {
-        $count_key = 'post_views_count';
-        $count = get_post_meta($post_id, $count_key, true);
-        return $count ? $count : '0';
-    }
-}
-function track_post_views($post_id) {
-    if (!is_single()) return;
-
-    $views = get_post_meta($post_id, 'post_views_count', true);
-
-    if ($views == '') {
-        $views = 0;
-        delete_post_meta($post_id, 'post_views_count');
-        add_post_meta($post_id, 'post_views_count', '0');
-    } else {
-        $views++;
-        update_post_meta($post_id, 'post_views_count', $views);
-    }
-}
-remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
-add_action('wp_head', 'track_post_views');
-
-// Add a custom column to the admin posts table
-function add_post_views_column($columns) {
-    $columns['post_views'] = 'Views';
-    return $columns;
-}
-add_filter('manage_posts_columns', 'add_post_views_column');
-
-// Populate the custom column with data
-function show_post_views_column($column_name, $post_id) {
-    if ($column_name === 'post_views') {
-        $views = get_post_meta($post_id, 'post_views_count', true);
-        echo $views ? esc_html($views) : '0';
-    }
-}
-add_action('manage_posts_custom_column', 'show_post_views_column', 10, 2);
-
-// Make the custom column sortable
-function make_post_views_column_sortable($columns) {
-    $columns['post_views'] = 'post_views_count';
-    return $columns;
-}
-add_filter('manage_edit-post_sortable_columns', 'make_post_views_column_sortable');
-
-// Handle the sorting for the custom column
-function post_views_column_orderby($query) {
-    if (!is_admin() || !$query->is_main_query()) return;
-    if ('post_views_count' === $query->get('orderby')) {
-        $query->set('meta_key', 'post_views_count');
-        $query->set('orderby', 'meta_value_num');
-    }
-}
-add_action('pre_get_posts', 'post_views_column_orderby');
-
 // ==========================================================
 // 🔹 Other Custom Functions
 // ==========================================================
@@ -415,3 +328,24 @@ function handle_course_retake_action() {
         exit;
     }
 }
+
+// Disable support for comments and trackbacks in post types
+function disable_all_comments() {
+    // Remove support from posts and pages
+    remove_post_type_support('post', 'comments');
+    remove_post_type_support('page', 'comments');
+}
+add_action('init', 'disable_all_comments', 100);
+
+// Close comments on front-end
+function disable_comments_status() {
+    return false;
+}
+add_filter('comments_open', 'disable_comments_status', 20, 2);
+add_filter('pings_open', 'disable_comments_status', 20, 2);
+
+// Hide existing comments
+function disable_comments_hide_existing($comments) {
+    return [];
+}
+add_filter('comments_array', 'disable_comments_hide_existing', 10, 2);
