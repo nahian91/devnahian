@@ -171,39 +171,75 @@ function infinity_today_views_report_page() {
         <div class="tab-content" style="margin-top:20px;">
         <?php
         // =================== TODAY TAB ===================
-        if($active_tab=='today'){
-            echo '<h2>🌞 Latest 5 Posts Viewed Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
+if($active_tab=='today'){
 
-            $latest_views = [];
-            foreach ($all_posts as $post) {
-                $views = get_post_meta($post->ID, '_infinity_unique_views_' . $today, true);
-                if (!is_array($views)) $views = [];
-                foreach ($views as $view) {
-                    $latest_views[] = [
-                        'post' => $post,
-                        'time' => $view['time'] ?? '',
-                    ];
-                }
-            }
+    echo '<h2>🌞 Latest 5 Posts Viewed Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
 
-            usort($latest_views, fn($a, $b) => strtotime($b['time']) - strtotime($a['time']));
-            $latest_views = array_slice($latest_views, 0, 5);
-
-            foreach ($latest_views as $item) {
-                $thumb = get_the_post_thumbnail_url($item['post']->ID, 'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
-                $time_only = $item['time'] ? date('h:i:s A', strtotime($item['time'])) : '-';
-                ?>
-                <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
-                    <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
-                    <div style="padding:12px;text-align:center;">
-                        <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:4px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
-                        <p style="margin:0;color:#888;font-size:12px;">Viewed at: <?php echo esc_html($time_only); ?></p>
-                    </div>
-                </div>
-                <?php
-            }
-            echo '</div>';
+    $latest_views = [];
+    foreach ($all_posts as $post) {
+        $views = get_post_meta($post->ID, '_infinity_unique_views_' . $today, true);
+        if (!is_array($views)) $views = [];
+        foreach ($views as $view) {
+            $latest_views[] = [
+                'post' => $post,
+                'time' => $view['time'] ?? '',
+            ];
         }
+    }
+
+    usort($latest_views, fn($a, $b) => strtotime($b['time']) - strtotime($a['time']));
+    $latest_views = array_slice($latest_views, 0, 5);
+
+    foreach ($latest_views as $item) {
+        $thumb = get_the_post_thumbnail_url($item['post']->ID, 'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+        $time_only = $item['time'] ? date('h:i:s A', strtotime($item['time'])) : '-';
+        ?>
+        <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+            <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+            <div style="padding:12px;text-align:center;">
+                <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:4px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+                <p style="margin:0;color:#888;font-size:12px;">Viewed at: <?php echo esc_html($time_only); ?></p>
+            </div>
+        </div>
+        <?php
+    }
+    echo '</div>';
+
+
+    // =================== TOP 20 MOST VIEWED TODAY ===================
+    echo '<h2 style="margin-top:40px;">🔥 Top 20 Most Viewed Posts Today</h2><div style="display:flex;flex-wrap:wrap;gap:15px;">';
+
+    $today_ranking = [];
+
+    foreach ($all_posts as $post) {
+        $views = get_post_meta($post->ID, '_infinity_unique_views_' . $today, true);
+        if (!is_array($views)) $views = [];
+
+        $today_ranking[] = [
+            'post' => $post,
+            'count' => count($views)
+        ];
+    }
+
+    usort($today_ranking, fn($a, $b) => $b['count'] - $a['count']);
+    $today_ranking = array_slice($today_ranking, 0, 20);
+
+    foreach ($today_ranking as $item) {
+        $thumb = get_the_post_thumbnail_url($item['post']->ID, 'medium') ?: 'https://via.placeholder.com/150?text=No+Image';
+        ?>
+        <div style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s;">
+            <img src="<?php echo esc_url($thumb); ?>" style="width:100%;height:120px;object-fit:cover;">
+            <div style="padding:12px;text-align:center;">
+                <a href="<?php echo esc_url(get_permalink($item['post']->ID)); ?>" target="_blank" style="font-weight:bold;font-size:14px;display:block;margin-bottom:4px;"><?php echo esc_html(get_the_title($item['post'])); ?></a>
+                <p style="margin:0;color:#888;font-size:12px;">Views Today: <?php echo esc_html($item['count']); ?></p>
+            </div>
+        </div>
+        <?php
+    }
+
+    echo '</div>';
+}
+
 
         // =================== 7 DAYS TAB ===================
         if($active_tab=='7days'){
