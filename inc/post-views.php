@@ -291,19 +291,31 @@ if($active_tab=='today'){
     echo '</div>';
 
     // ----------------- Latest 5 Viewed Posts -----------------
-    echo '<h2>🕒 Latest 5 Viewed Posts Today</h2>';
-    usort($latest_views,function($a,$b){ return $b['time'] - $a['time']; });
-    $latest_views = array_slice($latest_views,0,5);
-    echo '<div style="display:flex;flex-wrap:wrap;gap:15px;">';
-    foreach($latest_views as $item){
-        $thumb = get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150';
-        echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;">';
-        echo "<img src='$thumb' style='width:100%;height:120px;object-fit:cover;'>";
-        echo '<a href="'.get_permalink($item['post']->ID).'" target="_blank" style="display:block;margin:5px 0;font-weight:bold;">'.get_the_title($item['post']).'</a>';
-        echo '<p>Last Viewed: '.date('H:i:s, d M',$item['time']).'</p>';
-        echo '</div>';
-    }
+echo '<h2>🕒 Latest 5 Viewed Posts Today</h2>';
+usort($latest_views, function($a, $b) { return $b['time'] - $a['time']; });
+$latest_views = array_slice($latest_views, 0, 5);
+
+echo '<div style="display:flex;flex-wrap:wrap;gap:15px;">';
+
+foreach ($latest_views as $item) {
+    $post_obj = $item['post'];
+    $post_id = $post_obj->ID;
+
+    $thumb = get_the_post_thumbnail_url($post_id, 'medium') ?: 'https://via.placeholder.com/150';
+
+    // ⏱ Get Avg Watch Time
+    $avg_watch = get_post_avg_watch_time($post_id);
+    $avg_watch_str = $avg_watch ? format_watch_time($avg_watch) : '00:00';
+
+    echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;">';
+    echo "<img src='" . esc_url($thumb) . "' style='width:100%;height:120px;object-fit:cover;'>";
+    echo '<a href="' . esc_url(get_permalink($post_id)) . '" target="_blank" style="display:block;margin:5px 0;font-weight:bold;">' . esc_html(get_the_title($post_id)) . '</a>';
+    echo '<p>Avg Watch Time: ' . esc_html($avg_watch_str) . '</p>';
     echo '</div>';
+}
+
+echo '</div>';
+
 
     // ----------------- Top 20 Posts Today -----------------
     echo '<h2>🔥 Top 20 Posts Today</h2>';
@@ -324,66 +336,173 @@ if($active_tab=='today'){
 
 
         // -------------------- 7 & 30 DAYS TAB --------------------
-        if($active_tab=='7days' || $active_tab=='30days'){
-            $days = $active_tab=='7days'?7:30;
-            echo "<h2>📅 Last $days Days Top Posts</h2>";
-            echo '<div style="display:flex;flex-wrap:wrap;gap:15px;">';
-            $top_posts=[];
-            for($d=0;$d<$days;$d++){
-                $date = date('Y-m-d',strtotime($today." -$d days",$bd_timestamp));
-                foreach($all_posts as $post){
-                    $views = get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!is_array($views)) $views=[];
-                    $watch = get_post_meta($post->ID,'_infinity_watch_time_'.$date,true);
-                    if(!is_array($watch)) $watch=[];
-                    $avg_watch = count($views)?round(array_sum($watch)/count($views),1):0;
-                    if(count($views)>0) $top_posts[]= ['post'=>$post,'views'=>count($views),'avg_watch'=>$avg_watch];
-                }
+if ($active_tab == '7days' || $active_tab == '30days') {
+    $days = $active_tab == '7days' ? 7 : 30;
+    echo "<h2>📅 Last $days Days Top Posts</h2>";
+    echo '<div style="display:flex;flex-wrap:wrap;gap:15px;">';
+
+    $top_posts = [];
+    $prev_day_views = [];
+    $prev_day_watch = [];
+
+    for ($d = 0; $d < $days; $d++) {
+        $date = date('Y-m-d', strtotime($today . " -$d days", $bd_timestamp));
+
+        foreach ($all_posts as $post) {
+            $post_id = $post->ID;
+
+            // Unique views for the day
+            $views = get_post_meta($post_id, '_infinity_unique_views_' . $date, true);
+            if (!is_array($views)) $views = [];
+            $daily_views = count($views);
+
+            // Total watch time for the day
+            $watch = get_post_meta($post_id, '_infinity_watch_time_' . $date, true);
+            if (!is_array($watch)) $watch = [];
+            $daily_watch = array_sum($watch);
+
+            // Calculate average watch time
+            $avg_watch = $daily_views ? round($daily_watch / $daily_views, 1) : 0;
+
+            // Previous day data for trend (day-over-day)
+            $prev_views = $prev_day_views[$post_id] ?? 0;
+            $prev_watch = $prev_day_watch[$post_id] ?? 0;
+
+            // Views trend
+            $views_change = $prev_views ? round((($daily_views - $prev_views) / $prev_views) * 100, 1) : 100;
+            $views_trend = ($daily_views - $prev_views) >= 0 ? '▲' : '▼';
+            $views_color = ($daily_views - $prev_views) >= 0 ? '#27ae60' : '#e74c3c';
+
+            // Watch time trend
+            $watch_change = $prev_watch ? round((($avg_watch - $prev_watch) / $prev_watch) * 100, 1) : 100;
+            $watch_trend = ($avg_watch - $prev_watch) >= 0 ? '▲' : '▼';
+            $watch_color = ($avg_watch - $prev_watch) >= 0 ? '#16a085' : '#e67e22';
+
+            // Save current day as previous for next iteration
+            $prev_day_views[$post_id] = $daily_views;
+            $prev_day_watch[$post_id] = $avg_watch;
+
+            if ($daily_views > 0) {
+                $top_posts[] = [
+                    'post' => $post,
+                    'views' => $daily_views,
+                    'avg_watch' => $avg_watch,
+                    'views_trend' => $views_trend,
+                    'views_change' => $views_change,
+                    'views_color' => $views_color,
+                    'watch_trend' => $watch_trend,
+                    'watch_change' => $watch_change,
+                    'watch_color' => $watch_color
+                ];
             }
-            usort($top_posts,function($a,$b){return $b['views']-$a['views'];});
-            $top_posts=array_slice($top_posts,0,20);
-            foreach($top_posts as $item){
-                $thumb = get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150';
-                echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;">';
-                echo "<img src='$thumb' style='width:100%;height:120px;object-fit:cover;'>";
-                echo '<a href="'.get_permalink($item['post']->ID).'" target="_blank" style="display:block;margin:5px 0;font-weight:bold;">'.get_the_title($item['post']).'</a>';
-                echo '<p>Views: '.$item['views'].'</p>';
-                echo '<p>Avg Watch: '.format_watch_time($item['avg_watch']).'</p>';
-                echo '</div>';
-            }
-            echo '</div>';
         }
+    }
+
+    // Sort by views and take top 20
+    usort($top_posts, function ($a, $b) { return $b['views'] - $a['views']; });
+    $top_posts = array_slice($top_posts, 0, 20);
+
+    // Display cards
+    foreach ($top_posts as $item) {
+        $post_id = $item['post']->ID;
+        $thumb = get_the_post_thumbnail_url($post_id, 'medium') ?: 'https://via.placeholder.com/150';
+
+        echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
+        echo "<img src='" . esc_url($thumb) . "' style='width:100%;height:120px;object-fit:cover;border-radius:8px;'>";
+        echo '<a href="' . esc_url(get_permalink($post_id)) . '" target="_blank" style="display:block;margin:8px 0;font-weight:bold;font-size:15px;color:#333;">' . esc_html(get_the_title($post_id)) . '</a>';
+
+        // Views with trend
+        echo '<p style="margin:4px 0;font-size:14px;">Views: <strong>' . esc_html($item['views']) . '</strong> ';
+        echo '<span style="color:' . $item['views_color'] . ';">' . $item['views_trend'] . ' ' . abs($item['views_change']) . '%</span></p>';
+
+        // Avg Watch with trend
+        echo '<p style="margin:4px 0;font-size:14px;">Avg Watch: <strong>' . esc_html(format_watch_time($item['avg_watch'])) . '</strong> ';
+        echo '<span style="color:' . $item['watch_color'] . ';">' . $item['watch_trend'] . ' ' . abs($item['watch_change']) . '%</span></p>';
+
+        echo '</div>';
+    }
+
+    echo '</div>';
+}
+
 
         // -------------------- REPORTS TAB --------------------
-        if($active_tab=='reports'){
-            echo '<h2>📊 Day-Wise Reports (Last 30 Days)</h2>';
-            echo '<table class="wp-list-table widefat fixed striped">';
-            echo '<thead><tr><th>Date</th><th>Total Views</th><th>Unique Views</th><th>Avg Watch</th><th>Top Post</th></tr></thead><tbody>';
-            for($d=0;$d<30;$d++){
-                $date = date('Y-m-d',strtotime($today." -$d days",$bd_timestamp));
-                $total=0; $unique=0; $total_watch=0; $top_post_title='-'; $top_post_link='#'; $top_post_count=0;
-                $day_posts=[];
-                foreach($all_posts as $post){
-                    $views = get_post_meta($post->ID,'_infinity_unique_views_'.$date,true);
-                    if(!is_array($views)) $views=[];
-                    $watch = get_post_meta($post->ID,'_infinity_watch_time_'.$date,true);
-                    if(!is_array($watch)) $watch=[];
-                    $total += count($views);
-                    $unique += count(array_unique(array_column($views,'ip')));
-                    $total_watch += array_sum($watch);
-                    if(count($views)>0) $day_posts[]= ['post'=>$post,'views'=>count($views)];
-                }
-                if(!empty($day_posts)){
-                    usort($day_posts,function($a,$b){return $b['views']-$a['views'];});
-                    $top_post_title=get_the_title($day_posts[0]['post']);
-                    $top_post_link=get_permalink($day_posts[0]['post']->ID);
-                    $top_post_count=$day_posts[0]['views'];
-                }
-                $avg_watch = $unique ? $total_watch/$unique : 0;
-                echo "<tr><td>$date</td><td>$total</td><td>$unique</td><td>".format_watch_time($avg_watch)."</td><td><a href='$top_post_link' target='_blank'>$top_post_title ($top_post_count)</a></td></tr>";
+if($active_tab=='reports'){
+    echo '<h2>📊 Day-Wise Reports (Last 30 Days)</h2>';
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead>
+            <tr>
+                <th>Date</th>
+                <th>Post Title</th>
+                <th>Today\'s Views</th>
+                <th>Today Avg Watch</th>
+                <th>Avg Watch</th>
+                <th>Total Views</th>
+            </tr>
+          </thead><tbody>';
+
+    for($d=0;$d<30;$d++){
+        $date = date('Y-m-d', strtotime($today." -$d days", $bd_timestamp));
+        $total_views_day = 0;
+        $total_watch_day = 0;
+        $post_rows = [];
+
+        foreach($all_posts as $post){
+            $post_id = $post->ID;
+
+            // Today's unique views
+            $views = get_post_meta($post_id,'_infinity_unique_views_'.$date,true);
+            if(!is_array($views)) $views=[];
+            $today_views = count($views);
+
+            // Today's watch time
+            $watch = get_post_meta($post_id,'_infinity_watch_time_'.$date,true);
+            if(!is_array($watch)) $watch=[];
+            $today_watch_avg = $today_views ? round(array_sum($watch)/$today_views) : 0;
+
+            if($today_views>0){
+                $post_rows[] = [
+                    'title' => get_the_title($post_id),
+                    'link' => get_permalink($post_id),
+                    'views' => $today_views,
+                    'watch' => $today_watch_avg
+                ];
             }
-            echo '</tbody></table>';
+
+            // Totals per day
+            $total_views_day += $today_views;
+            $total_watch_day += array_sum($watch);
         }
+
+        // Average watch time for the day across all posts
+        $avg_watch_day = $total_views_day ? $total_watch_day / $total_views_day : 0;
+
+        if(!empty($post_rows)){
+            foreach($post_rows as $row){
+                echo '<tr>';
+                echo '<td>'.esc_html($date).'</td>';
+                echo '<td><a href="'.esc_url($row['link']).'" target="_blank">'.esc_html($row['title']).'</a></td>';
+                echo '<td>'.esc_html($row['views']).'</td>';
+                echo '<td>'.esc_html(format_watch_time($row['watch'])).'</td>';
+                echo '<td>'.esc_html(format_watch_time($avg_watch_day)).'</td>';
+                echo '<td>'.esc_html($total_views_day).'</td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr>';
+            echo '<td>'.esc_html($date).'</td>';
+            echo '<td>-</td>';
+            echo '<td>0</td>';
+            echo '<td>00:00</td>';
+            echo '<td>00:00</td>';
+            echo '<td>0</td>';
+            echo '</tr>';
+        }
+    }
+
+    echo '</tbody></table>';
+}
+
         ?>
         </div>
     </div>
