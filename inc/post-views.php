@@ -307,14 +307,18 @@ foreach ($latest_views as $item) {
     $avg_watch = get_post_avg_watch_time($post_id);
     $avg_watch_str = $avg_watch ? format_watch_time($avg_watch) : '00:00';
 
-    echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;">';
-    echo "<img src='" . esc_url($thumb) . "' style='width:100%;height:120px;object-fit:cover;'>";
-    echo '<a href="' . esc_url(get_permalink($post_id)) . '" target="_blank" style="display:block;margin:5px 0;font-weight:bold;">' . esc_html(get_the_title($post_id)) . '</a>';
+    // ⏰ Last Viewed Time (HH:MM:SS only)
+    $last_view_time = date('H:i:s', $item['time']);
+
+    echo '<div style="width:200px;background:#fff;padding:12px;border-radius:10px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
+    echo "<img src='" . esc_url($thumb) . "' style='width:100%;height:120px;object-fit:cover;border-radius:8px;'>";
+    echo '<p>Last Viewed: ' . esc_html($last_view_time) . '</p>';
     echo '<p>Avg Watch Time: ' . esc_html($avg_watch_str) . '</p>';
     echo '</div>';
 }
 
 echo '</div>';
+
 
 
     // ----------------- Top 20 Posts Today -----------------
@@ -324,7 +328,7 @@ echo '</div>';
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;">';
     foreach($top_posts_today as $item){
         $thumb = get_the_post_thumbnail_url($item['post']->ID,'medium') ?: 'https://via.placeholder.com/150';
-        echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;">';
+        echo '<div style="width:200px;background:#fff;padding:12px;border-radius:10px;text-align:center;">';
         echo "<img src='$thumb' style='width:100%;height:120px;object-fit:cover;'>";
         echo '<a href="'.get_permalink($item['post']->ID).'" target="_blank" style="display:block;margin:5px 0;font-weight:bold;">'.get_the_title($item['post']).'</a>';
         echo '<p>Views: '.$item['views'].'</p>';
@@ -407,7 +411,7 @@ if ($active_tab == '7days' || $active_tab == '30days') {
         $post_id = $item['post']->ID;
         $thumb = get_the_post_thumbnail_url($post_id, 'medium') ?: 'https://via.placeholder.com/150';
 
-        echo '<div style="width:220px;background:#fff;padding:12px;border-radius:10px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
+        echo '<div style="width:200px;background:#fff;padding:12px;border-radius:10px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
         echo "<img src='" . esc_url($thumb) . "' style='width:100%;height:120px;object-fit:cover;border-radius:8px;'>";
         echo '<a href="' . esc_url(get_permalink($post_id)) . '" target="_blank" style="display:block;margin:8px 0;font-weight:bold;font-size:15px;color:#333;">' . esc_html(get_the_title($post_id)) . '</a>';
 
