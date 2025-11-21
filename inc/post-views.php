@@ -430,86 +430,139 @@ if ($active_tab == '7days' || $active_tab == '30days') {
 }
 
 
-// -------------------- REPORTS TAB (All Posts + Trend + Top 5 Trending) --------------------
-if($active_tab=='reports'){
+if (!class_exists('WP_List_Table')) {
+    require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+}
+
+class Infinity_Posts_Report_Table extends WP_List_Table {
+
+    private $all_posts_data;
+
+    public function __construct($all_posts_data) {
+        parent::__construct([
+            'singular' => 'post',
+            'plural'   => 'posts',
+            'ajax'     => false
+        ]);
+        $this->all_posts_data = $all_posts_data;
+    }
+
+    // Define columns
+    public function get_columns() {
+        return [
+            'title'       => 'Post Title',
+            'total_views' => 'Total Views',
+            'views_7'     => 'Last 7 Days',
+            'views_30'    => 'Last 30 Days',
+            'trend'       => 'Trend',
+        ];
+    }
+
+    // Define sortable columns
+    public function get_sortable_columns() {
+        return [
+            'total_views' => ['total_views', true],
+            'views_7'     => ['views_7', false],
+            'views_30'    => ['views_30', false],
+        ];
+    }
+
+    // Prepare table items
+    public function prepare_items() {
+        $columns = $this->get_columns();
+        $hidden = [];
+        $sortable = $this->get_sortable_columns();
+        $this->_column_headers = [$columns, $hidden, $sortable];
+
+        $data = $this->all_posts_data;
+
+        // Handle sorting
+        $orderby = !empty($_GET['orderby']) ? $_GET['orderby'] : 'total_views';
+        $order   = !empty($_GET['order']) ? $_GET['order'] : 'desc';
+
+        usort($data, function($a, $b) use ($orderby, $order) {
+            if ($a[$orderby] == $b[$orderby]) return 0;
+            if ($order === 'asc') {
+                return ($a[$orderby] < $b[$orderby]) ? -1 : 1;
+            } else {
+                return ($a[$orderby] > $b[$orderby]) ? -1 : 1;
+            }
+        });
+
+        $this->items = $data;
+    }
+
+    // Render column data
+    public function column_default($item, $column_name) {
+        switch ($column_name) {
+            case 'title':
+                return '<a href="' . esc_url($item['link']) . '" target="_blank">' . esc_html($item['title']) . '</a>';
+            case 'total_views':
+            case 'views_7':
+            case 'views_30':
+                return esc_html($item[$column_name]);
+            case 'trend':
+                return $item['trend'];
+            default:
+                return '';
+        }
+    }
+}
+
+// -------------------- REPORTS TAB --------------------
+if ($active_tab == 'reports') {
     echo '<h2>📊 All Posts Report (7 & 30 Days Views + Trend)</h2>';
 
     $bd_timestamp = current_time('timestamp');
     $posts_data = [];
 
-    foreach($all_posts as $post){
+    foreach ($all_posts as $post) {
         $post_id = $post->ID;
 
-        // Total views
-        $total_views = get_post_meta($post_id,'post_views_count',true) ?: 0;
+        $total_views = get_post_meta($post_id, 'post_views_count', true) ?: 0;
 
-        // Last 7 days views
         $views_7 = 0;
-        for($d=0;$d<7;$d++){
+        for ($d = 0; $d < 7; $d++) {
             $date = date('Y-m-d', strtotime("-$d days", $bd_timestamp));
-            $views_arr = get_post_meta($post_id,'_infinity_unique_views_'.$date,true);
-            $views_7 += is_array($views_arr)?count($views_arr):0;
+            $views_arr = get_post_meta($post_id, '_infinity_unique_views_' . $date, true);
+            $views_7 += is_array($views_arr) ? count($views_arr) : 0;
         }
 
-        // Last 30 days views
         $views_30 = 0;
-        for($d=0;$d<30;$d++){
+        for ($d = 0; $d < 30; $d++) {
             $date = date('Y-m-d', strtotime("-$d days", $bd_timestamp));
-            $views_arr = get_post_meta($post_id,'_infinity_unique_views_'.$date,true);
-            $views_30 += is_array($views_arr)?count($views_arr):0;
+            $views_arr = get_post_meta($post_id, '_infinity_unique_views_' . $date, true);
+            $views_30 += is_array($views_arr) ? count($views_arr) : 0;
         }
 
-        // Trend calculation (7-day avg vs 30-day avg)
-        $avg_30 = $views_30/30;
-        if($avg_30 > 0){
-            $percent_change = round((($views_7/7 - $avg_30)/$avg_30)*100, 1);
+        $avg_30 = $views_30 / 30;
+        if ($avg_30 > 0) {
+            $percent_change = round((($views_7 / 7 - $avg_30) / $avg_30) * 100, 1);
             $trend_icon = $percent_change >= 0 ? '▲' : '▼';
             $trend_color = $percent_change >= 0 ? '#27ae60' : '#e74c3c';
-            $trend = "<span style='color:$trend_color;'>$trend_icon ".abs($percent_change)."%</span>";
+            $trend = "<span style='color:$trend_color;'>$trend_icon " . abs($percent_change) . "%</span>";
         } else {
             $percent_change = 0;
             $trend = '-';
         }
 
         $posts_data[] = [
-            'post_id' => $post_id,
-            'title' => get_the_title($post_id),
-            'link' => get_permalink($post_id),
+            'post_id'     => $post_id,
+            'title'       => get_the_title($post_id),
+            'link'        => get_permalink($post_id),
             'total_views' => $total_views,
-            'views_7' => $views_7,
-            'views_30' => $views_30,
-            'trend' => $trend,
-            'trend_value' => $percent_change, // for sorting top trending
+            'views_7'     => $views_7,
+            'views_30'    => $views_30,
+            'trend'       => $trend,
         ];
     }
 
-    // ----------------- All Posts Table -----------------
-    echo '<table class="wp-list-table widefat fixed striped">';
-    echo '<thead>
-            <tr>
-                <th>Post Title</th>
-                <th>Total Views</th>
-                <th>Last 7 Days Views</th>
-                <th>Last 30 Days Views</th>
-                <th>Trend</th>
-            </tr>
-          </thead><tbody>';
-
-    // Sort table by total views descending
-    usort($posts_data, function($a,$b){ return $b['total_views'] - $a['total_views']; });
-
-    foreach($posts_data as $data){
-        echo '<tr>';
-        echo '<td><a href="'.esc_url($data['link']).'" target="_blank">'.esc_html($data['title']).'</a></td>';
-        echo '<td>'.esc_html($data['total_views']).'</td>';
-        echo '<td>'.esc_html($data['views_7']).'</td>';
-        echo '<td>'.esc_html($data['views_30']).'</td>';
-        echo '<td>'.$data['trend'].'</td>';
-        echo '</tr>';
-    }
-
-    echo '</tbody></table>';
+    // Instantiate and display the table
+    $report_table = new Infinity_Posts_Report_Table($posts_data);
+    $report_table->prepare_items();
+    $report_table->display();
 }
+
 
 
         ?>
