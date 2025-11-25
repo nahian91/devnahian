@@ -496,16 +496,22 @@ if($active_tab=='traffic'){
     }
     arsort($referrer_counts);
     $top_refs = array_slice($referrer_counts,0,10,true);
+    $max_ref = !empty($top_refs) ? max($top_refs) : 1;
 
     echo '<div style="flex:1;min-width:280px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
     echo '<h3>🔗 Top Referrers (Last 30 Days)</h3>';
-    echo '<table style="width:100%;border-collapse:collapse;">';
-    echo '<thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Referrer</th><th style="border-bottom:1px solid #ddd;padding:6px;">Visits</th></tr></thead>';
-    echo '<tbody>';
-    foreach($top_refs as $ref=>$count){
-        echo '<tr><td style="padding:6px;">'.esc_html($ref).'</td><td style="padding:6px;">'.intval($count).'</td></tr>';
+    if(!empty($top_refs)){
+        echo '<table style="width:100%;border-collapse:collapse;">';
+        echo '<thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Referrer</th><th style="border-bottom:1px solid #ddd;padding:6px;">Visits</th></tr></thead>';
+        echo '<tbody>';
+        foreach($top_refs as $ref=>$count){
+            echo '<tr><td style="padding:6px;">'.esc_html($ref).'</td><td style="padding:6px;">'.intval($count).'</td></tr>';
+        }
+        echo '</tbody></table>';
+    } else {
+        echo '<p>No referrer data available yet.</p>';
     }
-    echo '</tbody></table></div>';
+    echo '</div>';
 
     // ----- Geo Location -----
     $geo_counts = [];
@@ -526,16 +532,22 @@ if($active_tab=='traffic'){
     }
     arsort($geo_counts);
     $top_geos = array_slice($geo_counts,0,10,true);
+    $max_geo = !empty($top_geos) ? max($top_geos) : 1;
 
     echo '<div style="flex:1;min-width:280px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
     echo '<h3>📍 Geo Location (Last 30 Days)</h3>';
-    echo '<table style="width:100%;border-collapse:collapse;">';
-    echo '<thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Location</th><th style="border-bottom:1px solid #ddd;padding:6px;">Visits</th></tr></thead>';
-    echo '<tbody>';
-    foreach($top_geos as $loc=>$count){
-        echo '<tr><td style="padding:6px;">'.esc_html($loc).'</td><td style="padding:6px;">'.intval($count).'</td></tr>';
+    if(!empty($top_geos)){
+        echo '<table style="width:100%;border-collapse:collapse;">';
+        echo '<thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Location</th><th style="border-bottom:1px solid #ddd;padding:6px;">Visits</th></tr></thead>';
+        echo '<tbody>';
+        foreach($top_geos as $loc=>$count){
+            echo '<tr><td style="padding:6px;">'.esc_html($loc).'</td><td style="padding:6px;">'.intval($count).'</td></tr>';
+        }
+        echo '</tbody></table>';
+    } else {
+        echo '<p>No geo location data available yet.</p>';
     }
-    echo '</tbody></table></div>';
+    echo '</div>';
 
     // ----- Bot Protection -----
     $bot_count = 0; $human_count = 0;
@@ -568,6 +580,7 @@ if($active_tab=='traffic'){
 
     echo '</div>'; // close flex container
 }
+
 
 
     
