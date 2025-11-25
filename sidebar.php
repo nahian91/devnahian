@@ -144,10 +144,6 @@
                         </div>
                         <div class="widget-post-box-content">
                             <p><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></p>
-                            <small>
-                                <span class="fa fa-eye"></span>
-                                <?php echo esc_html( number_format( get_post_views( get_the_ID() ) ) ); ?> Views
-                            </small>
                         </div>
                     </li>
                 <?php endwhile;

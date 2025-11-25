@@ -47,8 +47,6 @@ if(!function_exists('get_post_reading_time')){
                                 <li class="dot"></li>
                                 <li>Updated: <?php echo get_the_modified_date(); ?></li>
                                 <li class="dot"></li>
-                                <li>Views: <?php echo get_post_views(get_the_ID()); ?></li>
-                                <li class="dot"></li>
                                 <li>Reading Time: <?php echo get_post_reading_time(); ?> mins</li>
                             </ul>
                         </div>
