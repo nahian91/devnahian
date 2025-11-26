@@ -437,35 +437,47 @@ if($active_tab=='reports'){
     echo '<thead><tr><th>Post Title</th><th>Total Views</th><th>Today\'s Views</th><th>Avg Watch Time</th></tr></thead>';
     echo '<tbody>';
 
-    foreach($all_posts as $post){
-        $total_views = get_total_views_by_meta($post->ID);
-        $today_views = get_todays_views($post->ID);
-        $yesterday_views = get_yesterdays_views($post->ID);
+  foreach($all_posts as $post){
+    $total_views = get_total_views_by_meta($post->ID);
+    $today_views = get_todays_views($post->ID);
+    $yesterday_views = get_yesterdays_views($post->ID);
 
-        // Calculate trend
-        if($yesterday_views > 0){
-            $trend_percent = round((($today_views - $yesterday_views)/$yesterday_views)*100,1);
-        } else {
-            $trend_percent = $today_views > 0 ? 100 : 0;
-        }
-
-        if($trend_percent != 0){
-            $trend_icon = $trend_percent >= 0 ? '▲' : '▼';
-            $trend_color = $trend_percent >= 0 ? '#27ae60' : '#e74c3c';
-            $trend_html = " <span style='color:$trend_color;font-weight:bold;'>$trend_icon ".abs($trend_percent)."%</span>";
-        } else {
-            $trend_html = '';
-        }
-
-        $avg_watch = format_watch_time(get_avg_watch_time($post->ID));
-
-        echo '<tr>';
-        echo '<td><a href="'.esc_url(get_permalink($post->ID)).'" target="_blank">'.esc_html($post->post_title).'</a></td>';
-        echo '<td>'.intval($total_views).'</td>';
-        echo '<td>'.intval($today_views).$trend_html.'</td>';
-        echo '<td>'.esc_html($avg_watch).'</td>';
-        echo '</tr>';
+    // Calculate trend
+    if($yesterday_views > 0){
+        $trend_percent = round((($today_views - $yesterday_views)/$yesterday_views)*100,1);
+    } else {
+        $trend_percent = $today_views > 0 ? 100 : 0;
     }
+
+    if($trend_percent != 0){
+        $trend_icon = $trend_percent >= 0 ? '▲' : '▼';
+        $trend_color = $trend_percent >= 0 ? '#27ae60' : '#e74c3c';
+        $trend_html = " <span style='color:$trend_color;font-weight:bold;'>$trend_icon ".abs($trend_percent)."%</span>";
+    } else {
+        $trend_html = '';
+    }
+
+    $avg_watch = format_watch_time(get_avg_watch_time($post->ID));
+
+    // Badge logic
+    $total_views_html = intval($total_views);
+    if($total_views >= 100){
+        $badge_color = 'teal';
+    } elseif($total_views >= 51){
+        $badge_color = 'tomato';
+    } else {
+        $badge_color = 'black';
+    }
+    $total_views_html = "<span style='background-color:$badge_color;color:white;padding:2px 6px;border-radius:4px;'>$total_views_html</span>";
+
+    echo '<tr>';
+    echo '<td><a href="'.esc_url(get_permalink($post->ID)).'" target="_blank">'.esc_html($post->post_title).'</a></td>';
+    echo '<td>'.$total_views_html.'</td>';
+    echo '<td>'.intval($today_views).$trend_html.'</td>';
+    echo '<td>'.esc_html($avg_watch).'</td>';
+    echo '</tr>';
+}
+
 
     echo '</tbody></table>';
 }
