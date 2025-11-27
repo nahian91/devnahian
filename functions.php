@@ -349,24 +349,3 @@ function disable_comments_hide_existing($comments) {
     return [];
 }
 add_filter('comments_array', 'disable_comments_hide_existing', 10, 2);
-
-
-add_action('wp_ajax_track_theme_click', 'track_theme_click');
-add_action('wp_ajax_nopriv_track_theme_click', 'track_theme_click');
-
-function track_theme_click() {
-    $title = sanitize_text_field($_POST['title'] ?? '');
-    $type  = sanitize_text_field($_POST['type'] ?? '');
-
-    if ($title && $type) {
-        $post = get_page_by_title($title, OBJECT, 'post'); // Replace 'post' with your CPT if needed
-        $post_id = $post ? $post->ID : 0;
-
-        if ($post_id) {
-            $key = 'theme_click_' . sanitize_key($type);
-            $count = (int) get_post_meta($post_id, $key, true);
-            update_post_meta($post_id, $key, $count + 1);
-        }
-    }
-    wp_send_json_success();
-}
