@@ -1,6 +1,6 @@
 <?php
 /**
- * Theme Collection Block Template (SEO Optimized, No Inline CSS).
+ * Theme Collection Block Template (SEO Optimized, No Inline CSS, with Click Tracking)
  */
 
 // Create id attribute allowing for custom "anchor" value.
@@ -42,6 +42,10 @@ if ( $image ) {
 
     $title_attr = $title ? $title . ' - Explore Features & Demo' : '';
 }
+
+// Get click counts
+$demo_clicks     = (int) get_post_meta(get_the_ID(), 'theme_click_demo', true);
+$download_clicks = (int) get_post_meta(get_the_ID(), 'theme_click_download', true);
 ?>
 
 <div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $className ); ?>">
@@ -57,13 +61,12 @@ if ( $image ) {
     <?php endif; ?>
 
     <?php if ( $title ) : 
-    // Generate a safe ID for the title
-    $title_id = sanitize_title( $title );
-?>
-    <h2 id="<?php echo esc_attr( $title_id ); ?>">
-        <?php echo esc_html( $title ); ?>
-    </h2>
-<?php endif; ?>
+        $title_id = sanitize_title( $title );
+    ?>
+        <h2 id="<?php echo esc_attr( $title_id ); ?>">
+            <?php echo esc_html( $title ); ?>
+        </h2>
+    <?php endif; ?>
 
     <?php if ( $description ) : ?>
         <p><?php echo esc_html( $description ); ?></p>
@@ -82,15 +85,25 @@ if ( $image ) {
 
     <div class="theme-collection-link">
         <?php if ( $demo_link ) : ?>
-            <a href="<?php echo esc_url( $demo_link ); ?>" target="_blank" rel="noopener">
+            <a href="<?php echo esc_url( $demo_link ); ?>" 
+               class="theme-collection-btn track-click" 
+               data-title="<?php echo esc_attr( $title ); ?>" 
+               data-type="demo" 
+               target="_blank" rel="noopener">
                 <?php echo esc_html( $demo_link_label ? $demo_link_label : __( 'Demo', 'devnahian' ) ); ?>
             </a>
+            <small>Clicks: <?php echo $demo_clicks; ?></small>
         <?php endif; ?>
 
         <?php if ( $download_link ) : ?>
-            <a href="<?php echo esc_url( $download_link ); ?>" target="_blank" rel="noopener">
+            <a href="<?php echo esc_url( $download_link ); ?>" 
+               class="theme-collection-btn track-click" 
+               data-title="<?php echo esc_attr( $title ); ?>" 
+               data-type="download" 
+               target="_blank" rel="noopener">
                 <?php echo esc_html( $download_link_label ? $download_link_label : __( 'Download Now', 'devnahian' ) ); ?>
             </a>
+            <small>Clicks: <?php echo $download_clicks; ?></small>
         <?php endif; ?>
     </div>
 
@@ -127,3 +140,23 @@ if ( $title ) {
 <?php } ?>
 
 <!-- Theme Collection Section End -->
+
+<!-- Click Tracking JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.track-click').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const data = {
+                action: 'track_theme_click',
+                title: this.dataset.title,
+                type: this.dataset.type,
+            };
+            fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(data)
+            });
+        });
+    });
+});
+</script>

@@ -236,12 +236,14 @@ function infinity_today_views_report_page(){
         <h1>📈 Infinity Analytics</h1>
         <p><strong>Date:</strong> <?php echo esc_html($today); ?></p>
         <h2 class="nav-tab-wrapper">
-            <a href="?page=today-views-report&tab=today" class="nav-tab <?php echo $active_tab=='today'?'nav-tab-active':''; ?>">Today</a>
-            <a href="?page=today-views-report&tab=7days" class="nav-tab <?php echo $active_tab=='7days'?'nav-tab-active':''; ?>">Last 7 Days</a>
-            <a href="?page=today-views-report&tab=30days" class="nav-tab <?php echo $active_tab=='30days'?'nav-tab-active':''; ?>">Last 30 Days</a>
-            <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
-            <a href="?page=today-views-report&tab=traffic" class="nav-tab <?php echo $active_tab=='traffic'?'nav-tab-active':''; ?>">Traffic</a>
-        </h2>
+    <a href="?page=today-views-report&tab=today" class="nav-tab <?php echo $active_tab=='today'?'nav-tab-active':''; ?>">Today</a>
+    <a href="?page=today-views-report&tab=7days" class="nav-tab <?php echo $active_tab=='7days'?'nav-tab-active':''; ?>">Last 7 Days</a>
+    <a href="?page=today-views-report&tab=30days" class="nav-tab <?php echo $active_tab=='30days'?'nav-tab-active':''; ?>">Last 30 Days</a>
+    <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
+    <a href="?page=today-views-report&tab=traffic" class="nav-tab <?php echo $active_tab=='traffic'?'nav-tab-active':''; ?>">Traffic</a>
+    <a href="?page=today-views-report&tab=clicks" class="nav-tab <?php echo $active_tab=='clicks'?'nav-tab-active':''; ?>">Demo / Download</a>
+</h2>
+
         <div class="tab-content" style="margin-top:20px;">
     <?php
 
@@ -593,6 +595,57 @@ if($active_tab=='traffic'){
     echo '</div>'; // close flex container
 }
 
+if($active_tab=='clicks'){
+    echo '<h2>🔗 Demo & Download Clicks</h2>';
+
+    $total_demo = $total_download = 0;
+    $top_demo_post = $top_download_post = null;
+
+    foreach($all_posts as $p){
+        $demo = (int) get_post_meta($p->ID,'theme_click_demo',true);
+        $download = (int) get_post_meta($p->ID,'theme_click_download',true);
+
+        $total_demo += $demo;
+        $total_download += $download;
+
+        if(!$top_demo_post || $demo > get_post_meta($top_demo_post->ID,'theme_click_demo',true)){
+            $top_demo_post = $p;
+        }
+        if(!$top_download_post || $download > get_post_meta($top_download_post->ID,'theme_click_download',true)){
+            $top_download_post = $p;
+        }
+    }
+
+    // Cards
+    echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
+    $cards = [
+        ['Total Demo Clicks',$total_demo,'#0073aa'],
+        ['Total Download Clicks',$total_download,'#16a085'],
+        ['Top Demo Post', $top_demo_post ? esc_html($top_demo_post->post_title) : '-', '#f39c12'],
+        ['Top Download Post', $top_download_post ? esc_html($top_download_post->post_title) : '-', '#333']
+    ];
+    foreach($cards as $c){
+        echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">';
+        echo '<h3 style="margin:0 0 10px;font-size:16px;">'.$c[0].'</h3>';
+        echo '<p style="font-size:22px;font-weight:bold;color:'.$c[2].';">'.$c[1].'</p>';
+        echo '</div>';
+    }
+    echo '</div>';
+
+    // Table of all posts
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead><tr><th>Post</th><th>Demo Clicks</th><th>Download Clicks</th></tr></thead><tbody>';
+    foreach($all_posts as $p){
+        $demo = (int) get_post_meta($p->ID,'theme_click_demo',true);
+        $download = (int) get_post_meta($p->ID,'theme_click_download',true);
+        echo '<tr>';
+        echo '<td><a href="'.esc_url(get_permalink($p->ID)).'" target="_blank">'.esc_html($p->post_title).'</a></td>';
+        echo '<td>'.intval($demo).'</td>';
+        echo '<td>'.intval($download).'</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table>';
+}
 
 
     
