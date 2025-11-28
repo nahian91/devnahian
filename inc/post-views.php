@@ -240,7 +240,7 @@ function infinity_today_views_report_page(){
             <a href="?page=today-views-report&tab=7days" class="nav-tab <?php echo $active_tab=='7days'?'nav-tab-active':''; ?>">Last 7 Days</a>
             <a href="?page=today-views-report&tab=30days" class="nav-tab <?php echo $active_tab=='30days'?'nav-tab-active':''; ?>">Last 30 Days</a>
             <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
-            <a href="?page=today-views-report&tab=traffic" class="nav-tab <?php echo $active_tab=='traffic'?'nav-tab-active':''; ?>">Traffic</a>
+            <a href="?page=today-views-report&tab=categories" class="nav-tab <?php echo $active_tab=='categories'?'nav-tab-active':''; ?>">Categories</a>
         </h2>
         <div class="tab-content" style="margin-top:20px;">
     <?php
@@ -483,115 +483,137 @@ if($active_tab=='reports'){
 }
 
 
-// ----- Traffic Tab -----
-if($active_tab=='traffic'){
-    echo '<h2>🌐 Traffic Analytics</h2>';
+// ----- Categories Tab -----
+// ----- Categories Tab -----
+if ($active_tab == 'categories') {
+    echo '<h2>📊 Category Analytics & Comparison</h2>';
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead>
+        <tr>
+            <th>Category Name</th>
+            <th>Today Views</th>
+            <th>Last 7 Days</th>
+            <th>Last 30 Days</th>
+            <th>Best Post</th>
+        </tr>
+    </thead>';
+    echo '<tbody>';
 
-    echo '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:20px;">';
+    $categories = get_categories(['hide_empty' => false]);
 
-    // ----- Top Referrers -----
-    $referrer_counts = [];
-    foreach($all_posts as $p){
-        $keys = get_post_custom_keys($p->ID);
-        if(!$keys) continue;
-        foreach($keys as $key){
-            if(strpos($key,'_infinity_referrer_')===0){
-                $refs = get_post_meta($p->ID,$key,true);
-                if(is_array($refs)){
-                    foreach($refs as $r){
-                        $ref = sanitize_text_field($r['ref'] ?? '');
-                        if($ref) $referrer_counts[$ref] = ($referrer_counts[$ref] ?? 0)+1;
-                    }
-                }
+    $categories_data = [];
+
+    foreach ($categories as $cat) {
+        $cat_posts = get_posts([
+            'category' => $cat->term_id,
+            'numberposts' => -1,
+        ]);
+
+        $today_total = $yesterday_total = 0;
+        $week_total = $prev_week_total = 0;
+        $month_total = $prev_month_total = 0;
+        $best_post = ['title' => '', 'views' => 0];
+
+        $today = date('Y-m-d', current_time('timestamp'));
+        $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
+
+        foreach ($cat_posts as $p) {
+            // Today
+            $today_views_arr = get_post_meta($p->ID, '_infinity_unique_views_'.$today, true);
+            $today_views_arr = is_array($today_views_arr) ? $today_views_arr : [];
+            $today_count = count($today_views_arr);
+            $today_total += $today_count;
+
+            // Yesterday
+            $yesterday_views_arr = get_post_meta($p->ID, '_infinity_unique_views_'.$yesterday, true);
+            $yesterday_views_arr = is_array($yesterday_views_arr) ? $yesterday_views_arr : [];
+            $yesterday_count = count($yesterday_views_arr);
+            $yesterday_total += $yesterday_count;
+
+            // Last 7 days
+            $week_count = 0;
+            $prev_week_count = 0;
+            for ($i=0; $i<7; $i++){
+                $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
+                $v = get_post_meta($p->ID, '_infinity_unique_views_'.$date, true);
+                if(is_array($v)) $week_count += count($v);
+            }
+            for ($i=7; $i<14; $i++){
+                $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
+                $v = get_post_meta($p->ID, '_infinity_unique_views_'.$date, true);
+                if(is_array($v)) $prev_week_count += count($v);
+            }
+            $week_total += $week_count;
+            $prev_week_total += $prev_week_count;
+
+            // Last 30 days
+            $month_count = 0;
+            $prev_month_count = 0;
+            for ($i=0; $i<30; $i++){
+                $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
+                $v = get_post_meta($p->ID, '_infinity_unique_views_'.$date, true);
+                if(is_array($v)) $month_count += count($v);
+            }
+            for ($i=30; $i<60; $i++){
+                $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
+                $v = get_post_meta($p->ID, '_infinity_unique_views_'.$date, true);
+                if(is_array($v)) $prev_month_count += count($v);
+            }
+            $month_total += $month_count;
+            $prev_month_total += $prev_month_count;
+
+            // Best post by last 30 days
+            if($month_count > $best_post['views']){
+                $best_post['views'] = $month_count;
+                $best_post['title'] = get_the_title($p->ID);
             }
         }
-    }
-    arsort($referrer_counts);
-    $top_refs = array_slice($referrer_counts,0,10,true);
-    $max_ref = !empty($top_refs) ? max($top_refs) : 1;
 
-    echo '<div style="flex:1;min-width:280px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
-    echo '<h3>🔗 Top Referrers (Last 30 Days)</h3>';
-    if(!empty($top_refs)){
-        echo '<table style="width:100%;border-collapse:collapse;">';
-        echo '<thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Referrer</th><th style="border-bottom:1px solid #ddd;padding:6px;">Visits</th></tr></thead>';
-        echo '<tbody>';
-        foreach($top_refs as $ref=>$count){
-            echo '<tr><td style="padding:6px;">'.esc_html($ref).'</td><td style="padding:6px;">'.intval($count).'</td></tr>';
-        }
-        echo '</tbody></table>';
-    } else {
-        echo '<p>No referrer data available yet.</p>';
-    }
-    echo '</div>';
+        // Trend arrows & colors
+        $today_arrow = $today_total >= $yesterday_total ? '▲' : '▼';
+        $today_color = $today_arrow == '▲' ? 'green' : 'red';
 
-    // ----- Geo Location -----
-    $geo_counts = [];
-    foreach($all_posts as $p){
-        $keys = get_post_custom_keys($p->ID);
-        if(!$keys) continue;
-        foreach($keys as $key){
-            if(strpos($key,'_infinity_geo_')===0){
-                $geos = get_post_meta($p->ID,$key,true);
-                if(is_array($geos)){
-                    foreach($geos as $g){
-                        $loc = sanitize_text_field($g['location'] ?? 'Unknown');
-                        $geo_counts[$loc] = ($geo_counts[$loc] ?? 0)+1;
-                    }
-                }
-            }
-        }
-    }
-    arsort($geo_counts);
-    $top_geos = array_slice($geo_counts,0,10,true);
-    $max_geo = !empty($top_geos) ? max($top_geos) : 1;
+        $week_arrow = $week_total >= $prev_week_total ? '▲' : '▼';
+        $week_color = $week_arrow == '▲' ? 'green' : 'red';
 
-    echo '<div style="flex:1;min-width:280px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
-    echo '<h3>📍 Geo Location (Last 30 Days)</h3>';
-    if(!empty($top_geos)){
-        echo '<table style="width:100%;border-collapse:collapse;">';
-        echo '<thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Location</th><th style="border-bottom:1px solid #ddd;padding:6px;">Visits</th></tr></thead>';
-        echo '<tbody>';
-        foreach($top_geos as $loc=>$count){
-            echo '<tr><td style="padding:6px;">'.esc_html($loc).'</td><td style="padding:6px;">'.intval($count).'</td></tr>';
-        }
-        echo '</tbody></table>';
-    } else {
-        echo '<p>No geo location data available yet.</p>';
-    }
-    echo '</div>';
+        $month_arrow = $month_total >= $prev_month_total ? '▲' : '▼';
+        $month_color = $month_arrow == '▲' ? 'green' : 'red';
 
-    // ----- Bot Protection -----
-    $bot_count = 0; $human_count = 0;
-    foreach($all_posts as $p){
-        $keys = get_post_custom_keys($p->ID);
-        if(!$keys) continue;
-        foreach($keys as $key){
-            if(strpos($key,'_infinity_unique_views_')===0){
-                $views = get_post_meta($p->ID,$key,true);
-                if(is_array($views)){
-                    foreach($views as $v){
-                        $agent = strtolower($v['user_agent'] ?? '');
-                        if($agent && preg_match('/bot|crawl|spider|slurp|facebook|twitter/i',$agent)){
-                            $bot_count++;
-                        } else {
-                            $human_count++;
-                        }
-                    }
-                }
-            }
-        }
+        // Save data for sorting
+        $categories_data[] = [
+            'name' => $cat->name,
+            'today_total' => $today_total,
+            'week_total' => $week_total,
+            'month_total' => $month_total,
+            'today_arrow' => $today_arrow,
+            'today_color' => $today_color,
+            'week_arrow' => $week_arrow,
+            'week_color' => $week_color,
+            'month_arrow' => $month_arrow,
+            'month_color' => $month_color,
+            'best_post' => $best_post['title'],
+        ];
     }
 
-    echo '<div style="flex:1;min-width:280px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">';
-    echo '<h3>🤖 Bot Detection (Last 30 Days)</h3>';
-    echo '<div style="display:flex;justify-content:space-between;gap:20px;margin-top:10px;">';
-    echo '<div style="flex:1;background:#16a085;color:#fff;padding:15px;border-radius:8px;text-align:center;">Human Visitors<br><strong>'.intval($human_count).'</strong></div>';
-    echo '<div style="flex:1;background:#e74c3c;color:#fff;padding:15px;border-radius:8px;text-align:center;">Bot Visitors<br><strong>'.intval($bot_count).'</strong></div>';
-    echo '</div></div>';
+    // Sort categories by Today Views descending
+    usort($categories_data, function($a,$b){
+        return $b['today_total'] - $a['today_total'];
+    });
 
-    echo '</div>'; // close flex container
+    foreach ($categories_data as $c) {
+        echo '<tr>';
+        echo '<td>'.esc_html($c['name']).'</td>';
+        echo '<td style="color:'.$c['today_color'].';">'.intval($c['today_total']).' '.$c['today_arrow'].'</td>';
+        echo '<td style="color:'.$c['week_color'].';">'.intval($c['week_total']).' '.$c['week_arrow'].'</td>';
+        echo '<td style="color:'.$c['month_color'].';">'.intval($c['month_total']).' '.$c['month_arrow'].'</td>';
+        echo '<td>'.esc_html($c['best_post']).'</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody>';
+    echo '</table>';
 }
+
 
 
 
