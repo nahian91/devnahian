@@ -484,7 +484,7 @@ if($active_tab=='reports'){
 
 
 // ----- Categories Tab -----
-// ----- Categories Tab -----
+// ----- Categories Tab with Percentage Change -----
 if ($active_tab == 'categories') {
     echo '<h2>📊 Category Analytics & Comparison</h2>';
     echo '<table class="wp-list-table widefat fixed striped">';
@@ -500,7 +500,6 @@ if ($active_tab == 'categories') {
     echo '<tbody>';
 
     $categories = get_categories(['hide_empty' => false]);
-
     $categories_data = [];
 
     foreach ($categories as $cat) {
@@ -518,21 +517,19 @@ if ($active_tab == 'categories') {
         $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
 
         foreach ($cat_posts as $p) {
-            // Today
+            // Today / Yesterday
             $today_views_arr = get_post_meta($p->ID, '_infinity_unique_views_'.$today, true);
             $today_views_arr = is_array($today_views_arr) ? $today_views_arr : [];
             $today_count = count($today_views_arr);
             $today_total += $today_count;
 
-            // Yesterday
             $yesterday_views_arr = get_post_meta($p->ID, '_infinity_unique_views_'.$yesterday, true);
             $yesterday_views_arr = is_array($yesterday_views_arr) ? $yesterday_views_arr : [];
             $yesterday_count = count($yesterday_views_arr);
             $yesterday_total += $yesterday_count;
 
-            // Last 7 days
-            $week_count = 0;
-            $prev_week_count = 0;
+            // Last 7 days / previous 7 days
+            $week_count = $prev_week_count = 0;
             for ($i=0; $i<7; $i++){
                 $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
                 $v = get_post_meta($p->ID, '_infinity_unique_views_'.$date, true);
@@ -546,9 +543,8 @@ if ($active_tab == 'categories') {
             $week_total += $week_count;
             $prev_week_total += $prev_week_count;
 
-            // Last 30 days
-            $month_count = 0;
-            $prev_month_count = 0;
+            // Last 30 days / previous 30 days
+            $month_count = $prev_month_count = 0;
             for ($i=0; $i<30; $i++){
                 $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
                 $v = get_post_meta($p->ID, '_infinity_unique_views_'.$date, true);
@@ -569,33 +565,41 @@ if ($active_tab == 'categories') {
             }
         }
 
+        // Percentage changes
+        $today_percent = $yesterday_total ? round((($today_total-$yesterday_total)/$yesterday_total)*100,1) : ($today_total ? 100 : 0);
+        $week_percent  = $prev_week_total ? round((($week_total-$prev_week_total)/$prev_week_total)*100,1) : ($week_total ? 100 : 0);
+        $month_percent = $prev_month_total ? round((($month_total-$prev_month_total)/$prev_month_total)*100,1) : ($month_total ? 100 : 0);
+
         // Trend arrows & colors
-        $today_arrow = $today_total >= $yesterday_total ? '▲' : '▼';
-        $today_color = $today_arrow == '▲' ? 'green' : 'red';
+        $today_arrow = $today_percent >= 0 ? '▲' : '▼';
+        $today_color = $today_percent >= 0 ? 'green' : 'red';
 
-        $week_arrow = $week_total >= $prev_week_total ? '▲' : '▼';
-        $week_color = $week_arrow == '▲' ? 'green' : 'red';
+        $week_arrow = $week_percent >= 0 ? '▲' : '▼';
+        $week_color = $week_percent >= 0 ? 'green' : 'red';
 
-        $month_arrow = $month_total >= $prev_month_total ? '▲' : '▼';
-        $month_color = $month_arrow == '▲' ? 'green' : 'red';
+        $month_arrow = $month_percent >= 0 ? '▲' : '▼';
+        $month_color = $month_percent >= 0 ? 'green' : 'red';
 
-        // Save data for sorting
+        // Save for sorting
         $categories_data[] = [
             'name' => $cat->name,
             'today_total' => $today_total,
-            'week_total' => $week_total,
-            'month_total' => $month_total,
+            'today_percent' => $today_percent,
             'today_arrow' => $today_arrow,
             'today_color' => $today_color,
+            'week_total' => $week_total,
+            'week_percent' => $week_percent,
             'week_arrow' => $week_arrow,
             'week_color' => $week_color,
+            'month_total' => $month_total,
+            'month_percent' => $month_percent,
             'month_arrow' => $month_arrow,
             'month_color' => $month_color,
             'best_post' => $best_post['title'],
         ];
     }
 
-    // Sort categories by Today Views descending
+    // Sort by Today Views descending
     usort($categories_data, function($a,$b){
         return $b['today_total'] - $a['today_total'];
     });
@@ -603,9 +607,9 @@ if ($active_tab == 'categories') {
     foreach ($categories_data as $c) {
         echo '<tr>';
         echo '<td>'.esc_html($c['name']).'</td>';
-        echo '<td style="color:'.$c['today_color'].';">'.intval($c['today_total']).' '.$c['today_arrow'].'</td>';
-        echo '<td style="color:'.$c['week_color'].';">'.intval($c['week_total']).' '.$c['week_arrow'].'</td>';
-        echo '<td style="color:'.$c['month_color'].';">'.intval($c['month_total']).' '.$c['month_arrow'].'</td>';
+        echo '<td style="color:'.$c['today_color'].';">'.intval($c['today_total']).' '.$c['today_arrow'].' '.abs($c['today_percent']).'%</td>';
+        echo '<td style="color:'.$c['week_color'].';">'.intval($c['week_total']).' '.$c['week_arrow'].' '.abs($c['week_percent']).'%</td>';
+        echo '<td style="color:'.$c['month_color'].';">'.intval($c['month_total']).' '.$c['month_arrow'].' '.abs($c['month_percent']).'%</td>';
         echo '<td>'.esc_html($c['best_post']).'</td>';
         echo '</tr>';
     }
