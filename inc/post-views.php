@@ -446,47 +446,49 @@ if($active_tab=='reports') {
         'numberposts' => -1,
     ]);
 
-    // --------- Summary Cards ---------
-    $today = date('Y-m-d', current_time('timestamp'));
+    // --------- Summary Cards (New Version) ---------
+
+    $total_posts_count = count($all_posts);
+
+    // Threshold list
+    $thresholds = [10,20,30,40,50,60,100];
+
+    // Prepare cards array
     $cards = [
-        ['label'=>'Posts with 10+ Views Today','count'=>0,'threshold'=>'today', 'value'=>10],
-        ['label'=>'Posts with 50+ Views All Time','count'=>0,'threshold'=>'all', 'value'=>50],
-        ['label'=>'Posts with 100+ Views All Time','count'=>0,'threshold'=>'all', 'value'=>100],
-        ['label'=>'Posts with 200+ Views All Time','count'=>0,'threshold'=>'all', 'value'=>200],
-        ['label'=>'Posts under 50 Views','count'=>0,'threshold'=>'all', 'value'=>50],
-        ['label'=>'Posts under 40 Views','count'=>0,'threshold'=>'all', 'value'=>40],
-        ['label'=>'Posts under 30 Views','count'=>0,'threshold'=>'all', 'value'=>30],
-        ['label'=>'Posts under 20 Views','count'=>0,'threshold'=>'all', 'value'=>20],
+        ['label' => 'Total Posts', 'count' => $total_posts_count]
     ];
 
-    foreach($all_posts as $p) {
-        $today_views_arr = get_post_meta($p->ID, '_infinity_unique_views_'.$today, true);
-        $today_views = is_array($today_views_arr) ? count($today_views_arr) : 0;
+    foreach ($thresholds as $t) {
+        $cards[] = [
+            'label' => "Total {$t}+ Post Views",
+            'count' => 0,
+            'value' => $t
+        ];
+    }
 
-        // Today views
-        if($today_views >= 10) $cards[0]['count']++;
-
-        // All time views
+    // Count logic
+    foreach ($all_posts as $p) {
         $total_views = get_total_views_by_meta($p->ID);
-        if($total_views >= 50) $cards[1]['count']++;
-        if($total_views >= 100) $cards[2]['count']++;
-        if($total_views >= 200) $cards[3]['count']++;
 
-        // Under thresholds
-        foreach([4,5,6,7] as $i) {
-            if($total_views < $cards[$i]['value']) $cards[$i]['count']++;
+        foreach($thresholds as $i => $t) {
+            if ($total_views >= $t) {
+                $cards[$i + 1]['count']++; // +1 because index 0 is total posts
+            }
         }
     }
 
     // --------- Render Summary Cards ---------
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
-    $colors = ['#0073aa','#16a085','#f39c12','#27ae60','#8e44ad','#d35400','#c0392b','#34495e'];
+
+    $colors = ['#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12','#e67e22','#e74c3c','#2ecc71'];
+
     foreach($cards as $i => $c) {
         echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">';
         echo '<h3 style="margin:0 0 10px;font-size:16px;">'.esc_html($c['label']).'</h3>';
         echo '<p style="font-size:22px;font-weight:bold;color:'.$colors[$i].';">'.intval($c['count']).'</p>';
         echo '</div>';
     }
+
     echo '</div>';
 
     // --------- Sort Posts by All Time Views ---------
@@ -497,17 +499,25 @@ if($active_tab=='reports') {
     // --------- Posts Table ---------
     echo '<h2>📊 All Posts by Views</h2>';
     echo '<table class="wp-list-table widefat fixed striped">';
-    echo '<thead><tr><th>Post Title</th><th>Total Views</th><th>Today\'s Views</th><th>Avg Watch Time</th></tr></thead>';
+    echo '<thead>
+            <tr>
+                <th>Post Title</th>
+                <th>Total Views</th>
+                <th>Today\'s Views</th>
+                <th>Avg Watch Time</th>
+            </tr>
+          </thead>';
     echo '<tbody>';
 
     foreach($all_posts as $post) {
+
         $total_views = get_total_views_by_meta($post->ID);
         $today_views = get_todays_views($post->ID);
         $yesterday_views = get_yesterdays_views($post->ID);
 
         // Trend calculation
         $trend_html = '';
-        if($yesterday_views > 0) {
+        if($yesterday_views > 0){
             $trend_percent = round((($today_views - $yesterday_views) / $yesterday_views) * 100, 1);
         } else {
             $trend_percent = $today_views > 0 ? 100 : 0;
@@ -516,20 +526,16 @@ if($active_tab=='reports') {
         if($trend_percent != 0) {
             $trend_icon = $trend_percent >= 0 ? '▲' : '▼';
             $trend_color = $trend_percent >= 0 ? '#27ae60' : '#e74c3c';
-            $trend_html = " <span style='color:$trend_color;font-weight:bold;'>$trend_icon ".abs($trend_percent)."%</span>";
+            $trend_html = " <span style='color:$trend_color;font-weight:bold;'>$trend_icon ".abs($trend_percent)." %</span>";
         }
 
         $avg_watch = format_watch_time(get_avg_watch_time($post->ID));
 
-        // Badge logic for total views
-        $badge_color = '#000';
+        // Badge color
+        $badge_color = '#34495e';
         if($total_views >= 200) $badge_color = 'green';
         elseif($total_views >= 100) $badge_color = 'orange';
         elseif($total_views >= 50)  $badge_color = 'tomato';
-        elseif($total_views < 50 && $total_views >= 40) $badge_color = '#8e44ad';
-        elseif($total_views < 40 && $total_views >= 30) $badge_color = '#d35400';
-        elseif($total_views < 30 && $total_views >= 20) $badge_color = '#c0392b';
-        else $badge_color = '#34495e';
 
         $total_views_html = "<span style='background-color:$badge_color;color:white;padding:2px 6px;border-radius:4px;'>$total_views</span>";
 
@@ -543,6 +549,7 @@ if($active_tab=='reports') {
 
     echo '</tbody></table>';
 }
+
 
 
 
