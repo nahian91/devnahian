@@ -385,42 +385,58 @@ function infinity_today_views_report_page(){
         echo '</div>';
     }
 
-if($active_tab=='reports'){
+if($active_tab=='reports') {
 
     // --------- Helper Functions ---------
-    function get_total_views_by_meta($post_id){
-        $keys = get_post_custom_keys($post_id);
-        if(!$keys) return 0;
+    if(!function_exists('get_total_views_by_meta')) {
+        function get_total_views_by_meta($post_id) {
+            $keys = get_post_custom_keys($post_id);
+            if(!$keys) return 0;
 
-        $total = 0;
-        foreach($keys as $key){
-            if(strpos($key,'_infinity_unique_views_')===0){
-                $views = get_post_meta($post_id, $key, true);
-                if(is_array($views)) $total += count($views);
+            $total = 0;
+            foreach($keys as $key){
+                if(strpos($key,'_infinity_unique_views_') === 0){
+                    $views = get_post_meta($post_id, $key, true);
+                    if(is_array($views)) $total += count($views);
+                }
             }
+            return $total;
         }
-        return $total;
     }
 
-    function get_todays_views($post_id){
-        $today = date('Y-m-d', current_time('timestamp'));
-        $views = get_post_meta($post_id,'_infinity_unique_views_'.$today,true);
-        return is_array($views) ? count($views) : 0;
+    if(!function_exists('get_todays_views')) {
+        function get_todays_views($post_id) {
+            $today = date('Y-m-d', current_time('timestamp'));
+            $views = get_post_meta($post_id,'_infinity_unique_views_'.$today,true);
+            return is_array($views) ? count($views) : 0;
+        }
     }
 
-    function get_yesterdays_views($post_id){
-        $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
-        $views = get_post_meta($post_id,'_infinity_unique_views_'.$yesterday,true);
-        return is_array($views) ? count($views) : 0;
+    if(!function_exists('get_yesterdays_views')) {
+        function get_yesterdays_views($post_id) {
+            $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
+            $views = get_post_meta($post_id,'_infinity_unique_views_'.$yesterday,true);
+            return is_array($views) ? count($views) : 0;
+        }
     }
 
-    function get_avg_watch_time($post_id){
-        $today = date('Y-m-d', current_time('timestamp'));
-        $watchers = get_post_meta($post_id,'_infinity_watch_time_'.$today,true);
-        if(!is_array($watchers) || empty($watchers)) return 0;
-        $total = array_sum($watchers);
-        $unique = count($watchers);
-        return $unique ? round($total/$unique) : 0;
+    if(!function_exists('get_avg_watch_time')) {
+        function get_avg_watch_time($post_id) {
+            $today = date('Y-m-d', current_time('timestamp'));
+            $watchers = get_post_meta($post_id,'_infinity_watch_time_'.$today,true);
+            if(!is_array($watchers) || empty($watchers)) return 0;
+            $total = array_sum($watchers);
+            $unique = count($watchers);
+            return $unique ? round($total/$unique) : 0;
+        }
+    }
+
+    if(!function_exists('format_watch_time')) {
+        function format_watch_time($seconds) {
+            $minutes = floor($seconds / 60);
+            $seconds = $seconds % 60;
+            return $minutes.'m '.$seconds.'s';
+        }
     }
 
     // --------- Get All Posts ---------
@@ -437,12 +453,17 @@ if($active_tab=='reports'){
         ['label'=>'Posts with 50+ Views All Time','count'=>0,'threshold'=>'all', 'value'=>50],
         ['label'=>'Posts with 100+ Views All Time','count'=>0,'threshold'=>'all', 'value'=>100],
         ['label'=>'Posts with 200+ Views All Time','count'=>0,'threshold'=>'all', 'value'=>200],
+        ['label'=>'Posts under 50 Views','count'=>0,'threshold'=>'all', 'value'=>50],
+        ['label'=>'Posts under 40 Views','count'=>0,'threshold'=>'all', 'value'=>40],
+        ['label'=>'Posts under 30 Views','count'=>0,'threshold'=>'all', 'value'=>30],
+        ['label'=>'Posts under 20 Views','count'=>0,'threshold'=>'all', 'value'=>20],
     ];
 
-    foreach($all_posts as $p){
-        // Today views
+    foreach($all_posts as $p) {
         $today_views_arr = get_post_meta($p->ID, '_infinity_unique_views_'.$today, true);
-        $today_views = is_array($today_views_arr)?count($today_views_arr):0;
+        $today_views = is_array($today_views_arr) ? count($today_views_arr) : 0;
+
+        // Today views
         if($today_views >= 10) $cards[0]['count']++;
 
         // All time views
@@ -450,21 +471,26 @@ if($active_tab=='reports'){
         if($total_views >= 50) $cards[1]['count']++;
         if($total_views >= 100) $cards[2]['count']++;
         if($total_views >= 200) $cards[3]['count']++;
+
+        // Under thresholds
+        foreach([4,5,6,7] as $i) {
+            if($total_views < $cards[$i]['value']) $cards[$i]['count']++;
+        }
     }
 
-    // Render Summary Cards
+    // --------- Render Summary Cards ---------
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
-    $colors = ['#0073aa','#16a085','#f39c12','#27ae60'];
-    foreach($cards as $i=>$c){
+    $colors = ['#0073aa','#16a085','#f39c12','#27ae60','#8e44ad','#d35400','#c0392b','#34495e'];
+    foreach($cards as $i => $c) {
         echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">';
-        echo '<h3 style="margin:0 0 10px;font-size:16px;">'.$c['label'].'</h3>';
-        echo '<p style="font-size:22px;font-weight:bold;color:'.$colors[$i].';">'.$c['count'].'</p>';
+        echo '<h3 style="margin:0 0 10px;font-size:16px;">'.esc_html($c['label']).'</h3>';
+        echo '<p style="font-size:22px;font-weight:bold;color:'.$colors[$i].';">'.intval($c['count']).'</p>';
         echo '</div>';
     }
     echo '</div>';
 
     // --------- Sort Posts by All Time Views ---------
-    usort($all_posts, function($a, $b){
+    usort($all_posts, function($a, $b) {
         return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
     });
 
@@ -474,40 +500,38 @@ if($active_tab=='reports'){
     echo '<thead><tr><th>Post Title</th><th>Total Views</th><th>Today\'s Views</th><th>Avg Watch Time</th></tr></thead>';
     echo '<tbody>';
 
-    foreach($all_posts as $post){
+    foreach($all_posts as $post) {
         $total_views = get_total_views_by_meta($post->ID);
         $today_views = get_todays_views($post->ID);
         $yesterday_views = get_yesterdays_views($post->ID);
 
         // Trend calculation
-        if($yesterday_views > 0){
-            $trend_percent = round((($today_views - $yesterday_views)/$yesterday_views)*100,1);
+        $trend_html = '';
+        if($yesterday_views > 0) {
+            $trend_percent = round((($today_views - $yesterday_views) / $yesterday_views) * 100, 1);
         } else {
             $trend_percent = $today_views > 0 ? 100 : 0;
         }
 
-        if($trend_percent != 0){
+        if($trend_percent != 0) {
             $trend_icon = $trend_percent >= 0 ? '▲' : '▼';
             $trend_color = $trend_percent >= 0 ? '#27ae60' : '#e74c3c';
             $trend_html = " <span style='color:$trend_color;font-weight:bold;'>$trend_icon ".abs($trend_percent)."%</span>";
-        } else {
-            $trend_html = '';
         }
 
         $avg_watch = format_watch_time(get_avg_watch_time($post->ID));
 
         // Badge logic for total views
-        $total_views_html = intval($total_views);
-        if($total_views >= 200){
-            $badge_color = 'green';
-        } elseif($total_views >= 100){
-            $badge_color = 'orange';
-        } elseif($total_views >= 50){
-            $badge_color = 'tomato';
-        } else {
-            $badge_color = 'black';
-        }
-        $total_views_html = "<span style='background-color:$badge_color;color:white;padding:2px 6px;border-radius:4px;'>$total_views_html</span>";
+        $badge_color = '#000';
+        if($total_views >= 200) $badge_color = 'green';
+        elseif($total_views >= 100) $badge_color = 'orange';
+        elseif($total_views >= 50)  $badge_color = 'tomato';
+        elseif($total_views < 50 && $total_views >= 40) $badge_color = '#8e44ad';
+        elseif($total_views < 40 && $total_views >= 30) $badge_color = '#d35400';
+        elseif($total_views < 30 && $total_views >= 20) $badge_color = '#c0392b';
+        else $badge_color = '#34495e';
+
+        $total_views_html = "<span style='background-color:$badge_color;color:white;padding:2px 6px;border-radius:4px;'>$total_views</span>";
 
         echo '<tr>';
         echo '<td><a href="'.esc_url(get_permalink($post->ID)).'" target="_blank">'.esc_html($post->post_title).'</a></td>';
@@ -519,6 +543,7 @@ if($active_tab=='reports'){
 
     echo '</tbody></table>';
 }
+
 
 
 // ----- Categories Tab -----
