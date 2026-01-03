@@ -241,6 +241,7 @@ function infinity_today_views_report_page(){
             <a href="?page=today-views-report&tab=30days" class="nav-tab <?php echo $active_tab=='30days'?'nav-tab-active':''; ?>">Last 30 Days</a>
             <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
             <a href="?page=today-views-report&tab=categories" class="nav-tab <?php echo $active_tab=='categories'?'nav-tab-active':''; ?>">Categories</a>
+            <a href="?page=today-views-report&tab=plugins" class="nav-tab <?php echo $active_tab=='plugins'?'nav-tab-active':''; ?>">Plugins</a>
         </h2>
         <div class="tab-content" style="margin-top:20px;">
     <?php
@@ -686,6 +687,116 @@ if ($active_tab == 'categories') {
 
     echo '</tbody>';
     echo '</table>';
+}
+
+if ($active_tab == 'plugins') {
+    $username  = 'nahian91';
+    $cache_key = 'wp_org_stats_full_' . $username;
+    
+    // 1. Try to get cached data to keep the page fast
+    $plugin_data_list = get_transient($cache_key);
+
+    if (false === $plugin_data_list) {
+        // 2. Fetch all plugins from the author
+        $list_url = "https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=$username&request[per_page]=100";
+        $list_response = wp_remote_get($list_url);
+
+        if (is_wp_error($list_response)) {
+            echo '<div class="notice notice-error"><p>Error connecting to WordPress.org API.</p></div>';
+            return;
+        }
+
+        $list_data = json_decode(wp_remote_retrieve_body($list_response));
+        $plugin_data_list = [];
+
+        if (!empty($list_data->plugins)) {
+            foreach ($list_data->plugins as $plugin) {
+                // 3. Fetch detailed daily stats for this specific plugin
+                // limit=3 ensures we get Today and Yesterday regardless of timezone resets
+                $stats_url = "https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug={$plugin->slug}&limit=3";
+                $stats_response = wp_remote_get($stats_url);
+                
+                $today_count = 0;
+                $yesterday_count = 0;
+
+                if (!is_wp_error($stats_response)) {
+                    $stats_raw = json_decode(wp_remote_retrieve_body($stats_response), true);
+                    
+                    if (!empty($stats_raw) && is_array($stats_raw)) {
+                        krsort($stats_raw); // Sort keys (dates) newest to oldest
+                        $counts = array_values($stats_raw);
+
+                        $today_count     = isset($counts[0]) ? (int)$counts[0] : 0;
+                        $yesterday_count = isset($counts[1]) ? (int)$counts[1] : 0;
+                    }
+                }
+
+                $plugin_data_list[] = [
+                    'name'      => $plugin->name,
+                    'slug'      => $plugin->slug,
+                    'today'     => $today_count,
+                    'yesterday' => $yesterday_count,
+                    'all_time'  => $plugin->downloaded,
+                    'active'    => $plugin->active_installs
+                ];
+            }
+
+            // 4. Order the list by TODAY'S downloads (highest first)
+            usort($plugin_data_list, function($a, $b) {
+                return $b['today'] <=> $a['today'];
+            });
+
+            // Cache the final processed array for 12 hours
+            set_transient($cache_key, $plugin_data_list, 12 * HOUR_IN_SECONDS);
+        }
+    }
+
+    // --- RENDER TABLE ---
+    if (!empty($plugin_data_list)) {
+        echo '<h2>Plugin Performance: ' . esc_html($username) . '</h2>';
+        echo '<table class="wp-list-table widefat fixed striped" style="margin-top:20px; border-radius: 5px; overflow: hidden;">';
+        echo '<thead>
+                <tr>
+                    <th style="font-weight:bold;">Plugin Name</th>
+                    <th style="width:100px;">Today</th>
+                    <th style="width:100px;">Yesterday</th>
+                    <th style="width:130px;">Trend (vs Yesterday)</th>
+                    <th style="width:120px;">Active Installs</th>
+                    <th style="width:120px;">All Time</th>
+                </tr>
+              </thead>';
+        echo '<tbody>';
+
+        foreach ($plugin_data_list as $plugin) {
+            $today = $plugin['today'];
+            $yesterday = $plugin['yesterday'];
+            $diff = $today - $yesterday;
+            
+            // Calculate Growth/Decline Indicator
+            $trend_html = '<span style="color:#999;">—</span>';
+            if ($diff > 0) {
+                $pct = ($yesterday > 0) ? round(($diff / $yesterday) * 100) : 100;
+                $trend_html = "<span style='color:#46b450; font-weight:bold;'>▲ {$pct}%</span> <small>(+{$diff})</small>";
+            } elseif ($diff < 0) {
+                $pct = ($yesterday > 0) ? abs(round(($diff / $yesterday) * 100)) : 0;
+                $trend_html = "<span style='color:#dc3232; font-weight:bold;'>▼ {$pct}%</span> <small>({$diff})</small>";
+            }
+
+            echo "<tr>
+                    <td><strong><a href='https://wordpress.org/plugins/{$plugin['slug']}/' target='_blank' style='text-decoration:none;'>{$plugin['name']}</a></strong></td>
+                    <td style='font-size:1.1em; font-weight:bold; color:#2271b1;'>" . number_format($today) . "</td>
+                    <td>" . number_format($yesterday) . "</td>
+                    <td>{$trend_html}</td>
+                    <td>" . (is_numeric($plugin['active']) ? number_format($plugin['active']) : $plugin['active']) . "</td>
+                    <td>" . number_format($plugin['all_time']) . "</td>
+                  </tr>";
+        }
+
+        echo '</tbody></table>';
+        echo '<p style="color:#777; font-size:11px; margin-top:10px;">Data is synced with WordPress.org and cached for 12 hours.</p>';
+    } else {
+        echo '<p>No plugins found for user <strong>' . esc_html($username) . '</strong>.</p>';
+    }
 }
 
 
