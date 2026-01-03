@@ -9,49 +9,131 @@
 <aside id="secondary" class="sidebar widget-area" role="complementary">
 
 <?php if ( is_single() ) : ?>
-
-    <!-- Table of Contents Widget -->
-    <div class="widget toc-widget sticky-toc">
+<div class="widget">
         <div class="section-title">
-            <h5><?php esc_html_e( 'Table of Contents', 'textdomain' ); ?></h5>
+            <h5><?php esc_html_e( 'Learn with Me', 'textdomain' ); ?></h5>
         </div>
+            <div class="yt-channel">
+                <a href="https://www.youtube.com/@abdullahnahian?sub_confirmation=1" class="yt-sub-button" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" width="20">
+    Code with Abdullah Nahian
+</a>
+            </div>
+</div>
 
-        <div id="post-toc">
-            <?php
-            global $post;
+<style>
+    .yt-channel{
+        text-align: center;
+    }
+    .yt-sub-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #FF0000;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: sans-serif;
+    transition: background 0.3s;
+}
+.yt-sub-button:hover {
+    background-color: #cc0000;
+    color: #fff;
+}
+</style>
 
-            // Parse Gutenberg blocks
-            $blocks = parse_blocks( $post->post_content );
-            $toc_items = [];
-
-            foreach ( $blocks as $block ) {
-                // Only Theme Collections blocks
-                if ( $block['blockName'] === 'acf/theme-collections' ) {
-                    $title = $block['attrs']['data']['title'] ?? '';
-                    if ( $title ) {
-                        $id = sanitize_title( $title );
-                        $toc_items[] = [
-                            'title' => $title,
-                            'id'    => $id,
-                        ];
-                    }
-                }
-            }
-
-            if ( ! empty( $toc_items ) ) :
-                echo '<ul class="toc-list">';
-                foreach ( $toc_items as $item ) :
-                    echo '<li><a href="#' . esc_attr( $item['id'] ) . '">' . esc_html( $item['title'] ) . '</a></li>';
-                endforeach;
-                echo '</ul>';
-            else :
-                echo '<p>' . esc_html__( 'No headings found in this post.', 'textdomain' ) . '</p>';
-            endif;
-            ?>
-        </div>
+<!-- Latest Courses Widget -->
+    <div class="widget">
+    <div class="section-title">
+        <h5><?php esc_html_e( 'WordPress Free Plugins', 'textdomain' ); ?></h5>
     </div>
+    <ul class="widget-post-box" id="plugin-widget-list">
+        <li style="font-size: 13px; color: #666; padding: 10px;">Checking installations...</li>
+    </ul>
+    
+    <div class="widget-btn-wrapper" style="margin-top: 15px; text-align: center;">
+        <a href="https://profiles.wordpress.org/nahian91/#content-plugins" target="_blank" class="view-all-plugins-btn">
+            View All Plugins
+        </a>
+    </div>
+</div>
 
-<?php else : ?>
+<script>
+    (async function() {
+        const authorSlug = 'nahian91';
+        const proxy = 'https://corsproxy.io/?'; 
+        const widgetContainer = document.getElementById('plugin-widget-list');
+
+        try {
+            // Fetch plugins with icons, download counts, and active install data
+            const apiUrl = `${proxy}${encodeURIComponent(`https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=${authorSlug}&request[fields][icons]=1&request[fields][active_installs]=1&request[fields][downloaded]=1`)}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data.plugins && data.plugins.length > 0) {
+                // 1. Filter: Only plugins with 10 or more active installs
+                const filteredPlugins = data.plugins.filter(plugin => plugin.active_installs >= 10);
+
+                // 2. Sort by TOTAL downloads (Descending)
+                const sortedPlugins = filteredPlugins.sort((a, b) => b.downloaded - a.downloaded);
+                
+                // 3. Take only the top 5
+                const topFive = sortedPlugins.slice(0, 5);
+                
+                widgetContainer.innerHTML = ''; 
+
+                if (topFive.length === 0) {
+                    widgetContainer.innerHTML = '<li>No plugins with 10+ installs found.</li>';
+                    return;
+                }
+
+                topFive.forEach(plugin => {
+                    const pluginLink = `https://wordpress.org/plugins/${plugin.slug}`;
+                    const iconUrl = plugin.icons['1x'] || 'https://s.w.org/plugins/geopattern-icon/default.svg';
+
+                    widgetContainer.innerHTML += `
+                        <li style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div class="widget-post-box-image">
+                                <a href="${pluginLink}" target="_blank" style="display: block; width: 50px; height: 50px; background-image: url('${iconUrl}'); background-size: cover; border-radius: 6px; background-position: center; border: 1px solid #eee;"></a>
+                            </div>
+                            <div class="widget-post-box-content" style="padding-left: 12px;">
+                                <p style="margin: 0; font-size: 14px; font-weight: 600;">
+                                    <a href="${pluginLink}" target="_blank" style="text-decoration: none; color: #333;">${plugin.name}</a>
+                                </p>
+                                <small style="color: #ff0000; font-size: 11px; font-weight: bold;">
+                                    ${plugin.active_installs.toLocaleString()}+ Active Installs
+                                </small>
+                            </div>
+                        </li>
+                    `;
+                });
+            } else {
+                widgetContainer.innerHTML = '<li>No plugins found.</li>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            widgetContainer.innerHTML = '<li>Error loading plugins.</li>';
+        }
+    })();
+</script>
+
+<style>
+    .view-all-plugins-btn {
+        display: inline-block;
+        padding: 8px 20px;
+        background-color: #2271b1;
+        color: #fff !important;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+    }
+    .view-all-plugins-btn:hover { background-color: #135e96; }
+    .widget-post-box { list-style: none; padding: 0; margin: 0; }
+</style>
 
     <!-- Latest Courses Widget -->
     <div class="widget">
@@ -90,6 +172,9 @@
             ?>
         </ul>
     </div>
+<?php else : ?>
+
+    
 
     <!-- Categories Widget -->
     <div class="widget">
