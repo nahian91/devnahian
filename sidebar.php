@@ -14,7 +14,7 @@
             <h5><?php esc_html_e( 'Learn with Me', 'textdomain' ); ?></h5>
         </div>
             <div class="yt-channel">
-                <a href="https://www.youtube.com/@abdullahnahian?sub_confirmation=1" class="yt-sub-button" target="_blank">
+                <a href="https://www.youtube.com/@codewithAbdullahNahian?sub_confirmation=1" class="yt-sub-button" target="_blank">
     <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" width="20">
     Code with Abdullah Nahian
 </a>
