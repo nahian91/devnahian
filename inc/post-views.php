@@ -389,6 +389,7 @@ function infinity_today_views_report_page(){
 if($active_tab=='reports') {
 
     // --------- Helper Functions ---------
+    // (Existing functions remain unchanged)
     if(!function_exists('get_total_views_by_meta')) {
         function get_total_views_by_meta($post_id) {
             $keys = get_post_custom_keys($post_id);
@@ -447,14 +448,13 @@ if($active_tab=='reports') {
         'numberposts' => -1,
     ]);
 
-    // --------- Summary Cards (New Version) ---------
+    // --------- Summary Cards (Updated Version) ---------
 
     $total_posts_count = count($all_posts);
 
-    // Threshold list
-    $thresholds = [10,20,30,40,50,60,100];
+    // Added 200 and 300 to this list
+    $thresholds = [10, 20, 30, 40, 50, 60, 100, 200, 300]; 
 
-    // Prepare cards array
     $cards = [
         ['label' => 'Total Posts', 'count' => $total_posts_count]
     ];
@@ -467,13 +467,12 @@ if($active_tab=='reports') {
         ];
     }
 
-    // Count logic
     foreach ($all_posts as $p) {
         $total_views = get_total_views_by_meta($p->ID);
 
         foreach($thresholds as $i => $t) {
             if ($total_views >= $t) {
-                $cards[$i + 1]['count']++; // +1 because index 0 is total posts
+                $cards[$i + 1]['count']++; 
             }
         }
     }
@@ -481,7 +480,8 @@ if($active_tab=='reports') {
     // --------- Render Summary Cards ---------
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
 
-    $colors = ['#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12','#e67e22','#e74c3c','#2ecc71'];
+    // Added two extra colors for the new cards
+    $colors = ['#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12','#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b'];
 
     foreach($cards as $i => $c) {
         echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">';
@@ -498,6 +498,7 @@ if($active_tab=='reports') {
     });
 
     // --------- Posts Table ---------
+    // (Existing table logic remains unchanged)
     echo '<h2>📊 All Posts by Views</h2>';
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead>
@@ -516,7 +517,6 @@ if($active_tab=='reports') {
         $today_views = get_todays_views($post->ID);
         $yesterday_views = get_yesterdays_views($post->ID);
 
-        // Trend calculation
         $trend_html = '';
         if($yesterday_views > 0){
             $trend_percent = round((($today_views - $yesterday_views) / $yesterday_views) * 100, 1);
@@ -532,7 +532,6 @@ if($active_tab=='reports') {
 
         $avg_watch = format_watch_time(get_avg_watch_time($post->ID));
 
-        // Badge color
         $badge_color = '#34495e';
         if($total_views >= 200) $badge_color = 'green';
         elseif($total_views >= 100) $badge_color = 'orange';
@@ -550,7 +549,6 @@ if($active_tab=='reports') {
 
     echo '</tbody></table>';
 }
-
 
 
 
