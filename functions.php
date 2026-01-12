@@ -349,3 +349,38 @@ function disable_comments_hide_existing($comments) {
     return [];
 }
 add_filter('comments_array', 'disable_comments_hide_existing', 10, 2);
+
+// 1. Add the column to the Post list table
+add_filter( 'manage_posts_columns', 'devnahian_add_post_admin_thumbnail_column' );
+function devnahian_add_post_admin_thumbnail_column( $columns ) {
+    $columns['devnahian_post_thumb'] = esc_html__( 'Featured Image', 'devnahian' );
+    return $columns;
+}
+
+// 2. Output the featured image into the new column
+add_action( 'manage_posts_custom_column', 'devnahian_show_post_admin_thumbnail_column', 10, 2 );
+function devnahian_show_post_admin_thumbnail_column( $column, $post_id ) {
+    if ( 'devnahian_post_thumb' === $column ) {
+        if ( has_post_thumbnail( $post_id ) ) {
+            echo get_the_post_thumbnail( $post_id, array( 50, 50 ) );
+        } else {
+            echo esc_html__( 'No Image', 'devnahian' );
+        }
+    }
+}
+
+// 3. Optional: Add CSS to make the thumbnail look better in the admin panel
+add_action( 'admin_head', 'devnahian_admin_column_css' );
+function devnahian_admin_column_css() {
+    echo '<style>
+        .column-devnahian_post_thumb img {
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            max-width: 50px;
+            height: auto;
+        }
+        .column-devnahian_post_thumb {
+            width: 60px;
+        }
+    </style>';
+}
