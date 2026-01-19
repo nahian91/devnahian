@@ -384,3 +384,55 @@ function devnahian_admin_column_css() {
         }
     </style>';
 }
+
+
+/**
+ * 1. Add the "Collections" column to the Posts admin list
+ */
+add_filter('manage_posts_columns', 'add_acf_collection_column');
+function add_acf_collection_column($columns) {
+    // This adds the column header to the admin panel
+    $columns['theme_col_count'] = 'Collections'; 
+    return $columns;
+}
+
+/**
+ * 2. Count the specific ACF block 'acf/theme-collections'
+ */
+add_action('manage_posts_custom_column', 'display_acf_collection_column', 10, 2);
+function display_acf_collection_column($column, $post_id) {
+    if ($column === 'theme_col_count') {
+        $post = get_post($post_id);
+        
+        // Ensure there is content to parse
+        if (empty($post->post_content)) {
+            echo '0';
+            return;
+        }
+
+        $blocks = parse_blocks($post->post_content);
+        $target_block = 'acf/theme-collections'; // The ACF name
+        $count = 0;
+
+        // Recursive function to find the block even inside Groups/Columns
+        $count_blocks_recursive = function($blocks) use (&$count, $target_block, &$count_blocks_recursive) {
+            foreach ($blocks as $block) {
+                if ($block['blockName'] === $target_block) {
+                    $count++;
+                }
+                if (!empty($block['innerBlocks'])) {
+                    $count_blocks_recursive($block['innerBlocks']);
+                }
+            }
+        };
+
+        $count_blocks_recursive($blocks);
+
+        // Highlight with a badge if count is greater than 0
+        if ($count > 0) {
+            echo '<span style="background:#2271b1; color:#fff; padding:2px 8px; border-radius:10px; font-weight:bold;">' . $count . '</span>';
+        } else {
+            echo '<span style="color:#999;">0</span>';
+        }
+    }
+}
