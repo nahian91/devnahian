@@ -386,119 +386,178 @@ function infinity_today_views_report_page(){
         echo '</div>';
     }
 
-if($active_tab=='reports') {
+if ($active_tab == 'reports') {
 
     // --------- Helper Functions ---------
-    // (Existing functions remain unchanged)
-    if(!function_exists('get_total_views_by_meta')) {
+
+    if (!function_exists('get_total_views_by_meta')) {
         function get_total_views_by_meta($post_id) {
             $keys = get_post_custom_keys($post_id);
-            if(!$keys) return 0;
+            if (!$keys) return 0;
 
             $total = 0;
-            foreach($keys as $key){
-                if(strpos($key,'_infinity_unique_views_') === 0){
+            foreach ($keys as $key) {
+                if (strpos($key, '_infinity_unique_views_') === 0) {
                     $views = get_post_meta($post_id, $key, true);
-                    if(is_array($views)) $total += count($views);
+                    if (is_array($views)) {
+                        $total += count($views);
+                    }
                 }
             }
             return $total;
         }
     }
 
-    if(!function_exists('get_todays_views')) {
+    if (!function_exists('get_todays_views')) {
         function get_todays_views($post_id) {
             $today = date('Y-m-d', current_time('timestamp'));
-            $views = get_post_meta($post_id,'_infinity_unique_views_'.$today,true);
+            $views = get_post_meta($post_id, '_infinity_unique_views_' . $today, true);
             return is_array($views) ? count($views) : 0;
         }
     }
 
-    if(!function_exists('get_yesterdays_views')) {
+    if (!function_exists('get_yesterdays_views')) {
         function get_yesterdays_views($post_id) {
             $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
-            $views = get_post_meta($post_id,'_infinity_unique_views_'.$yesterday,true);
+            $views = get_post_meta($post_id, '_infinity_unique_views_' . $yesterday, true);
             return is_array($views) ? count($views) : 0;
         }
     }
 
-    if(!function_exists('get_avg_watch_time')) {
+    if (!function_exists('get_avg_watch_time')) {
         function get_avg_watch_time($post_id) {
             $today = date('Y-m-d', current_time('timestamp'));
-            $watchers = get_post_meta($post_id,'_infinity_watch_time_'.$today,true);
-            if(!is_array($watchers) || empty($watchers)) return 0;
+            $watchers = get_post_meta($post_id, '_infinity_watch_time_' . $today, true);
+            if (!is_array($watchers) || empty($watchers)) return 0;
+
             $total = array_sum($watchers);
             $unique = count($watchers);
-            return $unique ? round($total/$unique) : 0;
+            return $unique ? round($total / $unique) : 0;
         }
     }
 
-    if(!function_exists('format_watch_time')) {
+    if (!function_exists('format_watch_time')) {
         function format_watch_time($seconds) {
             $minutes = floor($seconds / 60);
             $seconds = $seconds % 60;
-            return $minutes.'m '.$seconds.'s';
+            return $minutes . 'm ' . $seconds . 's';
+        }
+    }
+
+    // --------- ACF Collection Counter ---------
+
+    if (!function_exists('get_theme_collection_block_count')) {
+        function get_theme_collection_block_count($post_id) {
+            $post = get_post($post_id);
+            if (empty($post->post_content)) return 0;
+
+            $blocks = parse_blocks($post->post_content);
+            $target = 'acf/theme-collections';
+            $count = 0;
+
+            $walker = function ($blocks) use (&$count, $target, &$walker) {
+                foreach ($blocks as $block) {
+                    if (!empty($block['blockName']) && $block['blockName'] === $target) {
+                        $count++;
+                    }
+                    if (!empty($block['innerBlocks'])) {
+                        $walker($block['innerBlocks']);
+                    }
+                }
+            };
+
+            $walker($blocks);
+            return $count;
         }
     }
 
     // --------- Get All Posts ---------
+
     $all_posts = get_posts([
         'post_type'   => 'post',
         'post_status' => 'publish',
         'numberposts' => -1,
     ]);
 
-    // --------- Summary Cards (Updated Version) ---------
+    // --------- Summary Cards ---------
 
-    $total_posts_count = count($all_posts);
-
-    // Added 200 and 300 to this list
-    $thresholds = [10, 20, 30, 40, 50, 60, 100, 200, 300]; 
+    $thresholds = [10, 20, 30, 40, 50, 60, 100, 200, 300];
 
     $cards = [
-        ['label' => 'Total Posts', 'count' => $total_posts_count]
+        ['label' => 'Total Posts', 'count' => count($all_posts)]
     ];
 
     foreach ($thresholds as $t) {
         $cards[] = [
             'label' => "Total {$t}+ Post Views",
             'count' => 0,
+            'today' => 0,
             'value' => $t
         ];
     }
 
+    // ➕ NEW COLLECTION CARD (AFTER 300+)
+    $cards[] = [
+        'label' => 'Posts with < 5 Collections',
+        'count' => 0,
+        'today' => 0,
+        'is_collection_card' => true
+    ];
+
     foreach ($all_posts as $p) {
+
         $total_views = get_total_views_by_meta($p->ID);
 
-        foreach($thresholds as $i => $t) {
+        foreach ($thresholds as $i => $t) {
             if ($total_views >= $t) {
-                $cards[$i + 1]['count']++; 
+                $cards[$i + 1]['count']++;
             }
+        }
+
+        // Collection logic
+        $collection_count = get_theme_collection_block_count($p->ID);
+        if ($collection_count < 5) {
+            $cards[count($cards) - 1]['count']++;
         }
     }
 
     // --------- Render Summary Cards ---------
+
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
 
-    // Added two extra colors for the new cards
-    $colors = ['#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12','#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b'];
+    $colors = [
+        '#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12',
+        '#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b',
+        '#8e44ad'
+    ];
 
-    foreach($cards as $i => $c) {
-        echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">';
-        echo '<h3 style="margin:0 0 10px;font-size:16px;">'.esc_html($c['label']).'</h3>';
-        echo '<p style="font-size:22px;font-weight:bold;color:'.$colors[$i].';">'.intval($c['count']).'</p>';
+    foreach ($cards as $i => $c) {
+        $today = isset($c['today']) ? intval($c['today']) : 0;
+
+        echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;
+                    box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">';
+
+        echo '<h3 style="margin:0 0 10px;font-size:16px;">' . esc_html($c['label']) . '</h3>';
+
+        echo '<p style="font-size:22px;font-weight:bold;color:' . ($colors[$i] ?? '#333') . ';">';
+        echo intval($c['count']);
+        echo " <span style='background:#27ae60;color:#fff;font-size:12px;
+                padding:2px 6px;border-radius:12px;margin-left:6px;'>+{$today} today</span>";
+        echo '</p>';
+
         echo '</div>';
     }
 
     echo '</div>';
 
-    // --------- Sort Posts by All Time Views ---------
-    usort($all_posts, function($a, $b) {
+    // --------- Sort Posts ---------
+
+    usort($all_posts, function ($a, $b) {
         return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
     });
 
     // --------- Posts Table ---------
-    // (Existing table logic remains unchanged)
+
     echo '<h2>📊 All Posts by Views</h2>';
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead>
@@ -508,47 +567,42 @@ if($active_tab=='reports') {
                 <th>Today\'s Views</th>
                 <th>Avg Watch Time</th>
             </tr>
-          </thead>';
-    echo '<tbody>';
+          </thead><tbody>';
 
-    foreach($all_posts as $post) {
+    foreach ($all_posts as $post) {
 
         $total_views = get_total_views_by_meta($post->ID);
         $today_views = get_todays_views($post->ID);
         $yesterday_views = get_yesterdays_views($post->ID);
 
-        $trend_html = '';
-        if($yesterday_views > 0){
+        if ($yesterday_views > 0) {
             $trend_percent = round((($today_views - $yesterday_views) / $yesterday_views) * 100, 1);
         } else {
             $trend_percent = $today_views > 0 ? 100 : 0;
         }
 
-        if($trend_percent != 0) {
-            $trend_icon = $trend_percent >= 0 ? '▲' : '▼';
-            $trend_color = $trend_percent >= 0 ? '#27ae60' : '#e74c3c';
-            $trend_html = " <span style='color:$trend_color;font-weight:bold;'>$trend_icon ".abs($trend_percent)." %</span>";
+        $trend_html = '';
+        if ($trend_percent != 0) {
+            $trend_html = " <span style='color:" . ($trend_percent >= 0 ? '#27ae60' : '#e74c3c') . ";font-weight:bold;'>" .
+                          ($trend_percent >= 0 ? '▲' : '▼') . " " . abs($trend_percent) . "%</span>";
         }
 
-        $avg_watch = format_watch_time(get_avg_watch_time($post->ID));
-
         $badge_color = '#34495e';
-        if($total_views >= 200) $badge_color = 'green';
-        elseif($total_views >= 100) $badge_color = 'orange';
-        elseif($total_views >= 50)  $badge_color = 'tomato';
-
-        $total_views_html = "<span style='background-color:$badge_color;color:white;padding:2px 6px;border-radius:4px;'>$total_views</span>";
+        if ($total_views >= 200) $badge_color = 'green';
+        elseif ($total_views >= 100) $badge_color = 'orange';
+        elseif ($total_views >= 50) $badge_color = 'tomato';
 
         echo '<tr>';
-        echo '<td><a href="'.esc_url(get_permalink($post->ID)).'" target="_blank">'.esc_html($post->post_title).'</a></td>';
-        echo '<td>'.$total_views_html.'</td>';
-        echo '<td>'.intval($today_views).$trend_html.'</td>';
-        echo '<td>'.esc_html($avg_watch).'</td>';
+        echo '<td><a href="' . esc_url(get_permalink($post->ID)) . '" target="_blank">' . esc_html($post->post_title) . '</a></td>';
+        echo '<td><span style="background:' . $badge_color . ';color:#fff;padding:2px 6px;border-radius:4px;">' . $total_views . '</span></td>';
+        echo '<td>' . $today_views . $trend_html . '</td>';
+        echo '<td>' . esc_html(format_watch_time(get_avg_watch_time($post->ID))) . '</td>';
         echo '</tr>';
     }
 
     echo '</tbody></table>';
 }
+
 
 
 
@@ -795,12 +849,7 @@ if ($active_tab == 'plugins') {
     } else {
         echo '<p>No plugins found for user <strong>' . esc_html($username) . '</strong>.</p>';
     }
-}
-
-
-
-
-    
+}  
 
     echo '</div></div>';
 }
