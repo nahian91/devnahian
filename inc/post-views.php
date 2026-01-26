@@ -396,14 +396,11 @@ if ($active_tab == 'reports') {
         function get_total_views_by_meta($post_id) {
             $keys = get_post_custom_keys($post_id);
             if (!$keys) return 0;
-
             $total = 0;
             foreach ($keys as $key) {
                 if (strpos($key, '_infinity_unique_views_') === 0) {
                     $views = get_post_meta($post_id, $key, true);
-                    if (is_array($views)) {
-                        $total += count($views);
-                    }
+                    if (is_array($views)) $total += count($views);
                 }
             }
             return $total;
@@ -445,22 +442,15 @@ if ($active_tab == 'reports') {
         function get_theme_collection_block_count($post_id) {
             $post = get_post($post_id);
             if (empty($post->post_content)) return 0;
-
             $blocks = parse_blocks($post->post_content);
             $target = 'acf/theme-collections';
             $count  = 0;
-
             $walker = function ($blocks) use (&$count, $target, &$walker) {
                 foreach ($blocks as $block) {
-                    if (!empty($block['blockName']) && $block['blockName'] === $target) {
-                        $count++;
-                    }
-                    if (!empty($block['innerBlocks'])) {
-                        $walker($block['innerBlocks']);
-                    }
+                    if (!empty($block['blockName']) && $block['blockName'] === $target) $count++;
+                    if (!empty($block['innerBlocks'])) $walker($block['innerBlocks']);
                 }
             };
-
             $walker($blocks);
             return $count;
         }
@@ -505,38 +495,29 @@ if ($active_tab == 'reports') {
         $total_views = get_total_views_by_meta($p->ID);
 
         foreach ($thresholds as $i => $t) {
-            if ($total_views >= $t) {
-                $cards[$i + 1]['count']++;
-            }
+            if ($total_views >= $t) $cards[$i + 1]['count']++;
         }
 
-        if (get_theme_collection_block_count($p->ID) < 5) {
-            $cards[count($cards) - 1]['count']++;
-        }
+        if (get_theme_collection_block_count($p->ID) < 5) $cards[count($cards) - 1]['count']++;
     }
 
     /* --------------------------------
-     * Render Cards
+     * Render Summary Cards
      * -------------------------------- */
 
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
-
     $colors = [
         '#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12',
         '#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b','#8e44ad','#16a085','#2980b9','#c0392b','#8e44ad'
     ];
-
     foreach ($cards as $i => $c) {
         echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;
             box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center;">';
-
         echo '<h3 style="margin-bottom:10px;">' . esc_html($c['label']) . '</h3>';
         echo '<p style="font-size:22px;font-weight:bold;color:' . ($colors[$i] ?? '#333') . ';">';
         echo intval($c['count']);
-        echo '</p>';
-        echo '</div>';
+        echo '</p></div>';
     }
-
     echo '</div>';
 
     /* --------------------------------
@@ -564,29 +545,29 @@ if ($active_tab == 'reports') {
 
     $rank = 1;
 
+    // Load yesterday's rank from post meta
+    $yesterday_ranks = [];
+    foreach ($all_posts as $p) {
+        $yesterday_ranks[$p->ID] = intval(get_post_meta($p->ID, '_yesterday_rank', true));
+    }
+
     foreach ($all_posts as $post) {
         $total = get_total_views_by_meta($post->ID);
         $today = get_todays_views($post->ID);
-        $yesterday = get_yesterdays_views($post->ID);
 
-        $trend_html = '';
-        if ($yesterday > 0) {
-            $trend = round((($today - $yesterday) / $yesterday) * 100, 1);
-            if ($trend != 0) {
-                $trend_html = "<span style='color:" . ($trend > 0 ? '#27ae60' : '#e74c3c') . ";font-weight:bold;'> " .
-                               ($trend > 0 ? '▲' : '▼') . " " . abs($trend) . "%</span>";
-            }
-        } elseif ($today > 0) {
-            $trend_html = "<span style='color:#27ae60;font-weight:bold;'> ▲ 100%</span>";
+        // Rank increment (only show if moved up)
+        $prev_rank = $yesterday_ranks[$post->ID] ?? $rank;
+        $rank_increment_html = '';
+        if ($prev_rank > $rank) {
+            $increment = $prev_rank - $rank;
+            $rank_increment_html = ' <span style="color:#27ae60;font-weight:bold;">▲ +' . $increment . '</span>';
         }
 
         // Categories
         $cats = get_the_category($post->ID);
-        $cat_html = !empty($cats)
-            ? esc_html(implode(', ', wp_list_pluck($cats, 'name')))
-            : '—';
+        $cat_html = !empty($cats) ? esc_html(implode(', ', wp_list_pluck($cats, 'name'))) : '—';
 
-        // Total Views badge color
+        // Total Views badge
         $badge_color = '';
         if ($total >= 500)      $badge_color = '#8e44ad';
         elseif ($total >= 400)  $badge_color = '#c0392b';
@@ -595,17 +576,16 @@ if ($active_tab == 'reports') {
         elseif ($total >= 100)  $badge_color = '#27ae60';
 
         echo '<tr>';
-        echo '<td><strong>' . $rank . '</strong>' . ($today > $yesterday ? ' <span style="color:#27ae60;">▲</span>' : ($today < $yesterday ? ' <span style="color:#e74c3c;">▼</span>' : '')) . '</td>';
+        echo '<td><strong>' . $rank . '</strong>' . $rank_increment_html . '</td>';
         echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
         echo '<td>' . $cat_html . '</td>';
-        if ($badge_color) {
-            echo '<td><span style="background:' . $badge_color . ';color:#fff;padding:4px 10px;border-radius:20px;font-weight:bold;">' . $total . '</span></td>';
-        } else {
-            echo '<td>' . $total . '</td>';
-        }
-        echo '<td>' . $today . $trend_html . '</td>';
+        echo '<td>' . ($badge_color ? '<span style="background:' . $badge_color . ';color:#fff;padding:4px 10px;border-radius:20px;font-weight:bold;">' . $total . '</span>' : $total) . '</td>';
+        echo '<td>' . $today . '</td>';
         echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
         echo '</tr>';
+
+        // Save today's rank for tomorrow
+        update_post_meta($post->ID, '_yesterday_rank', $rank);
 
         $rank++;
     }
