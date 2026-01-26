@@ -478,10 +478,10 @@ if ($active_tab == 'reports') {
     ]);
 
     /* --------------------------------
-     * Summary Cards (Thresholds)
+     * Summary Cards
      * -------------------------------- */
 
-    $thresholds = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500];
+    $thresholds = [10,20,30,40,50,60,70,80,90,100,200,300,400,500];
 
     $cards = [
         ['label' => 'Total Posts', 'count' => count($all_posts)]
@@ -495,7 +495,6 @@ if ($active_tab == 'reports') {
         ];
     }
 
-    // Collection card
     $cards[] = [
         'label' => 'Posts with < 5 Collections',
         'count' => 0,
@@ -516,15 +515,12 @@ if ($active_tab == 'reports') {
         }
     }
 
-    /* --------------------------------
-     * Render Cards
-     * -------------------------------- */
-
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
 
     $colors = [
         '#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12',
-        '#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b','#8e44ad','#16a085','#2980b9','#c0392b','#8e44ad'
+        '#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b',
+        '#8e44ad','#16a085','#2980b9','#c0392b','#8e44ad'
     ];
 
     foreach ($cards as $i => $c) {
@@ -534,8 +530,7 @@ if ($active_tab == 'reports') {
         echo '<h3 style="margin-bottom:10px;">' . esc_html($c['label']) . '</h3>';
         echo '<p style="font-size:22px;font-weight:bold;color:' . ($colors[$i] ?? '#333') . ';">';
         echo intval($c['count']);
-        echo '</p>';
-        echo '</div>';
+        echo '</p></div>';
     }
 
     echo '</div>';
@@ -553,38 +548,71 @@ if ($active_tab == 'reports') {
      * -------------------------------- */
 
     echo '<h2>📊 All Posts by Views</h2>';
-    echo '<table class="wp-list-table widefat fixed striped"><thead>
-        <tr>
-            <th>Post Title</th>
-            <th>Total Views</th>
-            <th>Today\'s Views</th>
-            <th>Avg Watch Time</th>
-        </tr></thead><tbody>';
+    echo '<table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th># Rank / Post Title</th>
+                <th>Total Views</th>
+                <th>Today\'s Views</th>
+                <th>Avg Watch Time</th>
+            </tr>
+        </thead>
+        <tbody>';
+
+    $rank = 1;
 
     foreach ($all_posts as $post) {
-        $total = get_total_views_by_meta($post->ID);
-        $today = get_todays_views($post->ID);
-        $yesterday = get_yesterdays_views($post->ID);
+
+        $total      = get_total_views_by_meta($post->ID);
+        $today      = get_todays_views($post->ID);
+        $yesterday  = get_yesterdays_views($post->ID);
 
         $trend = ($yesterday > 0)
             ? round((($today - $yesterday) / $yesterday) * 100, 1)
             : ($today > 0 ? 100 : 0);
 
         $trend_html = $trend
-            ? "<span style='color:" . ($trend > 0 ? '#27ae60' : '#e74c3c') . ";font-weight:bold;'> " .
-              ($trend > 0 ? '▲' : '▼') . " " . abs($trend) . "%</span>"
+            ? "<span style='color:" . ($trend > 0 ? '#27ae60' : '#e74c3c') . ";font-weight:bold;'>
+                " . ($trend > 0 ? '▲' : '▼') . " " . abs($trend) . "%
+              </span>"
             : '';
 
         echo '<tr>';
-        echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
-        echo '<td>' . $total . '</td>';
-        echo '<td>' . $today . $trend_html . '</td>';
+
+        echo '<td>
+            <strong>#' . $rank . '</strong> 
+            <a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">
+                ' . esc_html($post->post_title) . '
+            </a>
+        </td>';
+
+        if ($total > 100) {
+            echo '<td>
+                <span style="
+                    background:#27ae60;
+                    color:#fff;
+                    padding:4px 10px;
+                    border-radius:20px;
+                    font-weight:bold;
+                    display:inline-block;">
+                    ' . $total . '
+                </span>
+            </td>';
+        } else {
+            echo '<td>' . $total . '</td>';
+        }
+
+        echo '<td>' . $today . ' ' . $trend_html . '</td>';
         echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
+
         echo '</tr>';
+
+        $rank++;
     }
 
     echo '</tbody></table>';
 }
+
 
 
 
