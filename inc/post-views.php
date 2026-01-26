@@ -442,31 +442,6 @@ if ($active_tab == 'reports') {
         }
     }
 
-    if (!function_exists('get_theme_collection_block_count')) {
-        function get_theme_collection_block_count($post_id) {
-            $post = get_post($post_id);
-            if (empty($post->post_content)) return 0;
-
-            $blocks = parse_blocks($post->post_content);
-            $target = 'acf/theme-collections';
-            $count  = 0;
-
-            $walker = function ($blocks) use (&$count, $target, &$walker) {
-                foreach ($blocks as $block) {
-                    if (!empty($block['blockName']) && $block['blockName'] === $target) {
-                        $count++;
-                    }
-                    if (!empty($block['innerBlocks'])) {
-                        $walker($block['innerBlocks']);
-                    }
-                }
-            };
-
-            $walker($blocks);
-            return $count;
-        }
-    }
-
     /* --------------------------------
      * Get All Posts
      * -------------------------------- */
@@ -478,80 +453,24 @@ if ($active_tab == 'reports') {
     ]);
 
     /* --------------------------------
-     * Summary Cards
-     * -------------------------------- */
-
-    $thresholds = [10,20,30,40,50,60,70,80,90,100,200,300,400,500];
-
-    $cards = [
-        ['label' => 'Total Posts', 'count' => count($all_posts)]
-    ];
-
-    foreach ($thresholds as $t) {
-        $cards[] = [
-            'label' => "Total {$t}+ Post Views",
-            'count' => 0,
-            'value' => $t
-        ];
-    }
-
-    $cards[] = [
-        'label' => 'Posts with < 5 Collections',
-        'count' => 0,
-        'is_collection' => true
-    ];
-
-    foreach ($all_posts as $p) {
-        $total_views = get_total_views_by_meta($p->ID);
-
-        foreach ($thresholds as $i => $t) {
-            if ($total_views >= $t) {
-                $cards[$i + 1]['count']++;
-            }
-        }
-
-        if (get_theme_collection_block_count($p->ID) < 5) {
-            $cards[count($cards) - 1]['count']++;
-        }
-    }
-
-    echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
-
-    $colors = [
-        '#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12',
-        '#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b',
-        '#8e44ad','#16a085','#2980b9','#c0392b','#8e44ad'
-    ];
-
-    foreach ($cards as $i => $c) {
-        echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;
-            box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center;">';
-
-        echo '<h3 style="margin-bottom:10px;">' . esc_html($c['label']) . '</h3>';
-        echo '<p style="font-size:22px;font-weight:bold;color:' . ($colors[$i] ?? '#333') . ';">';
-        echo intval($c['count']);
-        echo '</p></div>';
-    }
-
-    echo '</div>';
-
-    /* --------------------------------
-     * Sort Posts by Total Views
+     * Sort by TODAY'S Views
      * -------------------------------- */
 
     usort($all_posts, function ($a, $b) {
-        return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
+        return get_todays_views($b->ID) - get_todays_views($a->ID);
     });
 
     /* --------------------------------
      * Posts Table
      * -------------------------------- */
 
-    echo '<h2>📊 All Posts by Views</h2>';
+    echo '<h2>📊 Posts Ranked by Today\'s Views</h2>';
     echo '<table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
-                <th># Rank / Post Title</th>
+                <th>Rank</th>
+                <th>Post Title</th>
+                <th>Category</th>
                 <th>Total Views</th>
                 <th>Today\'s Views</th>
                 <th>Avg Watch Time</th>
@@ -563,9 +482,9 @@ if ($active_tab == 'reports') {
 
     foreach ($all_posts as $post) {
 
-        $total      = get_total_views_by_meta($post->ID);
-        $today      = get_todays_views($post->ID);
-        $yesterday  = get_yesterdays_views($post->ID);
+        $total     = get_total_views_by_meta($post->ID);
+        $today     = get_todays_views($post->ID);
+        $yesterday = get_yesterdays_views($post->ID);
 
         $trend = ($yesterday > 0)
             ? round((($today - $yesterday) / $yesterday) * 100, 1)
@@ -577,24 +496,46 @@ if ($active_tab == 'reports') {
               </span>"
             : '';
 
+        // Categories
+        $cats = get_the_category($post->ID);
+        $cat_html = !empty($cats)
+            ? esc_html(implode(', ', wp_list_pluck($cats, 'name')))
+            : '—';
+
+        // Badge color logic
+        $badge_color = '';
+        if ($total >= 500) {
+            $badge_color = '#8e44ad'; // purple
+        } elseif ($total >= 400) {
+            $badge_color = '#c0392b'; // red
+        } elseif ($total >= 300) {
+            $badge_color = '#e67e22'; // orange
+        } elseif ($total >= 200) {
+            $badge_color = '#2980b9'; // blue
+        } elseif ($total >= 100) {
+            $badge_color = '#27ae60'; // green
+        }
+
         echo '<tr>';
 
+        echo '<td><strong>' . $rank . '</strong></td>';
+
         echo '<td>
-            <strong>#' . $rank . '</strong> 
             <a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">
                 ' . esc_html($post->post_title) . '
             </a>
         </td>';
 
-        if ($total > 100) {
+        echo '<td>' . $cat_html . '</td>';
+
+        if ($badge_color) {
             echo '<td>
                 <span style="
-                    background:#27ae60;
+                    background:' . $badge_color . ';
                     color:#fff;
                     padding:4px 10px;
                     border-radius:20px;
-                    font-weight:bold;
-                    display:inline-block;">
+                    font-weight:bold;">
                     ' . $total . '
                 </span>
             </td>';
