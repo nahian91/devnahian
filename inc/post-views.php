@@ -431,7 +431,6 @@ if ($active_tab == 'reports') {
             $today = wp_date('Y-m-d');
             $watchers = get_post_meta($post_id, '_infinity_watch_time_' . $today, true);
             if (!is_array($watchers) || empty($watchers)) return 0;
-
             return round(array_sum($watchers) / count($watchers));
         }
     }
@@ -453,18 +452,18 @@ if ($active_tab == 'reports') {
     ]);
 
     /* --------------------------------
-     * Sort by TODAY'S Views
+     * Sort by TOTAL VIEWS (DESC)
      * -------------------------------- */
 
     usort($all_posts, function ($a, $b) {
-        return get_todays_views($b->ID) - get_todays_views($a->ID);
+        return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
     });
 
     /* --------------------------------
-     * Posts Table
+     * Table
      * -------------------------------- */
 
-    echo '<h2>📊 Posts Ranked by Today\'s Views</h2>';
+    echo '<h2>📊 Posts Ranked by Total Views</h2>';
     echo '<table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
@@ -472,7 +471,8 @@ if ($active_tab == 'reports') {
                 <th>Post Title</th>
                 <th>Category</th>
                 <th>Total Views</th>
-                <th>Today\'s Views</th>
+                <th>Today</th>
+                <th>Rank Status</th>
                 <th>Avg Watch Time</th>
             </tr>
         </thead>
@@ -486,35 +486,28 @@ if ($active_tab == 'reports') {
         $today     = get_todays_views($post->ID);
         $yesterday = get_yesterdays_views($post->ID);
 
-        $trend = ($yesterday > 0)
-            ? round((($today - $yesterday) / $yesterday) * 100, 1)
-            : ($today > 0 ? 100 : 0);
+        /* ---------- Rank Status Badge ---------- */
+        if ($today > $yesterday) {
+            $rank_status = '<span style="background:#27ae60;color:#fff;padding:3px 8px;border-radius:12px;font-weight:bold;">▲ Up</span>';
+        } elseif ($today < $yesterday) {
+            $rank_status = '<span style="background:#e74c3c;color:#fff;padding:3px 8px;border-radius:12px;font-weight:bold;">▼ Down</span>';
+        } else {
+            $rank_status = '—';
+        }
 
-        $trend_html = $trend
-            ? "<span style='color:" . ($trend > 0 ? '#27ae60' : '#e74c3c') . ";font-weight:bold;'>
-                " . ($trend > 0 ? '▲' : '▼') . " " . abs($trend) . "%
-              </span>"
-            : '';
-
-        // Categories
+        /* ---------- Category ---------- */
         $cats = get_the_category($post->ID);
         $cat_html = !empty($cats)
             ? esc_html(implode(', ', wp_list_pluck($cats, 'name')))
             : '—';
 
-        // Badge color logic
+        /* ---------- Total Views Badge Color ---------- */
         $badge_color = '';
-        if ($total >= 500) {
-            $badge_color = '#8e44ad'; // purple
-        } elseif ($total >= 400) {
-            $badge_color = '#c0392b'; // red
-        } elseif ($total >= 300) {
-            $badge_color = '#e67e22'; // orange
-        } elseif ($total >= 200) {
-            $badge_color = '#2980b9'; // blue
-        } elseif ($total >= 100) {
-            $badge_color = '#27ae60'; // green
-        }
+        if ($total >= 500)      $badge_color = '#8e44ad';
+        elseif ($total >= 400)  $badge_color = '#c0392b';
+        elseif ($total >= 300)  $badge_color = '#e67e22';
+        elseif ($total >= 200)  $badge_color = '#2980b9';
+        elseif ($total >= 100)  $badge_color = '#27ae60';
 
         echo '<tr>';
 
@@ -529,21 +522,13 @@ if ($active_tab == 'reports') {
         echo '<td>' . $cat_html . '</td>';
 
         if ($badge_color) {
-            echo '<td>
-                <span style="
-                    background:' . $badge_color . ';
-                    color:#fff;
-                    padding:4px 10px;
-                    border-radius:20px;
-                    font-weight:bold;">
-                    ' . $total . '
-                </span>
-            </td>';
+            echo '<td><span style="background:' . $badge_color . ';color:#fff;padding:4px 10px;border-radius:20px;font-weight:bold;">' . $total . '</span></td>';
         } else {
             echo '<td>' . $total . '</td>';
         }
 
-        echo '<td>' . $today . ' ' . $trend_html . '</td>';
+        echo '<td>' . $today . '</td>';
+        echo '<td>' . $rank_status . '</td>';
         echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
 
         echo '</tr>';
