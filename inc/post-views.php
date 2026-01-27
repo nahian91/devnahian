@@ -410,6 +410,28 @@ if ($active_tab == 'reports') {
         }
     }
 
+    // Total views up to a specific date (YYYY-MM-DD)
+    if (!function_exists('get_total_views_by_date')) {
+        function get_total_views_by_date($post_id, $date) {
+            $keys = get_post_custom_keys($post_id);
+            if (!$keys) return 0;
+
+            $total = 0;
+            foreach ($keys as $key) {
+                if (strpos($key, '_infinity_unique_views_') === 0) {
+                    $key_date = str_replace('_infinity_unique_views_', '', $key);
+                    if ($key_date <= $date) {
+                        $views = get_post_meta($post_id, $key, true);
+                        if (is_array($views)) {
+                            $total += count($views);
+                        }
+                    }
+                }
+            }
+            return $total;
+        }
+    }
+
     if (!function_exists('get_todays_views')) {
         function get_todays_views($post_id) {
             $today = wp_date('Y-m-d');
@@ -488,9 +510,10 @@ if ($active_tab == 'reports') {
 
     foreach ($thresholds as $t) {
         $cards[] = [
-            'label' => "Total {$t}+ Post Views",
-            'count' => 0,
-            'value' => $t
+            'label'       => "Total {$t}+ Post Views",
+            'count'       => 0,
+            'today_added' => 0,
+            'value'       => $t
         ];
     }
 
@@ -500,12 +523,23 @@ if ($active_tab == 'reports') {
         'is_collection' => true
     ];
 
+    $today     = wp_date('Y-m-d');
+    $yesterday = wp_date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
+
     foreach ($all_posts as $p) {
-        $total_views = get_total_views_by_meta($p->ID);
+
+        $total_today     = get_total_views_by_date($p->ID, $today);
+        $total_yesterday = get_total_views_by_date($p->ID, $yesterday);
 
         foreach ($thresholds as $i => $t) {
-            if ($total_views >= $t) {
+
+            if ($total_today >= $t) {
                 $cards[$i + 1]['count']++;
+            }
+
+            // Newly crossed today
+            if ($total_yesterday < $t && $total_today >= $t) {
+                $cards[$i + 1]['today_added']++;
             }
         }
 
@@ -514,18 +548,38 @@ if ($active_tab == 'reports') {
         }
     }
 
+    /* --------------------------------
+     * Render Summary Cards (CSS SAME)
+     * -------------------------------- */
+
     echo '<div style="display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;">';
-    foreach ($cards as $c) {
+
+    $colors = [
+        '#0073aa','#1abc9c','#3498db','#9b59b6','#f39c12',
+        '#e67e22','#e74c3c','#2ecc71','#d35400','#c0392b',
+        '#8e44ad','#16a085','#2980b9','#c0392b','#8e44ad'
+    ];
+
+    foreach ($cards as $i => $c) {
+
+        $value = intval($c['count']);
+
+        if (!empty($c['today_added'])) {
+            $value .= ' <span style="font-size:14px;opacity:.7;">(+' . intval($c['today_added']) . ')</span>';
+        }
+
         echo '<div style="flex:1;min-width:180px;background:#fff;padding:20px;border-radius:10px;
             box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center;">';
+
         echo '<h3 style="margin-bottom:10px;">' . esc_html($c['label']) . '</h3>';
-        echo '<p style="font-size:22px;font-weight:bold;">' . intval($c['count']) . '</p>';
+        echo '<p style="font-size:22px;font-weight:bold;color:' . ($colors[$i] ?? '#333') . ';">' . $value . '</p>';
         echo '</div>';
     }
+
     echo '</div>';
 
     /* --------------------------------
-     * Sort by Total Views
+     * Sort Posts by Total Views
      * -------------------------------- */
 
     usort($all_posts, function ($a, $b) {
@@ -533,7 +587,7 @@ if ($active_tab == 'reports') {
     });
 
     /* --------------------------------
-     * Posts Table
+     * Posts Table (unchanged CSS)
      * -------------------------------- */
 
     echo '<h2>📊 All Posts by Views</h2>';
@@ -548,21 +602,20 @@ if ($active_tab == 'reports') {
     foreach ($all_posts as $post) {
 
         $total     = get_total_views_by_meta($post->ID);
-        $today     = get_todays_views($post->ID);
-        $yesterday = get_yesterdays_views($post->ID);
+        $today_v   = get_todays_views($post->ID);
+        $yesterday_v = get_yesterdays_views($post->ID);
 
-        // Today vs Yesterday indicator
         $compare_html = '';
-        if ($today > $yesterday) {
-            $compare_html = ' <span style="color:#27ae60;font-weight:bold;">▲ +' . ($today - $yesterday) . '</span>';
-        } elseif ($today < $yesterday) {
-            $compare_html = ' <span style="color:#c0392b;font-weight:bold;">▼ ' . ($yesterday - $today) . '</span>';
+        if ($today_v > $yesterday_v) {
+            $compare_html = ' <span style="color:#27ae60;font-weight:bold;">▲ +' . ($today_v - $yesterday_v) . '</span>';
+        } elseif ($today_v < $yesterday_v) {
+            $compare_html = ' <span style="color:#c0392b;font-weight:bold;">▼ ' . ($yesterday_v - $today_v) . '</span>';
         }
 
         echo '<tr>';
         echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
         echo '<td>' . intval($total) . '</td>';
-        echo '<td>' . intval($today) . $compare_html . '</td>';
+        echo '<td>' . intval($today_v) . $compare_html . '</td>';
         echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
         echo '</tr>';
     }
