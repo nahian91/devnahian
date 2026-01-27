@@ -9,6 +9,13 @@
 <aside id="secondary" class="sidebar widget-area" role="complementary">
 
 <?php if ( is_single() ) : ?>
+
+    <div class="widget" style="text-align:center">
+        <div class="section-title">
+            <h5><?php esc_html_e( 'Support Me', 'textdomain' ); ?></h5>
+        </div>
+        <a href="https://www.buymeacoffee.com/nahian" target="_blank"><img src="https://img.buymeacoffee.com/button-api/?text=Buy Me a Coffee&emoji=☕&slug=nahian&button_colour=FFDD00&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff" /></a>
+    </div>
 <div class="widget">
         <div class="section-title">
             <h5><?php esc_html_e( 'Learn with Me', 'textdomain' ); ?></h5>
