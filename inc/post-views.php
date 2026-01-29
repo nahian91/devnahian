@@ -593,32 +593,36 @@ if ($active_tab == 'reports') {
     echo '<h2>📊 All Posts by Views</h2>';
     echo '<table class="wp-list-table widefat fixed striped"><thead>
         <tr>
-            <th>Post Title</th>
-            <th>Total Views</th>
-            <th>Today\'s Views</th>
-            <th>Avg Watch Time</th>
-        </tr></thead><tbody>';
+        <th>Post Title</th>
+        <th>Total Views</th>
+        <th>Today\'s Views</th>
+        <th>Yesterday\'s Views</th>
+        <th>Avg Watch Time</th>
+    </tr></thead><tbody>';
 
     foreach ($all_posts as $post) {
 
-        $total     = get_total_views_by_meta($post->ID);
-        $today_v   = get_todays_views($post->ID);
-        $yesterday_v = get_yesterdays_views($post->ID);
+    $total        = get_total_views_by_meta($post->ID);
+    $today_v      = get_todays_views($post->ID);
+    $yesterday_v  = get_yesterdays_views($post->ID);
 
-        $compare_html = '';
-        if ($today_v > $yesterday_v) {
-            $compare_html = ' <span style="color:#27ae60;font-weight:bold;">▲ +' . ($today_v - $yesterday_v) . '</span>';
-        } elseif ($today_v < $yesterday_v) {
-            $compare_html = ' <span style="color:#c0392b;font-weight:bold;">▼ ' . ($yesterday_v - $today_v) . '</span>';
-        }
-
-        echo '<tr>';
-        echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
-        echo '<td>' . intval($total) . '</td>';
-        echo '<td>' . intval($today_v) . $compare_html . '</td>';
-        echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
-        echo '</tr>';
+    // Today vs Yesterday comparison
+    $today_compare = '';
+    if ($today_v > $yesterday_v) {
+        $today_compare = ' <span style="color:#27ae60;font-weight:bold;">▲ +' . ($today_v - $yesterday_v) . '</span>';
+    } elseif ($today_v < $yesterday_v) {
+        $today_compare = ' <span style="color:#c0392b;font-weight:bold;">▼ ' . ($yesterday_v - $today_v) . '</span>';
     }
+
+    echo '<tr>';
+    echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
+    echo '<td>' . intval($total) . '</td>';
+    echo '<td>' . intval($today_v) . $today_compare . '</td>';
+    echo '<td>' . intval($yesterday_v) . '</td>';
+    echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
+    echo '</tr>';
+}
+
 
     echo '</tbody></table>';
 }
