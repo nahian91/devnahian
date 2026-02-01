@@ -614,9 +614,23 @@ foreach ($all_posts as $post) {
     echo '<tr>';
     echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
     echo '<td>' . intval($total) . '</td>';
-    echo '<td>' . intval($today_v) . '</td>';
+
+    // Today Views with Tomato badge
+    if ($today_v >= 20) {
+        echo '<td><span style="background:#ff6347;color:#fff;padding:3px 8px;border-radius:12px;font-size:12px;">' . intval($today_v) . '</span></td>';
+    } else {
+        echo '<td>' . intval($today_v) . '</td>';
+    }
+
     echo '<td>' . intval($yesterday_v) . '</td>';
-    echo '<td' . ($week_total >= 50 ? ' style="background:#1abc9c;color:#fff;"' : '') . '>' . intval($week_total) . '</td>';
+
+    // Last 7 Days Views with Teal badge
+    if ($week_total >= 50) {
+        echo '<td><span style="background:#1abc9c;color:#fff;padding:3px 8px;border-radius:12px;font-size:12px;">' . intval($week_total) . '</span></td>';
+    } else {
+        echo '<td>' . intval($week_total) . '</td>';
+    }
+
     echo '</tr>';
 }
 
