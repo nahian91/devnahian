@@ -586,41 +586,42 @@ if ($active_tab == 'reports') {
         return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
     });
 
-    /* --------------------------------
-     * Posts Table (unchanged CSS)
-     * -------------------------------- */
+    // ----- Posts Table -----
+echo '<h2>📊 All Posts by Views</h2>';
+echo '<table class="wp-list-table widefat fixed striped"><thead>
+    <tr>
+        <th>Post Title</th>
+        <th>Total Views</th>
+        <th>Today\'s Views</th>
+        <th>Yesterday\'s Views</th>
+        <th>Last 7 Days Views</th>
+    </tr></thead><tbody>';
 
-    echo '<h2>📊 All Posts by Views</h2>';
-    echo '<table class="wp-list-table widefat fixed striped"><thead>
-        <tr>
-            <th>Post Title</th>
-            <th>Total Views</th>
-            <th>Today\'s Views</th>
-            <th>Avg Watch Time</th>
-        </tr></thead><tbody>';
+foreach ($all_posts as $post) {
 
-    foreach ($all_posts as $post) {
+    $total        = get_total_views_by_meta($post->ID);
+    $today_v      = get_todays_views($post->ID);
+    $yesterday_v  = get_yesterdays_views($post->ID);
 
-        $total     = get_total_views_by_meta($post->ID);
-        $today_v   = get_todays_views($post->ID);
-        $yesterday_v = get_yesterdays_views($post->ID);
-
-        $compare_html = '';
-        if ($today_v > $yesterday_v) {
-            $compare_html = ' <span style="color:#27ae60;font-weight:bold;">▲ +' . ($today_v - $yesterday_v) . '</span>';
-        } elseif ($today_v < $yesterday_v) {
-            $compare_html = ' <span style="color:#c0392b;font-weight:bold;">▼ ' . ($yesterday_v - $today_v) . '</span>';
-        }
-
-        echo '<tr>';
-        echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
-        echo '<td>' . intval($total) . '</td>';
-        echo '<td>' . intval($today_v) . $compare_html . '</td>';
-        echo '<td>' . format_watch_time(get_avg_watch_time($post->ID)) . '</td>';
-        echo '</tr>';
+    // Last 7 days total
+    $week_total = 0;
+    for ($i = 0; $i < 7; $i++) {
+        $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
+        $v = get_post_meta($post->ID, '_infinity_unique_views_' . $date, true);
+        if (is_array($v)) $week_total += count($v);
     }
 
-    echo '</tbody></table>';
+    echo '<tr>';
+    echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
+    echo '<td>' . intval($total) . '</td>';
+    echo '<td>' . intval($today_v) . '</td>';
+    echo '<td>' . intval($yesterday_v) . '</td>';
+    echo '<td' . ($week_total >= 50 ? ' style="background:#1abc9c;color:#fff;"' : '') . '>' . intval($week_total) . '</td>';
+    echo '</tr>';
+}
+
+echo '</tbody></table>';
+
 }
 
 
