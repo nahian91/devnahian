@@ -586,16 +586,46 @@ if ($active_tab == 'reports') {
         return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
     });
 
-    // ----- Posts Table -----
+    // ---------- Build Ranking Maps ----------
+
+// Today ranking (by total views)
+$today_rank_posts = $all_posts;
+usort($today_rank_posts, function ($a, $b) {
+    return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
+});
+
+$today_rank_map = [];
+$rank = 1;
+foreach ($today_rank_posts as $p) {
+    $today_rank_map[$p->ID] = $rank++;
+}
+
+// Yesterday ranking
+$yesterday_date = wp_date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
+
+$yesterday_rank_posts = $all_posts;
+usort($yesterday_rank_posts, function ($a, $b) use ($yesterday_date) {
+    return get_total_views_by_date($b->ID, $yesterday_date) - get_total_views_by_date($a->ID, $yesterday_date);
+});
+
+$yesterday_rank_map = [];
+$rank = 1;
+foreach ($yesterday_rank_posts as $p) {
+    $yesterday_rank_map[$p->ID] = $rank++;
+}
+
+
+// ---------- Posts Table ----------
 echo '<h2>📊 All Posts by Views</h2>';
 echo '<table class="wp-list-table widefat fixed striped"><thead>
-    <tr>
-        <th>Post Title</th>
-        <th>Total Views</th>
-        <th>Today\'s Views</th>
-        <th>Yesterday\'s Views</th>
-        <th>Last 7 Days Views</th>
-    </tr></thead><tbody>';
+<tr>
+    <th>Post Title</th>
+    <th>Total Views</th>
+    <th>Today\'s Views</th>
+    <th>Yesterday\'s Views</th>
+    <th>Last 7 Days Views</th>
+    <th>Ranking</th>
+</tr></thead><tbody>';
 
 foreach ($all_posts as $post) {
 
@@ -611,11 +641,37 @@ foreach ($all_posts as $post) {
         if (is_array($v)) $week_total += count($v);
     }
 
+    // Ranking logic
+    $today_rank     = $today_rank_map[$post->ID] ?? null;
+    $yesterday_rank = $yesterday_rank_map[$post->ID] ?? null;
+
+    $rank_change_html = '<span style="color:#999;">—</span>';
+    $top10_badge = '';
+
+    if ($today_rank && $yesterday_rank) {
+        $diff = $yesterday_rank - $today_rank;
+
+        if ($diff > 0) {
+            $rank_change_html = '<span style="color:#27ae60;font-weight:bold;">▲ +' . $diff . '</span>';
+        } elseif ($diff < 0) {
+            $rank_change_html = '<span style="color:#e74c3c;font-weight:bold;">▼ ' . abs($diff) . '</span>';
+        }
+    }
+
+    // 🎉 Entered Top 10 for first time
+    if ($today_rank <= 10 && ($yesterday_rank === null || $yesterday_rank > 10)) {
+        $top10_badge = ' <span style="background:#f1c40f;color:#000;padding:2px 6px;border-radius:10px;font-size:11px;font-weight:bold;">TOP 10</span>';
+    }
+
     echo '<tr>';
-    echo '<td><a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a></td>';
+
+    echo '<td>
+        <a target="_blank" href="' . esc_url(get_permalink($post->ID)) . '">' . esc_html($post->post_title) . '</a>
+    </td>';
+
     echo '<td>' . intval($total) . '</td>';
 
-    // Today Views with Tomato badge
+    // Today Views badge
     if ($today_v >= 20) {
         echo '<td><span style="background:#ff6347;color:#fff;padding:3px 8px;border-radius:12px;font-size:12px;">' . intval($today_v) . '</span></td>';
     } else {
@@ -624,18 +680,22 @@ foreach ($all_posts as $post) {
 
     echo '<td>' . intval($yesterday_v) . '</td>';
 
-    // Last 7 Days Views with Teal badge
+    // Last 7 Days badge
     if ($week_total >= 50) {
         echo '<td><span style="background:#1abc9c;color:#fff;padding:3px 8px;border-radius:12px;font-size:12px;">' . intval($week_total) . '</span></td>';
     } else {
         echo '<td>' . intval($week_total) . '</td>';
     }
 
+    echo '<td>
+        <strong>#' . intval($today_rank) . '</strong>
+        ' . $rank_change_html . $top10_badge . '
+    </td>';
+
     echo '</tr>';
 }
 
 echo '</tbody></table>';
-
 }
 
 
