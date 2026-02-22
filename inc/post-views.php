@@ -990,7 +990,7 @@ if ($active_tab == 'all_content') {
     );
 
     // Remove default "post"
-    $post_types = array_diff($post_types, ['post']);
+    $post_types = array_diff($post_types, ['post', 'course']);
 
     // Get all items from all selected post types
     $items = get_posts([
