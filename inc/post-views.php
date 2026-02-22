@@ -983,37 +983,48 @@ if ($active_tab == 'all_content') {
 
     echo '<h2>📊 All Content Analytics (Excluding Posts)</h2>';
 
-    // Get all public post types
-    $post_types = get_post_types(
-        ['public' => true],
-        'names'
-    );
+    // 1. Define excluded types and get public types
+    $excluded_types = ['post', 'course'];
+    $post_types = get_post_types(['public' => true], 'names');
+    $post_types = array_diff($post_types, $excluded_types);
 
-    // Remove unwanted types
-    $post_types = array_diff($post_types, ['post', 'course']);
-
-    // Pagination
-    $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-
-    $query = new WP_Query([
-        'post_type'      => $post_types,
-        'post_status'    => 'publish',
-        'posts_per_page' => 20,
-        'paged'          => $paged,
-        'meta_key'       => '_infinity_total_views',
-        'orderby'        => 'meta_value_num',
-        'order'          => 'DESC',
+    // 2. Fetch all items
+    $items = get_posts([
+        'post_type'   => $post_types,
+        'post_status' => 'publish',
+        'numberposts' => -1, // Note: Consider limiting to 100 if you have 1000s of items
     ]);
 
-    if (!$query->have_posts()) {
+    if (empty($items)) {
         echo '<p>No data available.</p>';
         return;
     }
 
+    // 3. Pre-fetch Total Views & Sort (Optimization)
+    foreach ($items as $item) {
+        $item->total_views = intval(get_total_views_by_meta($item->ID));
+    }
+
+    // Sort Descending by total_views
+    usort($items, function ($a, $b) {
+        return $b->total_views <=> $a->total_views;
+    });
+
+    // 4. Pre-calculate Dates (Better performance than doing this inside the loop)
+    $current_timestamp = current_time('timestamp');
+    $today_str = date('Y-m-d', $current_timestamp);
+    $yesterday_str = date('Y-m-d', strtotime('-1 day', $current_timestamp));
+    
+    $last_7_days = [];
+    for ($i = 0; $i < 7; $i++) {
+        $last_7_days[] = date('Y-m-d', strtotime("-$i days", $current_timestamp));
+    }
+
+    // 5. Render Table
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead>
             <tr>
-                <th>Title</th>
+                <th style="width: 30%;">Title</th>
                 <th>Type</th>
                 <th>Total Views</th>
                 <th>Today</th>
@@ -1023,28 +1034,20 @@ if ($active_tab == 'all_content') {
           </thead>';
     echo '<tbody>';
 
-    while ($query->have_posts()) {
-        $query->the_post();
+    foreach ($items as $item) {
+        $post_type_obj = get_post_type_object($item->post_type);
 
-        $post_id = get_the_ID();
-        $post_type_obj = get_post_type_object(get_post_type());
+        // Daily Views Logic
+        $today_v = get_post_meta($item->ID, '_infinity_unique_views_' . $today_str, true);
+        $today_count = is_array($today_v) ? count($today_v) : 0;
 
-        $total = get_post_meta($post_id, '_infinity_total_views', true);
-        $total = $total ? intval($total) : 0;
+        $yesterday_v = get_post_meta($item->ID, '_infinity_unique_views_' . $yesterday_str, true);
+        $yesterday_count = is_array($yesterday_v) ? count($yesterday_v) : 0;
 
-        $today = date('Y-m-d', current_time('timestamp'));
-        $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
-
-        $today_v = get_post_meta($post_id, '_infinity_unique_views_'.$today, true);
-        $today_v = is_array($today_v) ? count($today_v) : 0;
-
-        $yesterday_v = get_post_meta($post_id, '_infinity_unique_views_'.$yesterday, true);
-        $yesterday_v = is_array($yesterday_v) ? count($yesterday_v) : 0;
-
+        // Weekly Logic
         $week_total = 0;
-        for ($i = 0; $i < 7; $i++) {
-            $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
-            $v = get_post_meta($post_id, '_infinity_unique_views_'.$date, true);
+        foreach ($last_7_days as $date_key) {
+            $v = get_post_meta($item->ID, '_infinity_unique_views_' . $date_key, true);
             if (is_array($v)) {
                 $week_total += count($v);
             }
@@ -1052,35 +1055,19 @@ if ($active_tab == 'all_content') {
 
         echo '<tr>';
         echo '<td>
-                <a target="_blank" href="' . esc_url(get_permalink($post_id)) . '">' 
-                    . esc_html(get_the_title()) . 
-                '</a>
+                <strong><a target="_blank" href="' . esc_url(get_permalink($item->ID)) . '">' 
+                    . esc_html($item->post_title) . 
+                '</a></strong>
               </td>';
-        echo '<td>' . esc_html($post_type_obj->labels->singular_name) . '</td>';
-        echo '<td>' . $total . '</td>';
-        echo '<td>' . $today_v . '</td>';
-        echo '<td>' . $yesterday_v . '</td>';
-        echo '<td>' . $week_total . '</td>';
+        echo '<td><span class="badge">' . esc_html($post_type_obj->labels->singular_name) . '</span></td>';
+        echo '<td><strong>' . number_format($item->total_views) . '</strong></td>';
+        echo '<td>' . number_format($today_count) . '</td>';
+        echo '<td>' . number_format($yesterday_count) . '</td>';
+        echo '<td>' . number_format($week_total) . '</td>';
         echo '</tr>';
     }
 
     echo '</tbody></table>';
-
-    // Pagination links
-    echo '<div class="tablenav"><div class="tablenav-pages">';
-
-    echo paginate_links([
-        'base'      => add_query_arg('paged', '%#%'),
-        'format'    => '',
-        'current'   => $paged,
-        'total'     => $query->max_num_pages,
-        'prev_text' => '«',
-        'next_text' => '»',
-    ]);
-
-    echo '</div></div>';
-
-    wp_reset_postdata();
 }
 
     echo '</div></div>';
