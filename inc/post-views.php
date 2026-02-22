@@ -242,6 +242,10 @@ function infinity_today_views_report_page(){
             <a href="?page=today-views-report&tab=reports" class="nav-tab <?php echo $active_tab=='reports'?'nav-tab-active':''; ?>">Reports</a>
             <a href="?page=today-views-report&tab=categories" class="nav-tab <?php echo $active_tab=='categories'?'nav-tab-active':''; ?>">Categories</a>
             <a href="?page=today-views-report&tab=plugins" class="nav-tab <?php echo $active_tab=='plugins'?'nav-tab-active':''; ?>">Plugins</a>
+            <a href="?page=today-views-report&tab=all_content" 
+   class="nav-tab <?php echo $active_tab=='all_content'?'nav-tab-active':''; ?>">
+   All Content
+</a>
         </h2>
         <div class="tab-content" style="margin-top:20px;">
     <?php
@@ -948,6 +952,114 @@ if ($active_tab == 'plugins') {
         echo '<p>No plugins found for user <strong>' . esc_html($username) . '</strong>.</p>';
     }
 }  
+
+// --------------------------------
+// Global View Helpers
+// --------------------------------
+if (!function_exists('get_total_views_by_meta')) {
+    function get_total_views_by_meta($post_id) {
+        $keys = get_post_custom_keys($post_id);
+        if (!$keys) return 0;
+
+        $total = 0;
+        foreach ($keys as $key) {
+            if (strpos($key, '_infinity_unique_views_') === 0) {
+                $views = get_post_meta($post_id, $key, true);
+                if (is_array($views)) {
+                    $total += count($views);
+                }
+            }
+        }
+        return $total;
+    }
+}
+// ----------------------------
+// Pages Tab
+// ----------------------------
+// ----------------------------
+// All Content (Without Posts)
+// ----------------------------
+if ($active_tab == 'all_content') {
+
+    echo '<h2>📊 All Content Analytics (Excluding Posts)</h2>';
+
+    // Get all public post types
+    $post_types = get_post_types(
+        ['public' => true],
+        'names'
+    );
+
+    // Remove default "post"
+    $post_types = array_diff($post_types, ['post']);
+
+    // Get all items from all selected post types
+    $items = get_posts([
+        'post_type'   => $post_types,
+        'post_status' => 'publish',
+        'numberposts' => -1,
+    ]);
+
+    if (empty($items)) {
+        echo '<p>No data available.</p>';
+        return;
+    }
+
+    // Sort by total views
+    usort($items, function ($a, $b) {
+        return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
+    });
+
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Total Views</th>
+                <th>Today</th>
+                <th>Yesterday</th>
+                <th>Last 7 Days</th>
+            </tr>
+          </thead>';
+    echo '<tbody>';
+
+    foreach ($items as $item) {
+
+        $post_type_obj = get_post_type_object($item->post_type);
+
+        $total = get_total_views_by_meta($item->ID);
+
+        $today = date('Y-m-d', current_time('timestamp'));
+        $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
+
+        $today_v = get_post_meta($item->ID, '_infinity_unique_views_'.$today, true);
+        $today_v = is_array($today_v) ? count($today_v) : 0;
+
+        $yesterday_v = get_post_meta($item->ID, '_infinity_unique_views_'.$yesterday, true);
+        $yesterday_v = is_array($yesterday_v) ? count($yesterday_v) : 0;
+
+        $week_total = 0;
+        for ($i=0; $i<7; $i++) {
+            $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
+            $v = get_post_meta($item->ID, '_infinity_unique_views_'.$date, true);
+            if (is_array($v)) $week_total += count($v);
+        }
+
+        echo '<tr>';
+        echo '<td>
+                <a target="_blank" href="' . esc_url(get_permalink($item->ID)) . '">' 
+                    . esc_html($item->post_title) . 
+                '</a>
+              </td>';
+        echo '<td>' . esc_html($post_type_obj->labels->singular_name) . '</td>';
+        echo '<td>' . intval($total) . '</td>';
+        echo '<td>' . intval($today_v) . '</td>';
+        echo '<td>' . intval($yesterday_v) . '</td>';
+        echo '<td>' . intval($week_total) . '</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody></table>';
+}
 
     echo '</div></div>';
 }
