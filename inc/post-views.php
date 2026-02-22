@@ -989,25 +989,23 @@ if ($active_tab == 'all_content') {
         'names'
     );
 
-    // Remove default "post"
+    // Remove unwanted types
     $post_types = array_diff($post_types, ['post', 'course']);
 
-    // Get all items from all selected post types
-    $items = get_posts([
-        'post_type'   => $post_types,
-        'post_status' => 'publish',
-        'numberposts' => -1,
+    // Pagination setup
+    $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+
+    $query = new WP_Query([
+        'post_type'      => $post_types,
+        'post_status'    => 'publish',
+        'posts_per_page' => 20,
+        'paged'          => $paged,
     ]);
 
-    if (empty($items)) {
+    if (!$query->have_posts()) {
         echo '<p>No data available.</p>';
         return;
     }
-
-    // Sort by total views
-    usort($items, function ($a, $b) {
-        return get_total_views_by_meta($b->ID) - get_total_views_by_meta($a->ID);
-    });
 
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead>
@@ -1022,32 +1020,34 @@ if ($active_tab == 'all_content') {
           </thead>';
     echo '<tbody>';
 
-    foreach ($items as $item) {
+    while ($query->have_posts()) {
+        $query->the_post();
 
-        $post_type_obj = get_post_type_object($item->post_type);
+        $post_id = get_the_ID();
+        $post_type_obj = get_post_type_object(get_post_type());
 
-        $total = get_total_views_by_meta($item->ID);
+        $total = get_total_views_by_meta($post_id);
 
         $today = date('Y-m-d', current_time('timestamp'));
         $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
 
-        $today_v = get_post_meta($item->ID, '_infinity_unique_views_'.$today, true);
+        $today_v = get_post_meta($post_id, '_infinity_unique_views_'.$today, true);
         $today_v = is_array($today_v) ? count($today_v) : 0;
 
-        $yesterday_v = get_post_meta($item->ID, '_infinity_unique_views_'.$yesterday, true);
+        $yesterday_v = get_post_meta($post_id, '_infinity_unique_views_'.$yesterday, true);
         $yesterday_v = is_array($yesterday_v) ? count($yesterday_v) : 0;
 
         $week_total = 0;
         for ($i=0; $i<7; $i++) {
             $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
-            $v = get_post_meta($item->ID, '_infinity_unique_views_'.$date, true);
+            $v = get_post_meta($post_id, '_infinity_unique_views_'.$date, true);
             if (is_array($v)) $week_total += count($v);
         }
 
         echo '<tr>';
         echo '<td>
-                <a target="_blank" href="' . esc_url(get_permalink($item->ID)) . '">' 
-                    . esc_html($item->post_title) . 
+                <a target="_blank" href="' . esc_url(get_permalink($post_id)) . '">' 
+                    . esc_html(get_the_title()) . 
                 '</a>
               </td>';
         echo '<td>' . esc_html($post_type_obj->labels->singular_name) . '</td>';
@@ -1059,6 +1059,22 @@ if ($active_tab == 'all_content') {
     }
 
     echo '</tbody></table>';
+
+    // Pagination Links
+    echo '<div class="tablenav"><div class="tablenav-pages">';
+
+    echo paginate_links([
+        'base'      => add_query_arg('paged', '%#%'),
+        'format'    => '',
+        'current'   => $paged,
+        'total'     => $query->max_num_pages,
+        'prev_text' => '«',
+        'next_text' => '»',
+    ]);
+
+    echo '</div></div>';
+
+    wp_reset_postdata();
 }
 
     echo '</div></div>';
