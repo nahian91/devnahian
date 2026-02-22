@@ -992,7 +992,7 @@ if ($active_tab == 'all_content') {
     // Remove unwanted types
     $post_types = array_diff($post_types, ['post', 'course']);
 
-    // Pagination setup
+    // Pagination
     $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
 
     $query = new WP_Query([
@@ -1000,6 +1000,9 @@ if ($active_tab == 'all_content') {
         'post_status'    => 'publish',
         'posts_per_page' => 20,
         'paged'          => $paged,
+        'meta_key'       => '_infinity_total_views',
+        'orderby'        => 'meta_value_num',
+        'order'          => 'DESC',
     ]);
 
     if (!$query->have_posts()) {
@@ -1026,7 +1029,8 @@ if ($active_tab == 'all_content') {
         $post_id = get_the_ID();
         $post_type_obj = get_post_type_object(get_post_type());
 
-        $total = get_total_views_by_meta($post_id);
+        $total = get_post_meta($post_id, '_infinity_total_views', true);
+        $total = $total ? intval($total) : 0;
 
         $today = date('Y-m-d', current_time('timestamp'));
         $yesterday = date('Y-m-d', strtotime('-1 day', current_time('timestamp')));
@@ -1038,10 +1042,12 @@ if ($active_tab == 'all_content') {
         $yesterday_v = is_array($yesterday_v) ? count($yesterday_v) : 0;
 
         $week_total = 0;
-        for ($i=0; $i<7; $i++) {
+        for ($i = 0; $i < 7; $i++) {
             $date = date('Y-m-d', strtotime("-$i days", current_time('timestamp')));
             $v = get_post_meta($post_id, '_infinity_unique_views_'.$date, true);
-            if (is_array($v)) $week_total += count($v);
+            if (is_array($v)) {
+                $week_total += count($v);
+            }
         }
 
         echo '<tr>';
@@ -1051,16 +1057,16 @@ if ($active_tab == 'all_content') {
                 '</a>
               </td>';
         echo '<td>' . esc_html($post_type_obj->labels->singular_name) . '</td>';
-        echo '<td>' . intval($total) . '</td>';
-        echo '<td>' . intval($today_v) . '</td>';
-        echo '<td>' . intval($yesterday_v) . '</td>';
-        echo '<td>' . intval($week_total) . '</td>';
+        echo '<td>' . $total . '</td>';
+        echo '<td>' . $today_v . '</td>';
+        echo '<td>' . $yesterday_v . '</td>';
+        echo '<td>' . $week_total . '</td>';
         echo '</tr>';
     }
 
     echo '</tbody></table>';
 
-    // Pagination Links
+    // Pagination links
     echo '<div class="tablenav"><div class="tablenav-pages">';
 
     echo paginate_links([
