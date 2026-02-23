@@ -1,124 +1,289 @@
 <?php
 
-// Add this to your theme's functions.php file or a custom plugin
-
-// Function to register 'Tutorial' custom post type
-function create_posttype_tutorial() {
-    $labels = array(
-        'name'                  => _x( 'Tutorials', 'Post type general name', 'textdomain' ),
-        'singular_name'         => _x( 'Tutorial', 'Post type singular name', 'textdomain' ),
-        'menu_name'             => _x( 'Tutorials', 'Admin Menu text', 'textdomain' ),
-        'name_admin_bar'        => _x( 'Tutorial', 'Add New on Toolbar', 'textdomain' ),
-        'add_new'               => __( 'Add New', 'textdomain' ),
-        'add_new_item'          => __( 'Add New Tutorial', 'textdomain' ),
-        'new_item'              => __( 'New Tutorial', 'textdomain' ),
-        'edit_item'             => __( 'Edit Tutorial', 'textdomain' ),
-        'view_item'             => __( 'View Tutorial', 'textdomain' ),
-        'all_items'             => __( 'All Tutorials', 'textdomain' ),
-        'search_items'          => __( 'Search Tutorials', 'textdomain' ),
-        'parent_item_colon'     => __( 'Parent Tutorials:', 'textdomain' ),
-        'not_found'             => __( 'No Tutorials found.', 'textdomain' ),
-        'not_found_in_trash'    => __( 'No Tutorials found in Trash.', 'textdomain' ),
+/**
+ * 1. Register Professional Custom Post Types: Tutorial & Resource
+ */
+function dnr_register_post_types() {
+    
+    // --- TUTORIAL POST TYPE ---
+    $tutorial_labels = array(
+        'name'               => 'Tutorials',
+        'singular_name'      => 'Tutorial',
+        'menu_name'          => 'Tutorials',
+        'name_admin_bar'     => 'Tutorial',
+        'add_new'            => 'Add New Tutorial',
+        'add_new_item'       => 'Add New Tutorial',
+        'new_item'           => 'New Tutorial',
+        'edit_item'          => 'Edit Tutorial',
+        'view_item'          => 'View Tutorial',
+        'all_items'          => 'All Tutorials',
+        'search_items'       => 'Search Tutorials',
+        'parent_item_colon'  => 'Parent Tutorials:',
+        'not_found'          => 'No tutorials found.',
+        'not_found_in_trash' => 'No tutorials found in Trash.'
     );
 
-    $args = array(
-        'labels'                => $labels,
-        'public'                => true,
-        'publicly_queryable'    => true,
-        'show_ui'               => true,
-        'show_in_menu'          => true,
-        'query_var'             => true,
-        'rewrite'               => array( 'slug' => 'tutorial' ),
-        'capability_type'       => 'post',
-        'has_archive'           => true,
-        'hierarchical'          => false,
-        'menu_position'         => 25,
-        'show_in_rest'          => true, // For REST API support
-        'supports'              => array( 'title', 'editor', 'thumbnail', 'revisions', 'custom-fields' ),
+    register_post_type('tutorial', array(
+        'labels'             => $tutorial_labels,
+        'public'             => true,
+        'show_in_rest'       => true, // Gutenberg enabled
+        'menu_position'      => 25,
+        'menu_icon'          => 'dashicons-welcome-learn-more',
+        'supports'           => array('title', 'editor', 'thumbnail', 'revisions', 'custom-fields'),
+        'has_archive'        => true,
+        'rewrite'            => array('slug' => 'tutorial'),
+    ));
+
+    // --- RESOURCE POST TYPE ---
+    $resource_labels = array(
+        'name'               => 'Resources',
+        'singular_name'      => 'Resource',
+        'menu_name'          => 'Resources',
+        'name_admin_bar'     => 'Resource',
+        'add_new'            => 'Add New Resource',
+        'add_new_item'       => 'Add New Resource',
+        'new_item'           => 'New Resource',
+        'edit_item'          => 'Edit Resource',
+        'view_item'          => 'View Resource',
+        'all_items'          => 'All Resources',
+        'search_items'       => 'Search Resources',
+        'not_found'          => 'No resources found.',
+        'not_found_in_trash' => 'No resources found in Trash.'
     );
 
-    register_post_type( 'tutorial', $args );
+    register_post_type('resource', array(
+        'labels'             => $resource_labels,
+        'public'             => true,
+        'menu_position'      => 26,
+        'menu_icon'          => 'dashicons-database',
+        'supports'           => array('title', 'thumbnail', 'custom-fields'),
+        'has_archive'        => true,
+        'show_in_rest'       => false, 
+        'rewrite'            => array('slug' => 'resource'),
+    ));
+
+    // --- RESOURCE ORDERS (NESTED) ---
+    $order_labels = array(
+        'name'          => 'Orders',
+        'singular_name' => 'Order',
+        'all_items'     => 'All Orders',
+        'search_items'  => 'Search Orders',
+    );
+
+    register_post_type('resource_order', array(
+        'labels'             => $order_labels,
+        'public'             => false,
+        'show_ui'            => true,
+        'show_in_menu'       => 'edit.php?post_type=resource',
+        'supports'           => array('title'),
+    ));
 }
-add_action( 'init', 'create_posttype_tutorial' );
+add_action('init', 'dnr_register_post_types');
 
-// Function to register 'Theme' custom post type
-function create_posttype_theme() {
+/**
+ * 2. Professional Resource Categories (Taxonomy)
+ */
+function dnr_register_taxonomies() {
     $labels = array(
-        'name'                  => _x( 'Themes', 'Post type general name', 'textdomain' ),
-        'singular_name'         => _x( 'Theme', 'Post type singular name', 'textdomain' ),
-        'menu_name'             => _x( 'Themes', 'Admin Menu text', 'textdomain' ),
-        'name_admin_bar'        => _x( 'Theme', 'Add New on Toolbar', 'textdomain' ),
-        'add_new'               => __( 'Add New', 'textdomain' ),
-        'add_new_item'          => __( 'Add New Theme', 'textdomain' ),
-        'new_item'              => __( 'New Theme', 'textdomain' ),
-        'edit_item'             => __( 'Edit Theme', 'textdomain' ),
-        'view_item'             => __( 'View Theme', 'textdomain' ),
-        'all_items'             => __( 'All Themes', 'textdomain' ),
-        'search_items'          => __( 'Search Themes', 'textdomain' ),
-        'parent_item_colon'     => __( 'Parent Themes:', 'textdomain' ),
-        'not_found'             => __( 'No Themes found.', 'textdomain' ),
-        'not_found_in_trash'    => __( 'No Themes found in Trash.', 'textdomain' ),
+        'name'              => 'Resource Categories',
+        'singular_name'     => 'Category',
+        'search_items'      => 'Search Categories',
+        'all_items'         => 'All Categories',
+        'edit_item'         => 'Edit Category',
+        'update_item'       => 'Update Category',
+        'add_new_item'      => 'Add New Resource Category',
+        'new_item_name'     => 'New Category Name',
+        'menu_name'         => 'Categories',
     );
 
-    $args = array(
-        'labels'                => $labels,
-        'public'                => true,
-        'publicly_queryable'    => true,
-        'show_ui'               => true,
-        'show_in_menu'          => true,
-        'query_var'             => true,
-        'rewrite'               => array( 'slug' => 'theme' ),
-        'capability_type'       => 'post',
-        'has_archive'           => true,
-        'hierarchical'          => false,
-        'menu_position'         => 25,
-        'show_in_rest'          => true,
-        'supports'              => array( 'title', 'editor', 'thumbnail', 'revisions', 'custom-fields' ),
-    );
-
-    register_post_type( 'theme', $args );
+    register_taxonomy('resource_cat', 'resource', array(
+        'labels'            => $labels,
+        'rewrite'           => array('slug' => 'resource-category'),
+        'hierarchical'      => true,
+        'show_in_rest'      => true,
+        'show_admin_column' => true,
+    ));
 }
-add_action( 'init', 'create_posttype_theme' );
+add_action('init', 'dnr_register_taxonomies');
 
-
-// Function to register 'Digital' custom post type
-function create_posttype_digital() {
-    $labels = array(
-        'name'                  => _x( 'Digital', 'Post type general name', 'textdomain' ),
-        'singular_name'         => _x( 'Digital', 'Post type singular name', 'textdomain' ),
-        'menu_name'             => _x( 'Digital', 'Admin Menu text', 'textdomain' ),
-        'name_admin_bar'        => _x( 'Digital', 'Add New on Toolbar', 'textdomain' ),
-        'add_new'               => __( 'Add New', 'textdomain' ),
-        'add_new_item'          => __( 'Add New Digital', 'textdomain' ),
-        'new_item'              => __( 'New Digital', 'textdomain' ),
-        'edit_item'             => __( 'Edit Digital', 'textdomain' ),
-        'view_item'             => __( 'View Digital', 'textdomain' ),
-        'all_items'             => __( 'All Digital', 'textdomain' ),
-        'search_items'          => __( 'Search Digital', 'textdomain' ),
-        'parent_item_colon'     => __( 'Parent Digital:', 'textdomain' ),
-        'not_found'             => __( 'No Digital found.', 'textdomain' ),
-        'not_found_in_trash'    => __( 'No Digital found in Trash.', 'textdomain' ),
+/**
+ * 3. Custom Admin Submenus (Reports Dashboard)
+ */
+function dnr_resource_admin_menus() {
+    add_submenu_page(
+        'edit.php?post_type=resource',
+        'Sales Reports',
+        'Reports',
+        'manage_options',
+        'resource-reports',
+        'dnr_sales_reports_render'
     );
-
-    $args = array(
-        'labels'                => $labels,
-        'public'                => true,
-        'publicly_queryable'    => true,
-        'show_ui'               => true,
-        'show_in_menu'          => true,
-        'query_var'             => true,
-        'rewrite'               => array( 'slug' => 'digital' ),
-        'capability_type'       => 'post',
-        'has_archive'           => true,
-        'hierarchical'          => false,
-        'menu_position'         => 25,
-        'show_in_rest'          => true,
-        'supports'              => array( 'title', 'editor', 'thumbnail', 'revisions', 'custom-fields' ),
-    );
-
-    register_post_type( 'Digital', $args );
 }
-add_action( 'init', 'create_posttype_digital' );
+add_action('admin_menu', 'dnr_resource_admin_menus');
+
+function dnr_sales_reports_render() {
+    // 1. Fetch all orders to calculate stats
+    $orders = get_posts(array(
+        'post_type'   => 'resource_order',
+        'post_status' => 'publish',
+        'numberposts' => -1,
+    ));
+
+    $total_orders = count($orders);
+    $total_revenue = 0;
+    $sales_data = array();
+
+    foreach ($orders as $order) {
+        $product_id = get_post_meta($order->ID, '_product_id', true);
+        $price = get_field('resource_price', $product_id) ?: 0;
+        $total_revenue += (float)$price;
+
+        // Group by product for "Top Selling" section
+        if ($product_id) {
+            $sales_data[$product_id] = isset($sales_data[$product_id]) ? $sales_data[$product_id] + 1 : 1;
+        }
+    }
+    ?>
+    <div class="wrap">
+        <h1><span class="dashicons dashicons-chart-bar"></span> Resource Sales Reports</h1>
+        <hr class="wp-header-end">
+
+        <div style="display: flex; gap: 20px; margin-top: 20px;">
+            <div class="card" style="flex: 1; padding: 20px; border-left: 4px solid #2271b1; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h2 style="margin:0; font-size: 14px; color: #646970;">Total Revenue</h2>
+                <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0;">৳<?php echo number_format($total_revenue, 2); ?></p>
+            </div>
+            <div class="card" style="flex: 1; padding: 20px; border-left: 4px solid #25D366; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h2 style="margin:0; font-size: 14px; color: #646970;">Total Orders</h2>
+                <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0;"><?php echo $total_orders; ?></p>
+            </div>
+            <div class="card" style="flex: 1; padding: 20px; border-left: 4px solid #ffb900; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h2 style="margin:0; font-size: 14px; color: #646970;">Average Order Value</h2>
+                <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0;">
+                    ৳<?php echo $total_orders > 0 ? number_format($total_revenue / $total_orders, 2) : '0'; ?>
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: #fff; padding: 20px; border: 1px solid #ccd0d4;">
+            <h2>Top Selling Resources</h2>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Sales Count</th>
+                        <th>Estimated Earnings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    arsort($sales_data); // Sort by highest sales
+                    if (!empty($sales_data)) :
+                        foreach ($sales_data as $pid => $count) : 
+                            $p_price = get_field('resource_price', $pid) ?: 0;
+                            ?>
+                            <tr>
+                                <td><strong><?php echo get_the_title($pid); ?></strong></td>
+                                backyard<td><?php echo $count; ?></td>
+                                <td>৳<?php echo number_format($p_price * $count, 2); ?></td>
+                            </tr>
+                        <?php endforeach; 
+                    else : ?>
+                        <tr><td colspan="3">No sales data found yet.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php
+}
+
+/**
+ * 4. AJAX Handler: Order Submission Logic
+ */
+add_action('wp_ajax_submit_resource_order', 'dnr_handle_order_submission');
+add_action('wp_ajax_nopriv_submit_resource_order', 'dnr_handle_order_submission');
+
+function dnr_handle_order_submission() {
+    $prod_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    $name    = sanitize_text_field($_POST['client_name']);
+    $email   = sanitize_email($_POST['client_email']);
+    $phone   = sanitize_text_field($_POST['client_phone']);
+    $b_num   = sanitize_text_field($_POST['bkash_number']);
+    $trx_id  = sanitize_text_field($_POST['trx_id']);
+
+    if (!$prod_id || empty($trx_id)) {
+        wp_send_json_error('Missing required information.');
+    }
+
+    $order_id = wp_insert_post(array(
+        'post_title'  => 'Order: ' . get_the_title($prod_id) . ' - ' . $name,
+        'post_type'   => 'resource_order',
+        'post_status' => 'publish',
+    ));
+
+    if (!is_wp_error($order_id)) {
+        update_post_meta($order_id, '_customer_email', $email);
+        update_post_meta($order_id, '_customer_phone', $phone);
+        update_post_meta($order_id, '_bkash_sent_from', $b_num);
+        update_post_meta($order_id, '_transaction_id', $trx_id);
+        update_post_meta($order_id, '_product_id', $prod_id);
+        wp_send_json_success();
+    } else {
+        wp_send_json_error('Database error.');
+    }
+    wp_die();
+}
+
+/**
+ * 5. Professional Orders List Table
+ */
+function dnr_order_columns($columns) {
+    return array(
+        'cb'            => '<input type="checkbox" />',
+        'title'         => 'Order Name',
+        'customer_info' => 'Customer Details',
+        'payment_info'  => 'bKash Info',
+        'source_url'    => 'Source Product',
+        'whatsapp_btn'  => 'Action',
+        'date'          => 'Date',
+    );
+}
+add_filter('manage_resource_order_posts_columns', 'dnr_order_columns');
+
+function dnr_order_column_data($column, $post_id) {
+    $email   = get_post_meta($post_id, '_customer_email', true);
+    $phone   = get_post_meta($post_id, '_customer_phone', true);
+    $bkash   = get_post_meta($post_id, '_bkash_sent_from', true);
+    $trx     = get_post_meta($post_id, '_transaction_id', true);
+    $prod_id = get_post_meta($post_id, '_product_id', true);
+
+    switch ($column) {
+        case 'customer_info':
+            echo '<strong>' . esc_html($phone) . '</strong><br>' . esc_html($email);
+            break;
+        case 'payment_info':
+            echo 'From: ' . esc_html($bkash) . '<br>TrxID: <code>' . esc_html($trx) . '</code>';
+            break;
+        case 'source_url':
+            echo $prod_id ? '<a href="'.get_permalink($prod_id).'" target="_blank">View Item ↗</a>' : 'N/A';
+            break;
+        case 'whatsapp_btn':
+            $clean_phone = preg_replace('/[^0-9]/', '', $phone);
+            if (substr($clean_phone, 0, 2) !== '88') $clean_phone = '88' . $clean_phone;
+            $msg = rawurlencode("Hello! Thanks for your purchase of " . get_the_title($prod_id) . ". Link: ");
+            echo '<a href="https://wa.me/'.$clean_phone.'?text='.$msg.'" target="_blank" class="button" style="background:#25D366;color:#fff;border:none;box-shadow:none;">WhatsApp Link</a>';
+            break;
+    }
+}
+add_action('manage_resource_order_posts_custom_column', 'dnr_order_column_data', 10, 2);
+
+
+
+
+
+
+
 
 // Shortcode to display multiple WordPress.org plugins info with banner using Bootstrap, sorted by active installs
 function dnew_plugins_info_shortcode( $atts ) {
