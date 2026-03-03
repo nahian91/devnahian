@@ -80,6 +80,7 @@ function devnahian_setup() {
 }
 add_action( 'after_setup_theme', 'devnahian_setup' );
 
+require get_template_directory() . '/inc/shortcode/qrcode-generator.php';
 require get_template_directory() . '/inc/basic-seo.php';
 require get_template_directory() . '/inc/post-views.php';
 
